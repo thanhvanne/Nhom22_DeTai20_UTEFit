@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('UTEFit Foundation')}">
+</head>
+
+<body>
+
+<header th:replace="~{fragments/header :: header}">
+</header>
+
+
+<main class="container py-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-8">
+
+            <div class="card shadow">
+
+                <div class="card-body text-center p-5">
+
+                    <h1 class="display-4 fw-bold">
+                        UTEFit
+                    </h1>
+
+                    <h2 class="text-success mt-3">
+                        FOUNDATION OK
+                    </h2>
+
+                    <p class="lead mt-4">
+                        Spring Boot + Thymeleaf +
+                        Bootstrap + SQL Server
+                        đang hoạt động.
+                    </p>
+
+                    <span class="badge bg-success fs-6">
+                        System Ready
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+
+<footer th:replace="~{fragments/footer :: footer}">
+</footer>
+
+
+<div th:replace="~{fragments/scripts :: scripts}">
+</div>
+
+</body>
+</html>

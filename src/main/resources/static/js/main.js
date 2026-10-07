@@ -1,0 +1,1 @@
+console.log("UTEFit frontend loaded successfully.");
