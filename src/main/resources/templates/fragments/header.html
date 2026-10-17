@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="vi"
       xmlns:th="http://www.thymeleaf.org"
@@ -6,8 +5,7 @@
 
 <header th:fragment="header">
 
-    <nav class="navbar navbar-expand-lg navbar-dark
-                utefit-navbar">
+    <nav class="navbar navbar-expand-lg navbar-dark utefit-navbar">
 
         <div class="container">
 
@@ -24,7 +22,6 @@
                     aria-controls="utefitNavbar"
                     aria-expanded="false"
                     aria-label="Mở menu">
-
                 <span class="navbar-toggler-icon"></span>
             </button>
 
@@ -89,9 +86,10 @@
                         </ul>
                     </li>
 
+                    <!-- ĐÃ SỬA: trỏ sang /trainers thay vì anchor trên trang chủ -->
                     <li class="nav-item">
                         <a class="nav-link"
-                           href="/#huan-luyen-vien">
+                           th:href="@{/trainers}">
                             Huấn luyện viên
                         </a>
                     </li>
@@ -129,7 +127,6 @@
                         Tài khoản
                     </a>
 
-
                     <form th:action="@{/auth/logout}"
                           method="post"
                           class="m-0">
@@ -144,7 +141,6 @@
                         </button>
 
                     </form>
-
 
                 </div>
 

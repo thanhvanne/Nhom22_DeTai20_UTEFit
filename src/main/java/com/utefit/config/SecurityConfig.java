@@ -5,8 +5,6 @@ import com.utefit.security.CustomUserDetailsService;
 import com.utefit.security.JwtAuthenticationFilter;
 import com.utefit.security.JwtService;
 import jakarta.servlet.http.HttpServletResponse;
-
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -39,9 +37,7 @@ public class SecurityConfig {
             PasswordEncoder passwordEncoder
     ) {
         DaoAuthenticationProvider provider =
-                new DaoAuthenticationProvider(
-                        userDetailsService
-                );
+                new DaoAuthenticationProvider(userDetailsService);
 
         provider.setPasswordEncoder(passwordEncoder);
 
@@ -86,7 +82,11 @@ public class SecurityConfig {
                                 "/images/**",
                                 "/vendor/**",
                                 "/error",
-                                "/error/**"
+                                "/error/**",
+
+                                // PUBLIC PAGES
+                                "/trainers",
+                                "/trainers/**"
                         ).permitAll()
 
                         .requestMatchers("/member/**")
@@ -105,7 +105,6 @@ public class SecurityConfig {
                         .denyAll()
                 )
 
-
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(
                                 new LoginUrlAuthenticationEntryPoint("/login")
@@ -117,11 +116,8 @@ public class SecurityConfig {
                         })
                 )
 
-
                 .formLogin(form -> form.disable())
-
                 .httpBasic(basic -> basic.disable())
-
                 .logout(logout -> logout.disable())
 
                 .addFilterBefore(

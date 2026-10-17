@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Chỉnh sửa PT - UTEFit')}">
+</head>
+
+<body>
+
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="container py-5">
+
+    <h1 class="fw-bold mb-4">
+        Chỉnh sửa hồ sơ PT
+    </h1>
+
+    <div class="card shadow-sm">
+
+        <div class="card-body p-4">
+
+            <form
+                    th:action="@{/pt/profile/edit}"
+                    th:object="${form}"
+                    method="post">
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Chuyên môn
+                    </label>
+
+                    <input
+                            type="text"
+                            th:field="*{specialization}"
+                            class="form-control"
+                            maxlength="255">
+
+                    <div
+                            class="text-danger"
+                            th:if="${#fields.hasErrors('specialization')}"
+                            th:errors="*{specialization}">
+                    </div>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Số năm kinh nghiệm
+                    </label>
+
+                    <input
+                            type="number"
+                            th:field="*{yearsExperience}"
+                            class="form-control"
+                            min="0"
+                            max="80">
+
+                    <div
+                            class="text-danger"
+                            th:if="${#fields.hasErrors('yearsExperience')}"
+                            th:errors="*{yearsExperience}">
+                    </div>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Giới thiệu
+                    </label>
+
+                    <textarea
+                            th:field="*{bio}"
+                            class="form-control"
+                            rows="6"
+                            maxlength="2000">
+                    </textarea>
+
+                    <div
+                            class="text-danger"
+                            th:if="${#fields.hasErrors('bio')}"
+                            th:errors="*{bio}">
+                    </div>
+
+                </div>
+
+                <button
+                        type="submit"
+                        class="btn btn-success">
+
+                    Lưu thay đổi
+
+                </button>
+
+                <a
+                        th:href="@{/pt/profile}"
+                        class="btn btn-outline-secondary">
+
+                    Hủy
+
+                </a>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+<div th:replace="~{fragments/scripts :: scripts}"></div>
+
+</body>
+</html>

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="vi"
       xmlns:th="http://www.thymeleaf.org">
@@ -87,10 +86,10 @@
                     <span>phù hợp với bạn</span>
                 </h2>
 
-                <p>
-                    Khám phá các định hướng luyện tập
-                    khác nhau theo mục tiêu của bản thân.
-                </p>
+            <p>
+                Khám phá các định hướng luyện tập
+                khác nhau theo mục tiêu của bản thân.
+            </p>
 
             </div>
 
@@ -244,10 +243,16 @@
                 <h3>Khám phá huấn luyện viên UTEFit</h3>
 
                 <p>
-                    Danh sách PT và hồ sơ kinh nghiệm
-                    sẽ được hiển thị khi dữ liệu
-                    huấn luyện viên được hoàn thiện.
+                    Xem danh sách PT, kinh nghiệm làm việc,
+                    chuyên môn và chi nhánh làm việc của từng
+                    huấn luyện viên tại trang riêng.
                 </p>
+
+                <!-- Nút gọi sang trang /trainers của bạn -->
+                <a th:href="@{/trainers}"
+                   class="btn btn-outline-light btn-lg mt-3">
+                    Xem danh sách huấn luyện viên
+                </a>
 
             </div>
 

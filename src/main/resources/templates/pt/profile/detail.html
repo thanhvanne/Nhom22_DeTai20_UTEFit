@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Hồ sơ PT - UTEFit')}">
+</head>
+
+<body>
+
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="container py-5">
+
+    <h1 class="fw-bold mb-4">
+        Hồ sơ huấn luyện viên
+    </h1>
+
+    <div class="card shadow-sm">
+
+        <div class="card-body p-4">
+
+            <h3 th:text="${trainer.fullName}">
+                Trainer Name
+            </h3>
+
+            <hr>
+
+            <p>
+                <strong>Chuyên môn:</strong>
+
+                <span th:text="${trainer.specialization}">
+                </span>
+            </p>
+
+            <p>
+                <strong>Kinh nghiệm:</strong>
+
+                <span th:text="${trainer.yearsExperience}">
+                </span>
+
+                năm
+            </p>
+
+            <p>
+                <strong>Chi nhánh:</strong>
+
+                <span th:text="${trainer.branchName}">
+                </span>
+            </p>
+
+            <p>
+                <strong>Giới thiệu:</strong>
+            </p>
+
+            <p th:text="${trainer.bio}"
+               style="white-space: pre-line;">
+            </p>
+
+            <a th:href="@{/pt/profile/edit}"
+               class="btn btn-success">
+
+                Chỉnh sửa hồ sơ
+
+            </a>
+
+        </div>
+
+    </div>
+
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+<div th:replace="~{fragments/scripts :: scripts}"></div>
+
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('404 - UTEFit')}">
+</head>
+
+<body>
+
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="container py-5 text-center">
+
+    <div class="py-5">
+
+        <h1 class="display-1 fw-bold text-success">
+            404
+        </h1>
+
+        <h2 class="mb-3">
+            Không tìm thấy nội dung
+        </h2>
+
+        <p class="text-muted mb-4">
+            Huấn luyện viên hoặc trang bạn tìm kiếm không tồn tại.
+        </p>
+
+        <a th:href="@{/trainers}"
+           class="btn btn-success">
+            Quay lại danh sách PT
+        </a>
+
+    </div>
+
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+<div th:replace="~{fragments/scripts :: scripts}"></div>
+
+</body>
+</html>
