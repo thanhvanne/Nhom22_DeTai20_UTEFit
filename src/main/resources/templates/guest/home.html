@@ -1,8 +1,9 @@
+
 <!DOCTYPE html>
 <html lang="vi"
       xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments/head :: head('UTEFit Foundation')}">
+<head th:replace="~{fragments/head :: head('UTEFit - Fitness Center')}">
 </head>
 
 <body>
@@ -10,49 +11,366 @@
 <header th:replace="~{fragments/header :: header}">
 </header>
 
+<main>
 
-<main class="container py-5">
+    <!-- HERO -->
+    <section id="gioi-thieu" class="hero-section">
 
-    <div class="row justify-content-center">
+        <div class="container hero-content">
 
-        <div class="col-lg-8">
+            <div class="row align-items-center">
 
-            <div class="card shadow">
+                <div class="col-lg-8">
 
-                <div class="card-body text-center p-5">
-
-                    <h1 class="display-4 fw-bold">
-                        UTEFit
-                    </h1>
-
-                    <h2 class="text-success mt-3">
-                        FOUNDATION OK
-                    </h2>
-
-                    <p class="lead mt-4">
-                        Spring Boot + Thymeleaf +
-                        Bootstrap + SQL Server
-                        đang hoạt động.
-                    </p>
-
-                    <span class="badge bg-success fs-6">
-                        System Ready
+                    <span class="eyebrow">
+                        UTEFIT FITNESS CENTER
                     </span>
 
+                    <h1 class="hero-title mt-4">
+                        Bắt đầu hành trình
+                        <span>phiên bản tốt hơn</span>
+                        của bạn
+                    </h1>
+
+                    <p class="hero-description">
+                        Khám phá không gian luyện tập
+                        hiện đại, những chương trình
+                        đa dạng và cộng đồng yêu thích
+                        thể thao tại UTEFit.
+                    </p>
+
+                    <div class="d-flex gap-3 flex-wrap mt-4">
+
+                        <a th:href="@{/register}"
+                           class="btn btn-brand btn-lg">
+                            Đăng ký ngay
+                        </a>
+
+                        <a href="#chuong-trinh"
+                           class="btn btn-outline-light btn-lg">
+                            Khám phá chương trình
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="hero-features">
+
+                <span>CHƯƠNG TRÌNH ĐA DẠNG</span>
+                <span>LUYỆN TẬP KHOA HỌC</span>
+                <span>CỘNG ĐỒNG NĂNG ĐỘNG</span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- PROGRAMS -->
+    <section id="chuong-trinh"
+             class="site-section">
+
+        <div class="container">
+
+            <div class="section-heading">
+
+                <span class="eyebrow">
+                    TRAINING PROGRAMS
+                </span>
+
+                <h2>
+                    Chọn chương trình
+                    <span>phù hợp với bạn</span>
+                </h2>
+
+                <p>
+                    Khám phá các định hướng luyện tập
+                    khác nhau theo mục tiêu của bản thân.
+                </p>
+
+            </div>
+
+            <div class="row g-4">
+
+                <div class="col-md-6 col-lg-4"
+                     id="giam-can">
+
+                    <article class="program-card">
+
+                        <span class="program-icon">01</span>
+
+                        <h3>Giảm cân</h3>
+
+                        <p>
+                            Kết hợp cardio, vận động
+                            sức mạnh và xây dựng
+                            thói quen tập luyện bền vững.
+                        </p>
+
+                        <span class="card-note">
+                            WEIGHT MANAGEMENT
+                        </span>
+
+                    </article>
+                </div>
+
+                <div class="col-md-6 col-lg-4"
+                     id="tang-co">
+
+                    <article class="program-card">
+
+                        <span class="program-icon">02</span>
+
+                        <h3>Tăng cơ</h3>
+
+                        <p>
+                            Chương trình tập kháng lực,
+                            rèn luyện sức mạnh và
+                            nâng cao thể lực.
+                        </p>
+
+                        <span class="card-note">
+                            STRENGTH TRAINING
+                        </span>
+
+                    </article>
+                </div>
+
+                <div class="col-md-6 col-lg-4"
+                     id="voc-dang">
+
+                    <article class="program-card">
+
+                        <span class="program-icon">03</span>
+
+                        <h3>Cải thiện vóc dáng</h3>
+
+                        <p>
+                            Tập trung vào tư thế,
+                            khả năng vận động,
+                            cơ lõi và sự linh hoạt.
+                        </p>
+
+                        <span class="card-note">
+                            BODY CONDITIONING
+                        </span>
+
+                    </article>
+                </div>
+
+                <div class="col-md-6 col-lg-4"
+                     id="toan-dien">
+
+                    <article class="program-card">
+
+                        <span class="program-icon">04</span>
+
+                        <h3>Fitness toàn diện</h3>
+
+                        <p>
+                            Phối hợp các hình thức
+                            vận động để cải thiện
+                            sức khỏe và thể lực chung.
+                        </p>
+
+                        <span class="card-note">
+                            ALL-ROUND FITNESS
+                        </span>
+
+                    </article>
+                </div>
+
+                <div class="col-md-6 col-lg-4"
+                     id="kids">
+
+                    <article class="program-card">
+
+                        <span class="program-icon">05</span>
+
+                        <h3>Kids Fitness</h3>
+
+                        <p>
+                            Giới thiệu vận động
+                            phù hợp với trẻ em,
+                            chú trọng sự vui vẻ
+                            và an toàn.
+                        </p>
+
+                        <span class="card-note">
+                            JUNIOR FITNESS
+                        </span>
+
+                    </article>
                 </div>
 
             </div>
 
         </div>
 
-    </div>
+    </section>
+
+
+    <!-- TRAINERS -->
+    <section id="huan-luyen-vien"
+             class="site-section section-alternate">
+
+        <div class="container">
+
+            <div class="section-heading">
+
+                <span class="eyebrow">
+                    OUR TRAINERS
+                </span>
+
+                <h2>
+                    Đội ngũ <span>huấn luyện viên</span>
+                </h2>
+
+                <p>
+                    Tìm hiểu đội ngũ huấn luyện viên
+                    đồng hành cùng bạn tại UTEFit.
+                </p>
+
+            </div>
+
+            <div class="info-panel text-center">
+
+                <div class="info-symbol">◆</div>
+
+                <h3>Khám phá huấn luyện viên UTEFit</h3>
+
+                <p>
+                    Danh sách PT và hồ sơ kinh nghiệm
+                    sẽ được hiển thị khi dữ liệu
+                    huấn luyện viên được hoàn thiện.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- PRICING -->
+    <section id="bang-gia"
+             class="site-section">
+
+        <div class="container">
+
+            <div class="section-heading">
+
+                <span class="eyebrow">
+                    MEMBERSHIP & TRAINING
+                </span>
+
+                <h2>
+                    Lựa chọn <span>gói tập</span>
+                </h2>
+
+                <p>
+                    Các loại hình tập luyện tại UTEFit.
+                    Giá và thời hạn cụ thể được cập nhật
+                    từ hệ thống quản lý gói tập.
+                </p>
+
+            </div>
+
+            <div class="row g-4">
+
+                <div class="col-lg-4">
+
+                    <article class="pricing-card">
+
+                        <span class="pricing-label">
+                            MEMBERSHIP
+                        </span>
+
+                        <h3>Tự tập</h3>
+
+                        <p>
+                            Sử dụng không gian và thiết bị
+                            tập luyện theo quyền lợi
+                            của gói thành viên.
+                        </p>
+
+                        <div class="pricing-status">
+                            Giá đang cập nhật
+                        </div>
+
+                    </article>
+
+                </div>
+
+                <div class="col-lg-4">
+
+                    <article class="pricing-card featured">
+
+                        <span class="pricing-label">
+                            PERSONAL TRAINING
+                        </span>
+
+                        <h3>PT 1:1</h3>
+
+                        <p>
+                            Tập luyện cùng huấn luyện viên
+                            theo hình thức cá nhân.
+                        </p>
+
+                        <div class="pricing-status">
+                            Giá đang cập nhật
+                        </div>
+
+                    </article>
+
+                </div>
+
+                <div class="col-lg-4">
+
+                    <article class="pricing-card">
+
+                        <span class="pricing-label">
+                            GROUP TRAINING
+                        </span>
+
+                        <h3>Tập nhóm</h3>
+
+                        <p>
+                            Tham gia luyện tập cùng
+                            nhóm và huấn luyện viên.
+                        </p>
+
+                        <div class="pricing-status">
+                            Giá đang cập nhật
+                        </div>
+
+                    </article>
+
+                </div>
+
+            </div>
+
+            <div class="text-center mt-5">
+
+                <a th:href="@{/register}"
+                   class="btn btn-brand btn-lg">
+                    Trở thành thành viên UTEFit
+                </a>
+
+            </div>
+
+        </div>
+
+    </section>
 
 </main>
 
-
 <footer th:replace="~{fragments/footer :: footer}">
 </footer>
-
 
 <div th:replace="~{fragments/scripts :: scripts}">
 </div>

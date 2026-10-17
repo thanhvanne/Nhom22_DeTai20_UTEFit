@@ -20,14 +20,10 @@ public class OtpCode {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(
-            name = "user_id",
-            nullable = false,
-            foreignKey = @ForeignKey(name = "fk_otp_user")
-    )
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false, length = 10)
+    @Column(name = "code", nullable = false, length = 100)
     private String code;
 
     @Enumerated(EnumType.STRING)
@@ -43,6 +39,9 @@ public class OtpCode {
     @Column(name = "used_at")
     private LocalDateTime usedAt;
 
+    @Column(name = "attempt_count")
+    private Integer attemptCount;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -54,6 +53,10 @@ public class OtpCode {
 
         if (used == null) {
             used = false;
+        }
+
+        if (attemptCount == null) {
+            attemptCount = 0;
         }
     }
 }
