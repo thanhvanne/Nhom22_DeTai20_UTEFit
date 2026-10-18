@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/layout :: head('Chi tiết Người dùng')}"></head>
+<body>
+<div class="d-flex">
+    <div th:replace="~{admin/fragments/layout :: sidebar}"></div>
+
+    <div class="flex-grow-1">
+        <div th:replace="~{admin/fragments/layout :: topbar('Chi tiết Người dùng')}"></div>
+
+        <main class="container-fluid px-4 pb-5">
+            <div class="mb-3">
+                <a th:href="@{/admin/users}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left"></i> Quay lại danh sách
+                </a>
+            </div>
+
+            <div class="card border-0 shadow-sm col-lg-8">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
+                        <img th:src="${user.avatarUrl != null and !#strings.isEmpty(user.avatarUrl) ? user.avatarUrl : 'https://ui-avatars.com/api/?background=10b981&color=fff&name=' + user.fullName}"
+                             alt="Avatar" class="rounded-circle border shadow-sm me-3" width="76" height="76" style="object-fit: cover;">
+                        <div>
+                            <span class="admin-eyebrow">USER PROFILE</span>
+                            <h4 class="fw-bold mb-2 text-dark" th:text="${user.fullName}">Họ tên</h4>
+                            <span class="badge me-1"
+                                  th:classappend="${user.role.name() == 'ADMIN' ? 'bg-danger' : (user.role.name() == 'PT' ? 'bg-warning text-dark' : 'bg-info text-dark')}"
+                                  th:text="${user.role}">ROLE</span>
+                            <span class="badge"
+                                  th:classappend="${user.status.name() == 'ACTIVE' ? 'bg-success' : 'bg-secondary'}"
+                                  th:text="${user.status}">STATUS</span>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-sm-6">
+                            <label class="text-secondary small fw-semibold d-block mb-1">ID Tài khoản</label>
+                            <div class="fw-bold text-dark" th:text="'#' + ${user.id}"></div>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="text-secondary small fw-semibold d-block mb-1">Email đăng nhập</label>
+                            <div class="fw-semibold text-dark" th:text="${user.email}"></div>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="text-secondary small fw-semibold d-block mb-1">Số điện thoại</label>
+                            <div class="fw-semibold text-dark" th:text="${user.phone != null and !#strings.isEmpty(user.phone) ? user.phone : 'Chưa cập nhật'}"></div>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="text-secondary small fw-semibold d-block mb-1">Trạng thái kích hoạt (Enabled)</label>
+                            <div>
+                                <span th:if="${user.enabled}" class="text-success fw-semibold">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Đã kích hoạt
+                                </span>
+                                <span th:unless="${user.enabled}" class="text-danger fw-semibold">
+                                    <i class="bi bi-x-circle-fill me-1"></i> Chưa kích hoạt / Đang khóa
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="text-secondary small fw-semibold d-block mb-1">Ngày tạo tài khoản</label>
+                            <div class="text-dark" th:text="${user.createdAt != null ? #temporals.format(user.createdAt, 'dd/MM/yyyy HH:mm') : '-'}"></div>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="text-secondary small fw-semibold d-block mb-1">Cập nhật lần cuối</label>
+                            <div class="text-dark" th:text="${user.updatedAt != null ? #temporals.format(user.updatedAt, 'dd/MM/yyyy HH:mm') : '-'}"></div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted small">Thao tác bảo mật đối với tài khoản này:</span>
+                        <form th:action="@{/admin/users/{id}/toggle-lock(id=${user.id})}" method="post" class="m-0">
+                            <button type="submit" class="btn fw-semibold px-4"
+                                    th:classappend="${user.status.name() == 'LOCKED' ? 'btn-success' : 'btn-outline-danger'}"
+                                    onclick="return confirm('Bạn có chắc muốn thay đổi trạng thái khóa tài khoản này?');">
+                                <i class="bi me-1" th:classappend="${user.status.name() == 'LOCKED' ? 'bi-unlock' : 'bi-lock'}"></i>
+                                <span th:text="${user.status.name() == 'LOCKED' ? 'Mở khóa tài khoản này' : 'Khóa tài khoản này'}"></span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+<div th:replace="~{admin/fragments/layout :: scripts}"></div>
+</body>
+</html>

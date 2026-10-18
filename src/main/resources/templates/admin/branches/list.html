@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/layout :: head('Quản lý Chi nhánh')}"></head>
+<body>
+<div class="d-flex">
+    <div th:replace="~{admin/fragments/layout :: sidebar}"></div>
+
+    <div class="flex-grow-1">
+        <div th:replace="~{admin/fragments/layout :: topbar('Quản lý Chi nhánh (Branch Management)')}"></div>
+
+        <main class="container-fluid px-4 pb-5">
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm rounded-4 border-0">
+                <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm rounded-4 border-0">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- Thanh công cụ tìm kiếm & lọc -->
+            <div class="surface-card p-4 mb-4">
+                <form method="get" th:action="@{/admin/branches}" class="row g-3 align-items-end">
+                    <div class="col-md-5">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Tìm kiếm cơ sở</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                            <input type="text" name="keyword" class="form-control border-start-0"
+                                   placeholder="Tên chi nhánh, địa chỉ, số điện thoại..." th:value="${keyword}">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Trạng thái</label>
+                        <select name="active" class="form-select">
+                            <option value="">-- Tất cả trạng thái --</option>
+                            <option value="true" th:selected="${selectedActive != null and selectedActive}">Đang hoạt động</option>
+                            <option value="false" th:selected="${selectedActive != null and !selectedActive}">Tạm ngưng</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex gap-2">
+                        <button type="submit" class="btn btn-utefit w-100"><i class="bi bi-funnel-fill me-1"></i> Lọc</button>
+                        <a th:href="@{/admin/branches}" class="btn btn-outline-secondary" title="Đặt lại"><i class="bi bi-arrow-counterclockwise"></i></a>
+                    </div>
+                    <div class="col-md-2 text-end">
+                        <a th:href="@{/admin/branches/create}" class="btn btn-dark w-100 fw-semibold">
+                            <i class="bi bi-plus-lg text-success me-1"></i> Thêm mới
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Bảng dữ liệu Chi nhánh -->
+            <div class="surface-card overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                        <tr>
+                            <th class="ps-4" style="width: 70px;">ID</th>
+                            <th style="width: 120px;">Hình ảnh</th>
+                            <th>Chi nhánh</th>
+                            <th>Điện thoại</th>
+                            <th>Khung giờ mở cửa</th>
+                            <th>Trạng thái</th>
+                            <th class="text-end pe-4">Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:if="${branchPage.empty}">
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="bi bi-buildings fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                                Chưa có chi nhánh nào phù hợp với bộ lọc.
+                            </td>
+                        </tr>
+                        <tr th:each="b : ${branchPage.content}">
+                            <td class="ps-4 fw-bold text-secondary" th:text="'#' + ${b.id}">#1</td>
+                            <td>
+                                <img th:if="${b.imageUrl != null and !#strings.isEmpty(b.imageUrl)}"
+                                     th:src="${b.imageUrl}"
+                                     alt="Branch Image"
+                                     style="width: 88px; height: 56px; object-fit: cover;"
+                                     class="rounded-3 border shadow-sm">
+                                <div th:unless="${b.imageUrl != null and !#strings.isEmpty(b.imageUrl)}"
+                                     class="bg-light text-muted d-flex align-items-center justify-content-center rounded-3 border small"
+                                     style="width: 88px; height: 56px; font-size: 0.72rem;">
+                                    <i class="bi bi-image me-1"></i> No Image
+                                </div>
+                            </td>
+                            <td>
+                                <div class="fw-bold text-dark fs-6" th:text="${b.name}">UTEFit Thủ Đức</div>
+                                <div class="text-muted small"><i class="bi bi-geo-alt-fill text-success me-1"></i><span th:text="${b.address}"></span></div>
+                            </td>
+                            <td class="fw-medium" th:text="${b.phone != null and !#strings.isEmpty(b.phone) ? b.phone : '—'}"></td>
+                            <td>
+                                <span class="badge bg-light text-dark border px-3 py-2 rounded-pill fw-semibold">
+                                    <i class="bi bi-clock text-success me-1"></i>
+                                    <span th:text="${b.openingTime != null ? #temporals.format(b.openingTime, 'HH:mm') : '--:--'}"></span>
+                                    -
+                                    <span th:text="${b.closingTime != null ? #temporals.format(b.closingTime, 'HH:mm') : '--:--'}"></span>
+                                </span>
+                            </td>
+                            <td>
+                                <span th:if="${b.active}" class="status-pill bg-success bg-opacity-10 text-success">
+                                    <span class="dot bg-success"></span> Hoạt động
+                                </span>
+                                <span th:unless="${b.active}" class="status-pill bg-secondary bg-opacity-10 text-secondary">
+                                    <span class="dot bg-secondary"></span> Tạm ngưng
+                                </span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <a th:href="@{/admin/branches/{id}/edit(id=${b.id})}" class="btn btn-sm btn-outline-dark rounded-pill px-3 me-1">
+                                    <i class="bi bi-pencil-square me-1"></i> Sửa
+                                </a>
+                                <form th:action="@{/admin/branches/{id}/toggle-active(id=${b.id})}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm rounded-pill px-3"
+                                            th:classappend="${b.active ? 'btn-outline-warning' : 'btn-outline-success'}">
+                                        <span th:text="${b.active ? 'Tắt' : 'Bật'}"></span>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card-footer bg-white d-flex justify-content-between align-items-center px-4 py-3" th:if="${branchPage.totalPages > 1}">
+                    <span class="small text-muted">Trang <b th:text="${branchPage.number + 1}"></b> / <b th:text="${branchPage.totalPages}"></b></span>
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item" th:classappend="${branchPage.first} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/branches(page=${branchPage.number - 1}, keyword=${keyword}, active=${selectedActive})}">Trước</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, branchPage.totalPages - 1)}"
+                            th:classappend="${i == branchPage.number} ? 'active'">
+                            <a class="page-link" th:href="@{/admin/branches(page=${i}, keyword=${keyword}, active=${selectedActive})}" th:text="${i + 1}"></a>
+                        </li>
+                        <li class="page-item" th:classappend="${branchPage.last} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/branches(page=${branchPage.number + 1}, keyword=${keyword}, active=${selectedActive})}">Sau</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+<div th:replace="~{admin/fragments/layout :: scripts}"></div>
+</body>
+</html>

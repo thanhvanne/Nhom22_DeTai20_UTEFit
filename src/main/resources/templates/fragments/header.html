@@ -86,7 +86,6 @@
                         </ul>
                     </li>
 
-                    <!-- ĐÃ SỬA: trỏ sang /trainers thay vì anchor trên trang chủ -->
                     <li class="nav-item">
                         <a class="nav-link"
                            th:href="@{/trainers}">
@@ -120,6 +119,18 @@
 
                 <div sec:authorize="isAuthenticated()"
                      class="d-flex align-items-center gap-2">
+
+                    <a sec:authorize="hasRole('ADMIN')"
+                       class="btn btn-outline-light btn-sm"
+                       th:href="@{/admin/dashboard}">
+                        Quản trị Admin
+                    </a>
+
+                    <a sec:authorize="hasRole('PT')"
+                       class="btn btn-outline-light btn-sm"
+                       th:href="@{/pt/dashboard}">
+                        PT Dashboard
+                    </a>
 
                     <a sec:authorize="hasRole('MEMBER')"
                        class="btn btn-outline-light btn-sm"
