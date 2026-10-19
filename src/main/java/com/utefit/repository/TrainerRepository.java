@@ -93,4 +93,54 @@ public interface TrainerRepository extends JpaRepository<Trainer, Long> {
             @Param("userId") Long userId,
             @Param("role") UserRole role
     );
+
+    // ==================== BỔ SUNG CHO PHÂN HỆ ADMIN (GIAI ĐOẠN 3 - THÀNH VIÊN C) ====================
+
+    @EntityGraph(attributePaths = {"user", "branch"})
+    @Query(
+            value = """
+                    SELECT t FROM Trainer t
+                    JOIN t.user u
+                    LEFT JOIN t.branch b
+                    WHERE (
+                          :keyword IS NULL
+                          OR LOWER(u.firstName) LIKE :keyword
+                          OR LOWER(u.lastName) LIKE :keyword
+                          OR LOWER(CONCAT(u.firstName, ' ', u.lastName)) LIKE :keyword
+                          OR LOWER(u.email) LIKE :keyword
+                          OR LOWER(t.specialization) LIKE :keyword
+                    )
+                    AND (:branchId IS NULL OR b.id = :branchId)
+                    AND (:active IS NULL OR t.active = :active)
+                    """,
+            countQuery = """
+                    SELECT COUNT(t) FROM Trainer t
+                    JOIN t.user u
+                    LEFT JOIN t.branch b
+                    WHERE (
+                          :keyword IS NULL
+                          OR LOWER(u.firstName) LIKE :keyword
+                          OR LOWER(u.lastName) LIKE :keyword
+                          OR LOWER(CONCAT(u.firstName, ' ', u.lastName)) LIKE :keyword
+                          OR LOWER(u.email) LIKE :keyword
+                          OR LOWER(t.specialization) LIKE :keyword
+                    )
+                    AND (:branchId IS NULL OR b.id = :branchId)
+                    AND (:active IS NULL OR t.active = :active)
+                    """
+    )
+    Page<Trainer> searchAdminTrainers(
+            @Param("keyword") String keyword,
+            @Param("branchId") Long branchId,
+            @Param("active") Boolean active,
+            Pageable pageable
+    );
+
+    @Query("""
+            SELECT t FROM Trainer t
+            JOIN FETCH t.user u
+            LEFT JOIN FETCH t.branch b
+            WHERE t.id = :id
+            """)
+    Optional<Trainer> findAdminTrainerById(@Param("id") Long id);
 }

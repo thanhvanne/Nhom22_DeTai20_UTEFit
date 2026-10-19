@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/layout :: head(${isEdit ? 'Cập nhật Loại lớp' : 'Thêm Loại lớp'})}"></head>
+<body>
+<div class="d-flex">
+    <div th:replace="~{admin/fragments/layout :: sidebar}"></div>
+
+    <div class="flex-grow-1">
+        <div th:replace="~{admin/fragments/layout :: topbar(${isEdit ? 'Cập nhật Loại lớp tập' : 'Thêm Loại lớp tập mới'})}"></div>
+
+        <main class="container-fluid px-4 pb-5">
+            <div class="mb-3">
+                <a th:href="@{/admin/categories}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                    <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
+                </a>
+            </div>
+
+            <div class="surface-card col-lg-8 p-4">
+                <div th:if="${errorMessage}" class="alert alert-danger rounded-3">
+                    <i class="bi bi-exclamation-octagon-fill me-2"></i> <span th:text="${errorMessage}"></span>
+                </div>
+
+                <form th:action="${isEdit ? '/admin/categories/' + categoryForm.id + '/edit' : '/admin/categories/create'}"
+                      th:object="${categoryForm}" method="post">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Tên loại lớp (Category Name) <span class="text-danger">*</span></label>
+                        <input type="text" th:field="*{name}" class="form-control"
+                               th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
+                               placeholder="VD: Yoga & Mobility, Boxing, HIIT Cardio...">
+                        <div class="invalid-feedback" th:errors="*{name}"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Mô tả bộ môn</label>
+                        <textarea th:field="*{description}" rows="4" class="form-control"
+                                  th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"
+                                  placeholder="Mô tả đặc điểm và lợi ích của loại lớp tập này..."></textarea>
+                        <div class="invalid-feedback" th:errors="*{description}"></div>
+                    </div>
+
+                    <div class="form-check form-switch mb-4">
+                        <input class="form-check-input" type="checkbox" th:field="*{active}" id="categoryActiveSwitch">
+                        <label class="form-check-label fw-medium" for="categoryActiveSwitch">Loại lớp đang hoạt động</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-utefit px-4 py-2 rounded-pill">
+                        <i class="bi bi-save me-1"></i> <span th:text="${isEdit ? 'Lưu thay đổi' : 'Tạo loại lớp'}"></span>
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+</div>
+<div th:replace="~{admin/fragments/layout :: scripts}"></div>
+</body>
+</html>
