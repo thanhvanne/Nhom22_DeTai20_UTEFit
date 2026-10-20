@@ -17,52 +17,51 @@
 
     <div class="card shadow-sm">
 
-        <div class="card-body p-4">
+        <div class="card-body p-4 text-center">
+            <!-- Hiển thị Avatar PT -->
+            <div class="mb-3">
+                <img th:src="${trainer.user.avatarUrl != null ? trainer.user.avatarUrl : 'https://via.placeholder.com/150'}"
+                     alt="Avatar PT"
+                     class="rounded-circle img-thumbnail shadow-sm"
+                     style="width: 130px; height: 130px; object-fit: cover;">
+            </div>
 
-            <h3 th:text="${trainer.fullName}">
+            <h3 th:text="${trainer.user.firstName + ' ' + trainer.user.lastName}">
                 Trainer Name
             </h3>
 
-            <hr>
+            <p class="text-muted" th:text="${trainer.user.email}"></p>
 
+            <hr>
+        </div>
+
+        <div class="card-body px-4 pb-4">
             <p>
                 <strong>Chuyên môn:</strong>
-
-                <span th:text="${trainer.specialization}">
-                </span>
+                <span th:text="${trainer.specialization}"></span>
             </p>
 
             <p>
                 <strong>Kinh nghiệm:</strong>
-
-                <span th:text="${trainer.yearsExperience}">
-                </span>
-
-                năm
+                <span th:text="${trainer.yearsExperience}"></span> năm
             </p>
 
             <p>
                 <strong>Chi nhánh:</strong>
-
-                <span th:text="${trainer.branchName}">
-                </span>
+                <span th:text="${trainer.branch != null ? trainer.branch.name : 'Chưa cập nhật chi nhánh'}"></span>
             </p>
 
             <p>
-                <strong>Giới thiệu:</strong>
+                <strong>Giới thiệu bản thân:</strong>
             </p>
+            <p class="p-3 bg-light rounded" th:text="${trainer.bio}" style="white-space: pre-line;"></p>
 
-            <p th:text="${trainer.bio}"
-               style="white-space: pre-line;">
-            </p>
-
-            <a th:href="@{/pt/profile/edit}"
-               class="btn btn-success">
-
-                Chỉnh sửa hồ sơ
-
-            </a>
-
+            <div class="mt-4">
+                <a th:href="@{/pt/profile/edit}"
+                   class="btn btn-success px-4">
+                    Chỉnh sửa hồ sơ
+                </a>
+            </div>
         </div>
 
     </div>

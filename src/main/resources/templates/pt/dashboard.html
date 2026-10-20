@@ -9,88 +9,18 @@
 
 <header th:replace="~{fragments/header :: header}"></header>
 
-<main class="container py-5">
+<main class="py-5 bg-dark text-white">
 
-    <div class="mb-4">
+    <div class="container">
 
-        <h1 class="fw-bold">
+        <h1 class="display-5 fw-bold mb-3">
             PT Dashboard
         </h1>
 
-        <p class="text-muted">
+        <p class="lead text-muted mb-0">
             Hệ thống quản lý dành cho huấn luyện viên UTEFit.
+            Sử dụng menu ở thanh trên để truy cập hồ sơ cá nhân và yêu cầu từ Member.
         </p>
-
-    </div>
-
-    <div class="row g-4">
-
-        <div class="col-md-4">
-
-            <div class="card shadow-sm h-100">
-
-                <div class="card-body">
-
-                    <h5>Hồ sơ cá nhân</h5>
-
-                    <p>
-                        Xem và cập nhật thông tin huấn luyện viên.
-                    </p>
-
-                    <a th:href="@{/pt/profile}"
-                       class="btn btn-success">
-                        Xem hồ sơ
-                    </a>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="col-md-4">
-
-            <div class="card shadow-sm h-100">
-
-                <div class="card-body">
-
-                    <h5>Yêu cầu từ Member</h5>
-
-                    <p>
-                        Tiếp nhận yêu cầu tập luyện.
-                    </p>
-
-                    <span class="badge bg-secondary">
-                        Sắp triển khai
-                    </span>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="col-md-4">
-
-            <div class="card shadow-sm h-100">
-
-                <div class="card-body">
-
-                    <h5>Lịch tập cá nhân</h5>
-
-                    <p>
-                        Theo dõi và quản lý lịch tập với Member.
-                    </p>
-
-                    <span class="badge bg-secondary">
-                        Sắp triển khai
-                    </span>
-
-                </div>
-
-            </div>
-
-        </div>
 
     </div>
 

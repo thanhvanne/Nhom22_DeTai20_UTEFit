@@ -2,8 +2,7 @@
 <html lang="vi"
       xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments/head :: head('Chỉnh sửa PT - UTEFit')}">
-</head>
+<head th:replace="~{fragments/head :: head('Chỉnh sửa hồ sơ huấn luyện viên - UTEFit')}"></head>
 
 <body>
 
@@ -11,107 +10,194 @@
 
 <main class="container py-5">
 
-    <h1 class="fw-bold mb-4">
-        Chỉnh sửa hồ sơ PT
-    </h1>
-
-    <div class="card shadow-sm">
-
-        <div class="card-body p-4">
-
-            <form
-                    th:action="@{/pt/profile/edit}"
-                    th:object="${form}"
-                    method="post">
-
-                <div class="mb-3">
-
-                    <label class="form-label">
-                        Chuyên môn
-                    </label>
-
-                    <input
-                            type="text"
-                            th:field="*{specialization}"
-                            class="form-control"
-                            maxlength="255">
-
-                    <div
-                            class="text-danger"
-                            th:if="${#fields.hasErrors('specialization')}"
-                            th:errors="*{specialization}">
-                    </div>
-
-                </div>
-
-                <div class="mb-3">
-
-                    <label class="form-label">
-                        Số năm kinh nghiệm
-                    </label>
-
-                    <input
-                            type="number"
-                            th:field="*{yearsExperience}"
-                            class="form-control"
-                            min="0"
-                            max="80">
-
-                    <div
-                            class="text-danger"
-                            th:if="${#fields.hasErrors('yearsExperience')}"
-                            th:errors="*{yearsExperience}">
-                    </div>
-
-                </div>
-
-                <div class="mb-3">
-
-                    <label class="form-label">
-                        Giới thiệu
-                    </label>
-
-                    <textarea
-                            th:field="*{bio}"
-                            class="form-control"
-                            rows="6"
-                            maxlength="2000">
-                    </textarea>
-
-                    <div
-                            class="text-danger"
-                            th:if="${#fields.hasErrors('bio')}"
-                            th:errors="*{bio}">
-                    </div>
-
-                </div>
-
-                <button
-                        type="submit"
-                        class="btn btn-success">
-
-                    Lưu thay đổi
-
-                </button>
-
-                <a
-                        th:href="@{/pt/profile}"
-                        class="btn btn-outline-secondary">
-
-                    Hủy
-
-                </a>
-
-            </form>
-
+    <!-- Tiêu đề -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold mb-1">
+                Chỉnh sửa hồ sơ huấn luyện viên
+            </h1>
+            <p class="text-muted mb-0">
+                Cập nhật thông tin chuyên môn, chi nhánh làm việc và ảnh đại diện.
+            </p>
         </div>
 
+        <a th:href="@{/pt/profile}" class="btn btn-outline-secondary">
+            Quay lại hồ sơ
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+            <div class="row g-4">
+
+                <!-- Cột trái: avatar hiện tại -->
+                <div class="col-12 col-md-4 border-end-md">
+                    <h5 class="fw-semibold mb-3">Ảnh đại diện hiện tại</h5>
+
+                    <div class="text-center mb-3">
+                        <div class="rounded-circle overflow-hidden mx-auto mb-3"
+                             style="width: 140px; height: 140px; border: 3px solid #0d6efd;">
+                            <img th:if="${trainer.user != null and trainer.user.avatarUrl != null}"
+                                 th:src="${trainer.user.avatarUrl}"
+                                 alt="Avatar huấn luyện viên"
+                                 class="img-fluid h-100 w-100 object-fit-cover">
+
+                            <div th:if="${trainer.user == null or trainer.user.avatarUrl == null}"
+                                 class="h-100 w-100 d-flex align-items-center justify-content-center bg-light text-muted">
+                                Không có ảnh
+                            </div>
+                        </div>
+
+                        <p class="text-muted small mb-0">
+                            Ảnh đại diện sẽ xuất hiện trên trang giới thiệu huấn luyện viên và hồ sơ cá nhân.
+                        </p>
+                    </div>
+
+                    <!-- Upload ảnh mới -->
+                    <form th:action="@{/pt/profile/edit}"
+                          method="post"
+                          enctype="multipart/form-data"
+                          th:object="${trainer}">
+                        <input type="hidden"
+                               th:name="${_csrf.parameterName}"
+                               th:value="${_csrf.token}"/>
+
+                        <!-- Hidden để không mất các field khi chỉ đổi ảnh -->
+                        <input type="hidden" th:field="*{specialization}"/>
+                        <input type="hidden" th:field="*{yearsExperience}"/>
+                        <input type="hidden" th:field="*{bio}"/>
+                        <input type="hidden"
+                               name="branchId"
+                               th:value="${trainer.branch != null ? trainer.branch.id : ''}"/>
+
+                        <div class="mb-3">
+                            <label class="form-label">Đổi ảnh đại diện</label>
+                            <input type="file"
+                                   name="avatarFile"
+                                   class="form-control"
+                                   accept="image/*">
+                            <div class="form-text">
+                                JPG, PNG hoặc WebP. Tối đa 5MB.
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            Cập nhật ảnh
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Cột phải: form thông tin -->
+                <div class="col-12 col-md-8">
+                    <h5 class="fw-semibold mb-3">Thông tin huấn luyện viên</h5>
+
+                    <!-- Form chỉnh sửa thông tin -->
+                    <form th:action="@{/pt/profile/edit}"
+                          th:object="${trainer}"
+                          method="post"
+                          enctype="multipart/form-data">
+
+                        <!-- CSRF -->
+                        <input type="hidden"
+                               th:name="${_csrf.parameterName}"
+                               th:value="${_csrf.token}"/>
+
+                        <!-- Ẩn avatarFile để form này không bắt buộc upload -->
+                        <input type="hidden" name="avatarFile"/>
+
+                        <!-- Chi nhánh làm việc -->
+                        <div class="mb-3">
+                            <label class="form-label">Chi nhánh làm việc</label>
+                            <select class="form-select"
+                                    id="branchId"
+                                    name="branchId">
+                                <option value="">-- Chọn chi nhánh --</option>
+                                <option th:each="b : ${branches}"
+                                        th:value="${b.id}"
+                                        th:text="${b.name}"
+                                        th:selected="${trainer.branch != null and trainer.branch.id == b.id}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Chuyên môn -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                Chuyên môn
+                            </label>
+
+                            <input type="text"
+                                   th:field="*{specialization}"
+                                   class="form-control"
+                                   maxlength="255"
+                                   placeholder="Ví dụ: Gym giảm mỡ, Yoga, Powerlifting...">
+
+                            <div class="text-danger"
+                                 th:if="${#fields.hasErrors('specialization')}"
+                                 th:errors="*{specialization}">
+                            </div>
+                        </div>
+
+                        <!-- Số năm kinh nghiệm -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                Số năm kinh nghiệm
+                            </label>
+
+                            <input type="number"
+                                   th:field="*{yearsExperience}"
+                                   class="form-control"
+                                   min="0"
+                                   max="80">
+
+                            <div class="text-danger"
+                                 th:if="${#fields.hasErrors('yearsExperience')}"
+                                 th:errors="*{yearsExperience}">
+                            </div>
+                        </div>
+
+                        <!-- Giới thiệu -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                Giới thiệu
+                            </label>
+
+                            <textarea th:field="*{bio}"
+                                      class="form-control"
+                                      rows="6"
+                                      maxlength="2000"
+                                      placeholder="Giới thiệu ngắn gọn về bạn, phong cách huấn luyện, đối tượng học viên phù hợp...">
+                            </textarea>
+
+                            <div class="text-danger"
+                                 th:if="${#fields.hasErrors('bio')}"
+                                 th:errors="*{bio}">
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="mt-4 d-flex flex-wrap gap-2">
+                            <button type="submit"
+                                    class="btn btn-success">
+                                Lưu thay đổi
+                            </button>
+
+                            <a th:href="@{/pt/profile}"
+                               class="btn btn-outline-secondary">
+                                Hủy
+                            </a>
+                        </div>
+
+                    </form>
+                </div>
+
+            </div>
+        </div>
     </div>
 
 </main>
 
 <footer th:replace="~{fragments/footer :: footer}"></footer>
-
 <div th:replace="~{fragments/scripts :: scripts}"></div>
 
 </body>

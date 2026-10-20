@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi"
-      xmlns:th="http://www.thymeleaf.org">
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
     <meta charset="UTF-8">
@@ -100,10 +101,10 @@
                 <div class="trainer-profile-image">
 
                     <img
-                        th:src="${trainer.avatarUrl != null and !#strings.isEmpty(trainer.avatarUrl)
-                                ? trainer.avatarUrl
-                                : '/images/default-trainer.png'}"
-                        th:alt="${trainer.fullName}">
+                            th:src="${trainer.avatarUrl != null and !#strings.isEmpty(trainer.avatarUrl)
+                                    ? trainer.avatarUrl
+                                    : '/images/default-trainer.png'}"
+                            th:alt="${trainer.fullName}">
 
                 </div>
 
@@ -149,9 +150,9 @@
                     <div class="trainer-profile-stat">
 
                         <strong
-                            th:text="${trainer.yearsExperience != null
-                                      ? trainer.yearsExperience
-                                      : '—'}">
+                                th:text="${trainer.yearsExperience != null
+                                          ? trainer.yearsExperience
+                                          : '—'}">
 
                             5
 
@@ -236,9 +237,9 @@
                         <div>
 
                             <strong
-                                th:text="${trainer.branchName != null
-                                          ? trainer.branchName
-                                          : 'Chưa cập nhật chi nhánh'}">
+                                    th:text="${trainer.branchName != null
+                                              ? trainer.branchName
+                                              : 'Chưa cập nhật chi nhánh'}">
 
                                 UTEFit Thủ Đức
 
@@ -260,7 +261,7 @@
 
 
                 <!-- ACTIONS -->
-                <div class="trainer-profile-actions">
+                <div class="trainer-profile-actions d-flex flex-wrap gap-3">
 
                     <a th:href="@{/trainers}"
                        class="trainer-profile-back-button">
@@ -272,6 +273,14 @@
                         Quay lại danh sách
 
                     </a>
+
+                    <!-- Chỉ MEMBER đã đăng nhập mới thấy nút này -->
+                    <div sec:authorize="hasRole('MEMBER')">
+                        <a th:href="@{/member/trainer-requests/new(trainerId=${trainer.id})}"
+                           class="btn btn-brand btn-lg">
+                            Gửi yêu cầu huấn luyện viên
+                        </a>
+                    </div>
 
                 </div>
 
@@ -292,7 +301,7 @@
 
 <!-- Bootstrap JavaScript -->
 <script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
 </script>
 
 <!-- Global JavaScript -->

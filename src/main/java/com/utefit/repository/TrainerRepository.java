@@ -82,6 +82,16 @@ public interface TrainerRepository extends JpaRepository<Trainer, Long> {
             Pageable pageable
     );
 
+    // ==================== BỔ SUNG HÀM 1 THAM SỐ CHO PT PROFILE ====================
+    @Query("""
+            SELECT t FROM Trainer t
+            JOIN FETCH t.user u
+            LEFT JOIN FETCH t.branch
+            WHERE u.id = :userId
+            """)
+    Optional<Trainer> findByUserId(@Param("userId") Long userId);
+    // ============================================================================
+
     @Query("""
             SELECT t FROM Trainer t
             JOIN FETCH t.user u

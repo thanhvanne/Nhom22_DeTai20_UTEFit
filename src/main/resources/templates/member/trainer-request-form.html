@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/head :: head('Gửi yêu cầu huấn luyện viên - UTEFit')}">
+</head>
+
+<body>
+
+<header th:replace="~{fragments/header :: header}">
+</header>
+
+<main class="py-5 bg-light">
+
+    <div class="container">
+
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a th:href="@{/}">Trang chủ</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a th:href="@{/trainers}">Huấn luyện viên</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    Gửi yêu cầu PT
+                </li>
+            </ol>
+        </nav>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+
+                <div th:if="${errorMessage}" class="alert alert-danger">
+                    <span th:text="${errorMessage}"></span>
+                </div>
+
+                <div th:if="${successMessage}" class="alert alert-success">
+                    <span th:text="${successMessage}"></span>
+                </div>
+
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4">
+
+                        <h2 class="h4 mb-3">
+                            Gửi yêu cầu huấn luyện viên
+                        </h2>
+
+                        <p class="text-muted mb-4">
+                            Hãy giới thiệu ngắn gọn về mục tiêu luyện tập và thời gian rảnh của bạn
+                            để huấn luyện viên có thể hỗ trợ tốt hơn.
+                        </p>
+
+                        <div class="mb-4 p-3 rounded bg-white border">
+                            <h3 class="h5 mb-1"
+                                th:text="${trainer.fullName}">
+                                Tên huấn luyện viên
+                            </h3>
+                            <p class="mb-1 text-muted" th:text="${trainer.specialization}">
+                                Chuyên môn
+                            </p>
+                            <p class="mb-0 small text-secondary">
+                                <span th:text="${trainer.branchName != null ? trainer.branchName : 'Chi nhánh đang cập nhật'}">
+                                    Chi nhánh
+                                </span>
+                            </p>
+                        </div>
+
+                        <form th:action="@{/member/trainer-requests}"
+                              method="post"
+                              class="mt-3">
+
+                            <input type="hidden"
+                                   name="trainerId"
+                                   th:value="${trainer.id}"/>
+
+                            <input type="hidden"
+                                   th:name="${_csrf.parameterName}"
+                                   th:value="${_csrf.token}"/>
+
+                            <div class="mb-3">
+                                <label for="message" class="form-label">
+                                    Nội dung yêu cầu (không bắt buộc)
+                                </label>
+                                <textarea id="message"
+                                          name="message"
+                                          rows="5"
+                                          class="form-control"
+                                          placeholder="Ví dụ: Em muốn tập giảm mỡ, rảnh các buổi tối trong tuần."></textarea>
+                            </div>
+
+                            <div class="d-flex justify-content-between mt-4">
+                                <a th:href="@{/trainers/{id}(id=${trainer.id})}"
+                                   class="btn btn-outline-secondary">
+                                    Quay lại hồ sơ PT
+                                </a>
+
+                                <button type="submit"
+                                        class="btn btn-brand">
+                                    Gửi yêu cầu
+                                </button>
+                            </div>
+
+                        </form>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}">
+</footer>
+
+<div th:replace="~{fragments/scripts :: scripts}">
+</div>
+
+</body>
+</html>

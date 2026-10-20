@@ -1,4 +1,4 @@
-USE [master]
+USE UTEFitDB
 GO
 /****** Object:  Database [UTEFitDB]    Script Date: 18/10/2026 1:37:58 CH ******/
 CREATE DATABASE [UTEFitDB]
