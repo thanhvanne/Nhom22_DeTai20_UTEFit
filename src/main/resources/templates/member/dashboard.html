@@ -22,12 +22,13 @@
     </h1>
 
     <p class="ut-subtitle">
-        Quản lý tài khoản, gói tập và lịch sử
-        thanh toán của bạn.
+        Quản lý tài khoản, gói tập, lịch lớp
+        và lịch sử thanh toán của bạn.
     </p>
 
     <div class="row g-4 mt-2">
 
+        <!-- Profile -->
         <div class="col-md-6 col-lg-4">
 
             <div class="ut-card">
@@ -52,6 +53,7 @@
 
         </div>
 
+        <!-- Membership -->
         <div class="col-md-6 col-lg-4">
 
             <div class="ut-card">
@@ -76,6 +78,7 @@
 
         </div>
 
+        <!-- Payments -->
         <div class="col-md-6 col-lg-4">
 
             <div class="ut-card">
@@ -100,6 +103,7 @@
 
         </div>
 
+        <!-- Branches -->
         <div class="col-md-6 col-lg-4">
 
             <div class="ut-card">
@@ -124,6 +128,7 @@
 
         </div>
 
+        <!-- Class Booking: Giai đoạn 4 -->
         <div class="col-md-6 col-lg-4">
 
             <div class="ut-card">
@@ -131,16 +136,21 @@
 
                     <div class="program-icon">05</div>
 
-                    <h3>Lớp tập</h3>
+                    <h3>Đăng ký lớp tập</h3>
 
                     <p>
-                        Tìm kiếm các lớp tập,
-                        xem chi nhánh và PT phụ trách.
+                        Tìm lịch lớp còn chỗ, đăng ký,
+                        hủy lịch và xem lịch cá nhân.
                     </p>
 
-                    <a class="btn btn-outline-light mt-3"
-                       th:href="@{/classes}">
-                        Xem lớp tập
+                    <a class="btn btn-brand mt-3"
+                       th:href="@{/member/classes}">
+                        Đăng ký lịch lớp
+                    </a>
+
+                    <a class="btn btn-outline-light mt-3 ms-2"
+                       th:href="@{/member/schedule}">
+                        Lịch của tôi
                     </a>
 
                 </div>
@@ -148,6 +158,7 @@
 
         </div>
 
+        <!-- Trainers -->
         <div class="col-md-6 col-lg-4">
 
             <div class="ut-card">

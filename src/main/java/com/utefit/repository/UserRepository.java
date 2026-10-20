@@ -1,11 +1,14 @@
+
 package com.utefit.repository;
 
 import com.utefit.entity.User;
 import com.utefit.enums.UserRole;
 import com.utefit.enums.UserStatus;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -16,6 +19,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
     boolean existsByEmail(String email);
+
+    // Khóa Member trong transaction đặt/hủy lịch.
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT u FROM User u WHERE u.email = :email")
+    Optional<User> lockByEmailForBooking(
+            @Param("email") String email
+    );
 
     @Query("""
             SELECT u FROM User u
