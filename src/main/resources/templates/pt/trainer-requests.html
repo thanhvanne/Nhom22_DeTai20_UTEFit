@@ -79,6 +79,7 @@
                                     —
                                 </td>
                                 <td>
+                                    <!-- PENDING: giữ nguyên Accept / Reject -->
                                     <div th:if="${req.status.name() == 'PENDING'}" class="d-flex gap-2">
 
                                         <form th:action="@{'/pt/trainer-requests/' + ${req.id} + '/accept'}"
@@ -105,7 +106,26 @@
 
                                     </div>
 
-                                    <div th:if="${req.status.name() != 'PENDING'}"
+                                    <!-- ACCEPTED: Đã xử lý + Tạo lịch + Nhắn tin -->
+                                    <div th:if="${req.status.name() == 'ACCEPTED'}"
+                                         class="d-flex flex-column align-items-start gap-1">
+                                        <div class="text-muted small">
+                                            Đã xử lý
+                                        </div>
+                                        <div class="d-flex gap-2 mt-1">
+                                            <a class="btn btn-outline-secondary btn-sm"
+                                               th:href="@{/pt/personal-schedules/create(memberId=${req.memberId})}">
+                                                Tạo lịch
+                                            </a>
+                                            <a class="btn btn-outline-primary btn-sm"
+                                               th:href="@{/pt/chat/member/{memberId}(memberId=${req.memberId})}">
+                                                Nhắn tin
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <!-- REJECTED: chỉ hiển thị Đã xử lý -->
+                                    <div th:if="${req.status.name() == 'REJECTED'}"
                                          class="text-muted small">
                                         Đã xử lý
                                     </div>

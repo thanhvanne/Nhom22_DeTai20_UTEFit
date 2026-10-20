@@ -4,12 +4,14 @@ import com.utefit.dto.trainerrequest.TrainerRequestResponse;
 import com.utefit.entity.Trainer;
 import com.utefit.entity.TrainerRequest;
 import com.utefit.entity.User;
+import com.utefit.enums.NotificationType;
 import com.utefit.enums.TrainerRequestStatus;
 import com.utefit.enums.UserRole;
 import com.utefit.enums.UserStatus;
 import com.utefit.repository.TrainerRepository;
 import com.utefit.repository.TrainerRequestRepository;
 import com.utefit.repository.UserRepository;
+import com.utefit.service.NotificationService;
 import com.utefit.service.TrainerRequestService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ public class TrainerRequestServiceImpl implements TrainerRequestService {
     private final TrainerRequestRepository trainerRequestRepository;
     private final TrainerRepository trainerRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Override
     public TrainerRequestResponse createRequest(Long memberUserId,
@@ -48,11 +51,9 @@ public class TrainerRequestServiceImpl implements TrainerRequestService {
 
         User trainerUser = trainer.getUser();
 
-        // Lấy trạng thái active/enabled an toàn cho cả Boolean và boolean
         boolean trainerActive = Boolean.TRUE.equals(trainer.getActive());
         boolean trainerUserEnabled = Boolean.TRUE.equals(trainerUser.getEnabled());
 
-        // Chặn PT inactive / user khoá / không phải PT
         if (!trainerActive
                 || !trainerUserEnabled
                 || trainerUser.getStatus() != UserStatus.ACTIVE
@@ -60,7 +61,6 @@ public class TrainerRequestServiceImpl implements TrainerRequestService {
             throw new IllegalStateException("Huấn luyện viên hiện không khả dụng.");
         }
 
-        // Chặn duplicate PENDING
         boolean existedPending = trainerRequestRepository
                 .existsByMember_IdAndTrainer_IdAndStatus(
                         memberUserId,
@@ -83,6 +83,19 @@ public class TrainerRequestServiceImpl implements TrainerRequestService {
                 .build();
 
         TrainerRequest saved = trainerRequestRepository.save(entity);
+
+        // Notification cho PT: Member gửi request
+        String memberName = buildFullName(member.getLastName(), member.getFirstName());
+        String title = "Yêu cầu huấn luyện viên mới";
+        String content = memberName + " vừa gửi yêu cầu huấn luyện viên cho bạn.";
+
+        notificationService.createNotificationForUser(
+                trainerUser.getId(),
+                NotificationType.TRAINER_REQUEST_SENT,
+                title,
+                content,
+                saved.getId()
+        );
 
         return toResponse(saved);
     }
@@ -130,7 +143,35 @@ public class TrainerRequestServiceImpl implements TrainerRequestService {
 
         request.setStatus(targetStatus);
         request.setRespondedAt(LocalDateTime.now());
-        // @Transactional sẽ tự flush
+
+        // Notification cho Member
+        User member = request.getMember();
+        Trainer trainer = request.getTrainer();
+        User trainerUser = trainer.getUser();
+
+        String trainerName = buildFullName(trainerUser.getLastName(), trainerUser.getFirstName());
+
+        NotificationType type;
+        String title;
+        String content;
+
+        if (targetStatus == TrainerRequestStatus.ACCEPTED) {
+            type = NotificationType.TRAINER_REQUEST_ACCEPTED;
+            title = "Yêu cầu huấn luyện viên được chấp nhận";
+            content = "Huấn luyện viên " + trainerName + " đã chấp nhận yêu cầu của bạn.";
+        } else { // REJECTED
+            type = NotificationType.TRAINER_REQUEST_REJECTED;
+            title = "Yêu cầu huấn luyện viên bị từ chối";
+            content = "Huấn luyện viên " + trainerName + " đã từ chối yêu cầu của bạn.";
+        }
+
+        notificationService.createNotificationForUser(
+                member.getId(),
+                type,
+                title,
+                content,
+                request.getId()
+        );
     }
 
     private TrainerRequestResponse toResponse(TrainerRequest entity) {

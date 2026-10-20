@@ -9,9 +9,18 @@
 
         <div class="container">
 
-            <!-- Logo -->
+            <!-- Logo cho GUEST / MEMBER / ADMIN (không phải PT) -->
             <a class="navbar-brand fw-bold utefit-logo"
-               th:href="@{/}">
+               th:href="@{/}"
+               sec:authorize="!hasRole('PT')">
+                <span class="brand-symbol">◆</span>
+                UTE<span>FIT</span>
+            </a>
+
+            <!-- Logo cho PT: về PT Dashboard -->
+            <a class="navbar-brand fw-bold utefit-logo"
+               th:href="@{/pt/dashboard}"
+               sec:authorize="hasRole('PT')">
                 <span class="brand-symbol">◆</span>
                 UTE<span>FIT</span>
             </a>
@@ -42,7 +51,6 @@
                     </li>
 
                     <li class="nav-item dropdown">
-
                         <a class="nav-link dropdown-toggle"
                            href="#"
                            role="button"
@@ -51,42 +59,36 @@
                         </a>
 
                         <ul class="dropdown-menu utefit-dropdown">
-
                             <li>
                                 <a class="dropdown-item"
                                    href="/#giam-can">
                                     Giảm cân
                                 </a>
                             </li>
-
                             <li>
                                 <a class="dropdown-item"
                                    href="/#tang-co">
                                     Tăng cơ
                                 </a>
                             </li>
-
                             <li>
                                 <a class="dropdown-item"
                                    href="/#voc-dang">
                                     Cải thiện vóc dáng
                                 </a>
                             </li>
-
                             <li>
                                 <a class="dropdown-item"
                                    href="/#toan-dien">
                                     Fitness toàn diện
                                 </a>
                             </li>
-
                             <li>
                                 <a class="dropdown-item"
                                    href="/#kids">
                                     Kids Fitness
                                 </a>
                             </li>
-
                         </ul>
                     </li>
 
@@ -181,6 +183,27 @@
                        class="btn btn-outline-light btn-sm"
                        th:href="@{/admin}">
                         Admin
+                    </a>
+
+                    <!-- Tin nhắn + Thông báo (chỉ PT, dùng ở dashboard khi có biến dashboard) -->
+                    <a sec:authorize="hasRole('PT')"
+                       th:if="${dashboard != null}"
+                       class="btn btn-outline-light btn-sm d-flex align-items-center gap-1"
+                       href="#"
+                       role="button">
+                        Tin nhắn
+                        <span class="badge bg-primary"
+                              th:text="${dashboard.unreadMessageCount}">0</span>
+                    </a>
+
+                    <a sec:authorize="hasRole('PT')"
+                       th:if="${dashboard != null}"
+                       class="btn btn-outline-light btn-sm d-flex align-items-center gap-1"
+                       href="#"
+                       role="button">
+                        Thông báo
+                        <span class="badge bg-danger"
+                              th:text="${dashboard.unreadNotificationCount}">0</span>
                     </a>
 
                     <!-- Logout -->

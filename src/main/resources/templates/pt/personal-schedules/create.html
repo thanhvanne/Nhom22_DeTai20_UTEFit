@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/head :: head('Tạo lịch tập cá nhân - UTEFit')}"></head>
+
+<body>
+
+<style>
+    body {
+        background: #f8fafc;
+        color: #0f172a;
+    }
+
+    .schedule-wrapper {
+        max-width: 760px;
+        margin: 2.5rem auto;
+    }
+
+    .card-schedule {
+        background: #ffffff;
+        border-radius: 1.5rem;
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+    }
+
+    .schedule-header {
+        background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+        color: #fff;
+        padding: 1.75rem 2rem;
+    }
+
+    .schedule-header h2 {
+        margin-bottom: 0.4rem;
+        font-weight: 600;
+    }
+
+    .schedule-header p {
+        margin-bottom: 0;
+        opacity: 0.85;
+        font-size: 0.9rem;
+    }
+
+    .member-preview {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: linear-gradient(135deg, #eff6ff, #f0f9ff);
+        border-radius: 1rem;
+        padding: 1rem 1.25rem;
+        border: 1px solid #dbeafe;
+        margin-bottom: 1.5rem;
+    }
+
+    .avatar-large {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #60a5fa, #2563eb);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: 700;
+        font-size: 1.4rem;
+        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+        flex-shrink: 0;
+    }
+
+    .form-label {
+        font-weight: 500;
+        font-size: 0.85rem;
+        color: #475569;
+    }
+
+    .form-control {
+        border-radius: 0.75rem;
+        border: 1.5px solid #e2e8f0;
+        font-size: 0.92rem;
+        padding: 0.6rem 0.8rem;
+    }
+
+    .form-control:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+        outline: none;
+    }
+
+    .btn-gradient {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        border: none;
+        color: #fff;
+        border-radius: 0.75rem;
+        padding: 0.6rem 1.3rem;
+        font-weight: 600;
+    }
+
+    .btn-gradient:hover {
+        box-shadow: 0 10px 20px rgba(37, 99, 235, 0.25);
+        transform: translateY(-1px);
+    }
+</style>
+
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="py-4">
+    <div class="container">
+        <div class="schedule-wrapper">
+
+            <div class="card-schedule">
+
+                <!-- Header gradient -->
+                <div class="schedule-header">
+                    <h2>Tạo lịch tập cá nhân</h2>
+                    <p>Thiết lập buổi tập 1–1 cho hội viên đã được bạn chấp nhận yêu cầu.</p>
+                </div>
+
+                <div class="p-4 p-md-5">
+
+                    <!-- Thông báo -->
+                    <div th:if="${successMessage}" class="alert alert-success">
+                        <span th:text="${successMessage}"></span>
+                    </div>
+                    <div th:if="${errorMessage}" class="alert alert-danger">
+                        <span th:text="${errorMessage}"></span>
+                    </div>
+
+                    <!-- Hội viên -->
+                    <div class="member-preview">
+                        <div class="avatar-large">
+                            <span th:text="${#strings.substring(member.fullName, 0, 1)}">A</span>
+                        </div>
+                        <div>
+                            <div class="fw-semibold" th:text="${member.fullName}">Tên hội viên</div>
+                            <div class="text-muted small" th:text="${member.email}">email@example.com</div>
+                        </div>
+                    </div>
+
+                    <!-- Form tạo lịch -->
+                    <form th:action="@{/pt/personal-schedules/create}" method="post">
+                        <input type="hidden" name="memberId" th:value="${member.id}"/>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="scheduleDate">Ngày tập</label>
+                                <input type="date" id="scheduleDate" name="scheduleDate"
+                                       class="form-control" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label" for="startTime">Bắt đầu</label>
+                                <input type="time" id="startTime" name="startTime"
+                                       class="form-control" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label" for="endTime">Kết thúc</label>
+                                <input type="time" id="endTime" name="endTime"
+                                       class="form-control" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="title">Tiêu đề buổi tập</label>
+                            <input type="text" id="title" name="title"
+                                   class="form-control"
+                                   placeholder="Ví dụ: Buổi tập Core & Cardio — mục tiêu giảm mỡ">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label" for="note">Ghi chú chi tiết</label>
+                            <textarea id="note" name="note" rows="3"
+                                      class="form-control"
+                                      placeholder="Mục tiêu, lưu ý sức khỏe, bài tập trọng tâm..."></textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="#" onclick="history.back(); return false;"
+                               class="btn btn-outline-secondary">
+                                ← Quay lại
+                            </a>
+                            <button type="submit" class="btn-gradient">
+                                Lưu lịch tập
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<div th:replace="~{fragments/scripts :: scripts}"></div>
+
+</body>
+</html>

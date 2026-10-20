@@ -14,6 +14,12 @@ import java.util.Optional;
 
 public interface TrainerRepository extends JpaRepository<Trainer, Long> {
 
+    /**
+     * Dùng cho các chức năng phía PT (chat, dashboard...) để lấy Trainer từ user id của tài khoản PT.
+     * Spring Data JPA sẽ tự sinh query dựa trên quan hệ Trainer.user.id.
+     */
+    Optional<Trainer> findByUser_Id(Long userId);
+
     @Query("""
             SELECT t FROM Trainer t
             JOIN FETCH t.user u

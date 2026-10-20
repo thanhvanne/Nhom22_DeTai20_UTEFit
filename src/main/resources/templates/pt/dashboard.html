@@ -2,32 +2,127 @@
 <html lang="vi"
       xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments/head :: head('PT Dashboard - UTEFit')}">
-</head>
+<head th:replace="~{fragments/head :: head('PT Dashboard - UTEFit')}"></head>
 
-<body>
+<body class="bg-dark">
 
 <header th:replace="~{fragments/header :: header}"></header>
 
-<main class="py-5 bg-dark text-white">
+<main class="container py-5">
 
-    <div class="container">
+    <!-- HERO TỐI DÀNH RIÊNG CHO PT -->
+    <section class="card border-0 shadow-lg overflow-hidden mb-4"
+             style="background: radial-gradient(circle at top left, #1b2a4d 0, #030712 55%, #02030a 100%);">
 
-        <h1 class="display-5 fw-bold mb-3">
-            PT Dashboard
-        </h1>
+        <div class="card-body p-4 p-md-5 text-white">
 
-        <p class="lead text-muted mb-0">
-            Hệ thống quản lý dành cho huấn luyện viên UTEFit.
-            Sử dụng menu ở thanh trên để truy cập hồ sơ cá nhân và yêu cầu từ Member.
-        </p>
+            <div class="row g-4 align-items-center">
 
-    </div>
+                <!-- Bên trái: tiêu đề + mô tả -->
+                <div class="col-12 col-lg-8">
+
+                    <h1 class="fw-bold display-5 mb-3">
+                        Khu vực huấn luyện viên UTEFit
+                    </h1>
+
+                    <p class="mb-2 text-white-50 fs-6">
+                        Đây là không gian làm việc dành riêng cho huấn luyện viên cá nhân. Tại đây, bạn có thể
+                        theo dõi yêu cầu từ học viên, chủ động sắp xếp lịch tập 1–1 và quản lý các lớp được phân
+                        công một cách trực quan.
+                    </p>
+
+                    <p class="mb-0 text-white-50 fs-6">
+                        Khi một học viên chọn bạn làm huấn luyện viên, đó là bước đầu của một hành trình mới.
+                        Hãy sử dụng <strong>“Yêu cầu từ Member”</strong> để phản hồi kịp thời, và
+                        <strong>“Lịch tập cá nhân”</strong> để xây dựng lộ trình tập luyện phù hợp cho từng người.
+                    </p>
+
+                </div>
+
+                <!-- Bên phải: avatar + tên + chi nhánh -->
+                <div class="col-12 col-lg-4">
+
+                    <div class="d-flex flex-column align-items-center align-items-lg-start">
+
+                        <!-- Avatar tròn -->
+                        <div class="rounded-circle overflow-hidden d-flex align-items-center justify-content-center mb-3"
+                             style="width: 88px; height: 88px; border: 3px solid #ff3366; box-shadow: 0 0 15px rgba(255,51,102,.5);">
+
+                            <img th:if="${dashboard.avatarUrl != null}"
+                                 th:src="${dashboard.avatarUrl}"
+                                 alt="Avatar PT"
+                                 class="img-fluid h-100 w-100 object-fit-cover">
+
+                            <div th:if="${dashboard.avatarUrl == null}"
+                                 class="h-100 w-100 d-flex align-items-center justify-content-center bg-dark text-white fw-semibold">
+                                PT
+                            </div>
+                        </div>
+
+                        <!-- Tên + chi nhánh -->
+                        <div class="text-center text-lg-start mb-2">
+                            <div class="fw-semibold fs-5"
+                                 th:text="${dashboard.trainerName}">
+                                Minh Tran
+                            </div>
+                            <div class="small text-white-50"
+                                 th:text="${dashboard.branchName != null ? dashboard.branchName : 'UTEFit'}">
+                                UTEFit Thu Duc
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- PHẦN NỀN ĐƠN GIẢN BÊN DƯỚI (TÙY Ý, CHỈ ĐỂ ĐẸP) -->
+    <section class="card border-0 shadow-sm bg-dark text-white-50">
+        <div class="card-body p-4 p-md-5">
+
+            <div class="row g-4 align-items-center">
+
+                <div class="col-12 col-lg-6">
+                    <h3 class="fw-semibold mb-3 text-white">
+                        Lịch tập cá nhân & lớp tại UTEFit
+                    </h3>
+                    <p class="mb-2">
+                        Mỗi buổi tập là một cơ hội để bạn đồng hành cùng học viên: lắng nghe mục tiêu,
+                        đánh giá thể trạng và thiết kế bài tập phù hợp. Lịch tập cá nhân được hiển thị
+                        dưới dạng bảng tuần, giúp bạn dễ dàng quan sát toàn bộ lịch làm việc.
+                    </p>
+                    <p class="mb-0">
+                        Kết hợp giữa buổi PT 1–1 và lớp nhóm, UTEFit hỗ trợ bạn tối ưu hiệu quả huấn luyện
+                        mà vẫn đảm bảo sự cân bằng thời gian.
+                    </p>
+                </div>
+
+                <div class="col-12 col-lg-6">
+                    <div class="border rounded-4 p-3 p-md-4 bg-gradient"
+                         style="background: linear-gradient(135deg, rgba(13,110,253,.2), rgba(255,51,102,.35));">
+                        <p class="mb-2 small text-white-75">
+                            Gợi ý:
+                        </p>
+                        <ul class="small mb-0">
+                            <li>Chọn <strong>“Lịch tập cá nhân”</strong> trên thanh menu để xem lịch dạng thời khóa biểu tuần.</li>
+                            <li>Sử dụng <strong>“Yêu cầu từ Member”</strong> để xem và xử lý yêu cầu PT đang chờ.</li>
+                            <li>Khi tính năng chat hoàn thiện, bạn sẽ thấy tin nhắn và thông báo realtime ngay trên thanh trên cùng.</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
 
 </main>
 
 <footer th:replace="~{fragments/footer :: footer}"></footer>
-
 <div th:replace="~{fragments/scripts :: scripts}"></div>
 
 </body>
