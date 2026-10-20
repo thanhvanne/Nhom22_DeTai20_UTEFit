@@ -1,0 +1,212 @@
+
+/* UTEFit - Giai đoạn 3 */
+
+.ut-page {
+    padding-top: 55px;
+    padding-bottom: 80px;
+}
+
+.ut-page-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    color: #fff;
+}
+
+.ut-page-title span {
+    color: #ff326b;
+}
+
+.ut-subtitle {
+    color: #a9b6cf;
+    line-height: 1.8;
+}
+
+.ut-card {
+    height: 100%;
+    border: 1px solid rgba(166, 184, 220, .18);
+    background: #111b31;
+    border-radius: 16px;
+    overflow: hidden;
+    color: #f3f6ff;
+}
+
+.ut-card-body {
+    padding: 25px;
+}
+
+.ut-card h3 {
+    font-weight: 700;
+    font-size: 1.3rem;
+}
+
+.ut-card p {
+    color: #a9b6cf;
+}
+
+.ut-card-image {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    background: #192540;
+}
+
+.ut-empty-image {
+    height: 220px;
+    background:
+            radial-gradient(circle at 80% 20%,
+            rgba(255, 50, 107, .25), transparent 55%),
+            linear-gradient(135deg, #192540, #0a1020);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #a9b6cf;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.ut-panel {
+    padding: 30px;
+    border-radius: 16px;
+    background: #111b31;
+    border: 1px solid rgba(166, 184, 220, .18);
+}
+
+.ut-panel .form-label {
+    color: #dfe8fa;
+    font-weight: 600;
+}
+
+.ut-panel .form-control,
+.ut-panel .form-select,
+.ut-search .form-control,
+.ut-search .form-select {
+    color: #f3f6ff;
+    background-color: #0a1224;
+    border: 1px solid #394663;
+    min-height: 46px;
+}
+
+.ut-panel .form-control:focus,
+.ut-panel .form-select:focus,
+.ut-search .form-control:focus,
+.ut-search .form-select:focus {
+    color: #fff;
+    background-color: #0a1224;
+    border-color: #ff326b;
+    box-shadow: 0 0 0 3px rgba(255, 50, 107, .13);
+}
+
+.ut-panel .form-control::placeholder,
+.ut-search .form-control::placeholder {
+    color: #8996af;
+}
+
+.ut-panel .form-select option,
+.ut-search .form-select option {
+    color: #fff;
+    background: #111b31;
+}
+
+.ut-search {
+    padding: 22px;
+    margin: 30px 0;
+    background: #111b31;
+    border: 1px solid rgba(166, 184, 220, .18);
+    border-radius: 16px;
+}
+
+.ut-status {
+    font-size: .78rem;
+    font-weight: 800;
+    letter-spacing: .5px;
+    border-radius: 999px;
+    padding: 6px 11px;
+    display: inline-block;
+    background: #263650;
+    color: #dce8ff;
+}
+
+.ut-status.ACTIVE,
+.ut-status.PAID,
+.ut-status.OPEN {
+    background: #133e32;
+    color: #8ef0be;
+}
+
+.ut-status.PENDING {
+    background: #46371b;
+    color: #ffdf8b;
+}
+
+.ut-status.FULL,
+.ut-status.CANCELLED,
+.ut-status.FAILED {
+    background: #4b2032;
+    color: #ff9cbb;
+}
+
+.ut-table {
+    --bs-table-bg: transparent;
+    --bs-table-color: #e6edfd;
+    --bs-table-border-color: #30405e;
+    margin-bottom: 0;
+}
+
+.ut-table th {
+    color: #a9b6cf;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.ut-avatar {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border: 3px solid #ff326b;
+    border-radius: 50%;
+}
+
+.ut-avatar-placeholder {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: #263650;
+    color: #ff7ea0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+}
+
+.ut-pagination .page-link {
+    color: #f3f6ff;
+    background: #111b31;
+    border-color: #35415b;
+}
+
+.ut-pagination .active .page-link {
+    background: #ff326b;
+    border-color: #ff326b;
+    color: #fff;
+}
+
+.ut-pagination .disabled .page-link {
+    color: #72809a;
+    background: #0d1425;
+    border-color: #35415b;
+}
+
+@media (max-width: 768px) {
+    .ut-page {
+        padding-top: 30px;
+    }
+
+    .ut-panel {
+        padding: 20px;
+    }
+
+    .ut-card-image,
+    .ut-empty-image {
+        height: 190px;
+    }
+}

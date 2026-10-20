@@ -1,8 +1,9 @@
+
 <!DOCTYPE html>
 <html lang="vi"
       xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments/head :: head('Member Dashboard')}">
+<head th:replace="~{fragments/head :: head('Member Dashboard - UTEFit')}">
 </head>
 
 <body>
@@ -10,40 +11,196 @@
 <header th:replace="~{fragments/header :: header}">
 </header>
 
-<main class="container py-5 member-shell">
+<main class="container ut-page">
 
-    <h2>UTEFit - Member Dashboard</h2>
+    <span class="eyebrow">
+        UTEFIT MEMBER PORTAL
+    </span>
 
-    <div class="alert alert-success mt-4">
+    <h1 class="ut-page-title mt-3">
+        Trung tâm <span>hội viên</span>
+    </h1>
 
-        Bạn đã đăng nhập thành công
-        với quyền MEMBER.
+    <p class="ut-subtitle">
+        Quản lý tài khoản, gói tập và lịch sử
+        thanh toán của bạn.
+    </p>
+
+    <div class="row g-4 mt-2">
+
+        <div class="col-md-6 col-lg-4">
+
+            <div class="ut-card">
+                <div class="ut-card-body">
+
+                    <div class="program-icon">01</div>
+
+                    <h3>Hồ sơ cá nhân</h3>
+
+                    <p>
+                        Chỉnh sửa họ tên, số điện thoại,
+                        ảnh đại diện và đổi mật khẩu.
+                    </p>
+
+                    <a class="btn btn-brand mt-3"
+                       th:href="@{/member/profile}">
+                        Quản lý hồ sơ
+                    </a>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+
+            <div class="ut-card">
+                <div class="ut-card-body">
+
+                    <div class="program-icon">02</div>
+
+                    <h3>Membership</h3>
+
+                    <p>
+                        Chọn chi nhánh, đăng ký gói
+                        và theo dõi thời hạn sử dụng.
+                    </p>
+
+                    <a class="btn btn-brand mt-3"
+                       th:href="@{/member/memberships}">
+                        Gói tập của tôi
+                    </a>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+
+            <div class="ut-card">
+                <div class="ut-card-body">
+
+                    <div class="program-icon">03</div>
+
+                    <h3>Thanh toán</h3>
+
+                    <p>
+                        Xem trạng thái thanh toán CASH,
+                        số tiền và lịch sử giao dịch.
+                    </p>
+
+                    <a class="btn btn-brand mt-3"
+                       th:href="@{/member/payments}">
+                        Xem thanh toán
+                    </a>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+
+            <div class="ut-card">
+                <div class="ut-card-body">
+
+                    <div class="program-icon">04</div>
+
+                    <h3>Chi nhánh UTEFit</h3>
+
+                    <p>
+                        Tra cứu các phòng tập đang
+                        hoạt động trong hệ thống.
+                    </p>
+
+                    <a class="btn btn-outline-light mt-3"
+                       th:href="@{/branches}">
+                        Khám phá chi nhánh
+                    </a>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+
+            <div class="ut-card">
+                <div class="ut-card-body">
+
+                    <div class="program-icon">05</div>
+
+                    <h3>Lớp tập</h3>
+
+                    <p>
+                        Tìm kiếm các lớp tập,
+                        xem chi nhánh và PT phụ trách.
+                    </p>
+
+                    <a class="btn btn-outline-light mt-3"
+                       th:href="@{/classes}">
+                        Xem lớp tập
+                    </a>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+
+            <div class="ut-card">
+                <div class="ut-card-body">
+
+                    <div class="program-icon">06</div>
+
+                    <h3>Huấn luyện viên</h3>
+
+                    <p>
+                        Khám phá hồ sơ các PT
+                        và tìm người hướng dẫn phù hợp.
+                    </p>
+
+                    <a class="btn btn-outline-light mt-3"
+                       th:href="@{/trainers}">
+                        Tìm PT
+                    </a>
+
+                </div>
+            </div>
+
+        </div>
 
     </div>
 
-    <p>
-        Đây là trang demo để kiểm tra
-        Spring Security và JWT.
-    </p>
+    <div class="ut-panel mt-5">
 
-    <p>
-        MEMBER không được truy cập
-        <code>/admin/**</code>
-        hoặc
-        <code>/pt/**</code>.
-    </p>
+        <h3 class="mb-3">
+            Tài khoản của bạn
+        </h3>
 
-    <form th:action="@{/auth/logout}" method="post">
+        <p class="ut-subtitle">
+            Khu vực này dành riêng cho MEMBER.
+            Các trang PT và Admin được Spring Security
+            bảo vệ theo vai trò.
+        </p>
 
-        <input type="hidden"
-               th:name="${_csrf.parameterName}"
-               th:value="${_csrf.token}">
+        <form th:action="@{/auth/logout}"
+              method="post">
 
-        <button type="submit" class="btn btn-danger">
-            Đăng xuất
-        </button>
+            <input type="hidden"
+                   th:name="${_csrf.parameterName}"
+                   th:value="${_csrf.token}">
 
-    </form>
+            <button type="submit"
+                    class="btn btn-outline-danger">
+                Đăng xuất
+            </button>
+
+        </form>
+
+    </div>
 
 </main>
 

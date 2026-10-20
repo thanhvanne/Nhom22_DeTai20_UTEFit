@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Chi nhánh - UTEFit')}">
+</head>
+
+<body>
+
+<header th:replace="~{fragments/header :: header}">
+</header>
+
+<main class="container ut-page">
+
+    <h1 class="ut-page-title">
+        Hệ thống <span>chi nhánh</span>
+    </h1>
+
+    <p class="ut-subtitle">
+        Khám phá các cơ sở tập luyện đang hoạt động của UTEFit.
+    </p>
+
+    <form class="ut-search row g-3"
+          th:action="@{/branches}"
+          method="get">
+
+        <div class="col-md-9">
+            <input type="search"
+                   name="keyword"
+                   class="form-control"
+                   placeholder="Tìm tên, địa chỉ, số điện thoại..."
+                   th:value="${keyword}">
+        </div>
+
+        <div class="col-md-3">
+            <button class="btn btn-brand w-100"
+                    type="submit">
+                Tìm chi nhánh
+            </button>
+        </div>
+
+    </form>
+
+    <div class="row g-4">
+
+        <div class="col-md-6 col-lg-4"
+             th:each="b : ${branchPage.content}">
+
+            <article class="ut-card">
+
+                <img th:if="${b.imageUrl != null and !#strings.isEmpty(b.imageUrl)}"
+                     class="ut-card-image"
+                     th:src="${b.imageUrl}"
+                     alt="Ảnh chi nhánh">
+
+                <div th:unless="${b.imageUrl != null and !#strings.isEmpty(b.imageUrl)}"
+                     class="ut-empty-image">
+                    UTEFIT FITNESS
+                </div>
+
+                <div class="ut-card-body">
+
+                    <h3 th:text="${b.name}">
+                        Tên chi nhánh
+                    </h3>
+
+                    <p th:text="${b.address}">
+                        Địa chỉ
+                    </p>
+
+                    <p th:if="${b.phone != null}">
+                        Điện thoại:
+                        <span th:text="${b.phone}"></span>
+                    </p>
+
+                    <a class="btn btn-brand mt-2"
+                       th:href="@{/branches/{id}(id=${b.id})}">
+                        Xem chi tiết
+                    </a>
+
+                </div>
+            </article>
+
+        </div>
+
+    </div>
+
+    <div th:if="${branchPage.empty}"
+         class="ut-panel text-center mt-4">
+        Không tìm thấy chi nhánh phù hợp.
+    </div>
+
+    <nav th:if="${branchPage.totalPages > 1}"
+         class="mt-5"
+         aria-label="Phân trang chi nhánh">
+
+        <ul class="pagination ut-pagination justify-content-center flex-wrap">
+
+            <li class="page-item"
+                th:classappend="${branchPage.first} ? 'disabled'">
+
+                <a class="page-link"
+                   th:href="@{/branches(page=${branchPage.number - 1},keyword=${keyword})}">
+                    Trước
+                </a>
+            </li>
+
+            <li class="page-item"
+                th:each="i : ${#numbers.sequence(0,branchPage.totalPages - 1)}"
+                th:classappend="${i == branchPage.number} ? 'active'">
+
+                <a class="page-link"
+                   th:href="@{/branches(page=${i},keyword=${keyword})}"
+                   th:text="${i + 1}">
+                    1
+                </a>
+            </li>
+
+            <li class="page-item"
+                th:classappend="${branchPage.last} ? 'disabled'">
+
+                <a class="page-link"
+                   th:href="@{/branches(page=${branchPage.number + 1},keyword=${keyword})}">
+                    Sau
+                </a>
+            </li>
+
+        </ul>
+    </nav>
+
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}">
+</footer>
+
+<div th:replace="~{fragments/scripts :: scripts}">
+</div>
+
+</body>
+</html>

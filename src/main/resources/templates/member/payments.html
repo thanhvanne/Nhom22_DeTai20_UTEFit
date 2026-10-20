@@ -1,0 +1,123 @@
+
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Lịch sử thanh toán - UTEFit')}">
+</head>
+
+<body>
+
+<header th:replace="~{fragments/header :: header}">
+</header>
+
+<main class="container ut-page">
+
+    <div class="d-flex justify-content-between
+                align-items-center flex-wrap gap-3 mb-4">
+
+        <div>
+            <h1 class="ut-page-title">
+                Lịch sử <span>thanh toán</span>
+            </h1>
+
+            <p class="ut-subtitle mb-0">
+                Theo dõi các giao dịch gói tập của bạn.
+            </p>
+        </div>
+
+        <a class="btn btn-outline-light"
+           th:href="@{/member/memberships}">
+            Gói tập của tôi
+        </a>
+
+    </div>
+
+    <div class="ut-panel">
+
+        <div class="table-responsive">
+
+            <table class="table ut-table align-middle">
+
+                <thead>
+                <tr>
+                    <th>Mã GD</th>
+                    <th>Gói tập</th>
+                    <th>Số tiền</th>
+                    <th>Phương thức</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày tạo</th>
+                    <th>Ngày thanh toán</th>
+                    <th>Mã giao dịch</th>
+                </tr>
+                </thead>
+
+                <tbody>
+
+                <tr th:each="p : ${payments}">
+
+                    <td th:text="${p.id}">1</td>
+
+                    <td th:text="${p.planName}">
+                        Membership
+                    </td>
+
+                    <td th:text="${p.amount} + ' VND'">
+                        0 VND
+                    </td>
+
+                    <td th:text="${p.method}">
+                        CASH
+                    </td>
+
+                    <td>
+                        <span class="ut-status"
+                              th:classappend="${p.status}"
+                              th:text="${p.status}">
+                            PENDING
+                        </span>
+                    </td>
+
+                    <td th:text="${#temporals.format(p.createdAt, 'dd/MM/yyyy HH:mm')}">
+                        01/01/2026
+                    </td>
+
+                    <td>
+                        <span th:if="${p.paidAt != null}"
+                              th:text="${#temporals.format(p.paidAt, 'dd/MM/yyyy HH:mm')}">
+                        </span>
+
+                        <span th:unless="${p.paidAt != null}">
+                            Chưa thanh toán
+                        </span>
+                    </td>
+
+                    <td th:text="${p.transactionCode ?: '-'}">
+                        -
+                    </td>
+
+                </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div th:if="${#lists.isEmpty(payments)}"
+             class="text-center ut-subtitle py-4">
+            Chưa có giao dịch nào.
+        </div>
+
+    </div>
+
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}">
+</footer>
+
+<div th:replace="~{fragments/scripts :: scripts}">
+</div>
+
+</body>
+</html>

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="vi"
       xmlns:th="http://www.thymeleaf.org"
@@ -6,7 +7,6 @@
 <header th:fragment="header">
 
     <nav class="navbar navbar-expand-lg navbar-dark utefit-navbar">
-
         <div class="container">
 
             <a class="navbar-brand fw-bold utefit-logo"
@@ -28,75 +28,40 @@
             <div class="collapse navbar-collapse"
                  id="utefitNavbar">
 
-                <ul class="navbar-nav mx-auto gap-lg-3">
+                <ul class="navbar-nav mx-auto gap-lg-2">
 
                     <li class="nav-item">
                         <a class="nav-link"
-                           href="/#gioi-thieu">
-                            Giới thiệu
+                           th:href="@{/}">
+                            Trang chủ
                         </a>
                     </li>
 
-                    <li class="nav-item dropdown">
-
-                        <a class="nav-link dropdown-toggle"
-                           href="#"
-                           role="button"
-                           data-bs-toggle="dropdown">
-                            Chương trình tập
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           th:href="@{/branches}">
+                            Chi nhánh
                         </a>
+                    </li>
 
-                        <ul class="dropdown-menu utefit-dropdown">
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           th:href="@{/membership-plans}">
+                            Gói tập
+                        </a>
+                    </li>
 
-                            <li>
-                                <a class="dropdown-item"
-                                   href="/#giam-can">
-                                    Giảm cân
-                                </a>
-                            </li>
-
-                            <li>
-                                <a class="dropdown-item"
-                                   href="/#tang-co">
-                                    Tăng cơ
-                                </a>
-                            </li>
-
-                            <li>
-                                <a class="dropdown-item"
-                                   href="/#voc-dang">
-                                    Cải thiện vóc dáng
-                                </a>
-                            </li>
-
-                            <li>
-                                <a class="dropdown-item"
-                                   href="/#toan-dien">
-                                    Fitness toàn diện
-                                </a>
-                            </li>
-
-                            <li>
-                                <a class="dropdown-item"
-                                   href="/#kids">
-                                    Kids Fitness
-                                </a>
-                            </li>
-
-                        </ul>
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           th:href="@{/classes}">
+                            Lớp tập
+                        </a>
                     </li>
 
                     <li class="nav-item">
                         <a class="nav-link"
                            th:href="@{/trainers}">
                             Huấn luyện viên
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link"
-                           href="/#bang-gia">
-                            Bảng giá
                         </a>
                     </li>
 
@@ -114,16 +79,15 @@
                        th:href="@{/register}">
                         Đăng ký
                     </a>
-
                 </div>
 
                 <div sec:authorize="isAuthenticated()"
                      class="d-flex align-items-center gap-2">
 
-                    <a sec:authorize="hasRole('ADMIN')"
+                    <a sec:authorize="hasRole('MEMBER')"
                        class="btn btn-outline-light btn-sm"
-                       th:href="@{/admin/dashboard}">
-                        Quản trị Admin
+                       th:href="@{/member/dashboard}">
+                        Tài khoản
                     </a>
 
                     <a sec:authorize="hasRole('PT')"
@@ -132,10 +96,10 @@
                         PT Dashboard
                     </a>
 
-                    <a sec:authorize="hasRole('MEMBER')"
+                    <a sec:authorize="hasRole('ADMIN')"
                        class="btn btn-outline-light btn-sm"
-                       th:href="@{/member/dashboard}">
-                        Tài khoản
+                       th:href="@{/admin/dashboard}">
+                        Admin
                     </a>
 
                     <form th:action="@{/auth/logout}"
@@ -150,17 +114,13 @@
                                 class="btn btn-brand btn-sm">
                             Đăng xuất
                         </button>
-
                     </form>
 
                 </div>
 
             </div>
-
         </div>
-
     </nav>
 
 </header>
-
 </html>

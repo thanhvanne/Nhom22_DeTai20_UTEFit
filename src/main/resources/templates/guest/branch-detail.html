@@ -1,0 +1,99 @@
+
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Chi tiết chi nhánh - UTEFit')}">
+</head>
+
+<body>
+
+<header th:replace="~{fragments/header :: header}">
+</header>
+
+<main class="container ut-page">
+
+    <a class="btn btn-outline-light mb-4"
+       th:href="@{/branches}">
+        ← Tất cả chi nhánh
+    </a>
+
+    <div class="row g-4">
+
+        <div class="col-lg-6">
+
+            <img th:if="${branch.imageUrl != null}"
+                 th:src="${branch.imageUrl}"
+                 alt="Ảnh chi nhánh"
+                 class="img-fluid rounded-4 w-100"
+                 style="max-height:440px;object-fit:cover">
+
+            <div th:unless="${branch.imageUrl != null}"
+                 class="ut-empty-image rounded-4"
+                 style="height:360px">
+                UTEFIT FITNESS CENTER
+            </div>
+
+        </div>
+
+        <div class="col-lg-6">
+
+            <div class="ut-panel h-100">
+
+                <span class="eyebrow">
+                    UTEFIT BRANCH
+                </span>
+
+                <h1 class="ut-page-title mt-3"
+                    th:text="${branch.name}">
+                    Tên chi nhánh
+                </h1>
+
+                <p class="ut-subtitle mt-4"
+                   th:text="${branch.description}">
+                    Mô tả
+                </p>
+
+                <hr class="border-secondary">
+
+                <p>
+                    <strong>Địa chỉ:</strong>
+                    <span th:text="${branch.address}"></span>
+                </p>
+
+                <p>
+                    <strong>Điện thoại:</strong>
+                    <span th:text="${branch.phone ?: 'Đang cập nhật'}"></span>
+                </p>
+
+                <p>
+                    <strong>Giờ mở cửa:</strong>
+                    <span th:text="${branch.openingTime ?: 'Đang cập nhật'}"></span>
+                </p>
+
+                <p>
+                    <strong>Giờ đóng cửa:</strong>
+                    <span th:text="${branch.closingTime ?: 'Đang cập nhật'}"></span>
+                </p>
+
+                <a class="btn btn-brand mt-3"
+                   th:href="@{/member/memberships(branchId=${branch.id})}">
+                    Chọn gói tập tại chi nhánh
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}">
+</footer>
+
+<div th:replace="~{fragments/scripts :: scripts}">
+</div>
+
+</body>
+</html>

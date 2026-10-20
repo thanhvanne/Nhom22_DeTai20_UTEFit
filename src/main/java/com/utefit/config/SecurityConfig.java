@@ -1,23 +1,22 @@
+
 package com.utefit.config;
 
 import com.utefit.repository.UserRepository;
 import com.utefit.security.CustomUserDetailsService;
 import com.utefit.security.JwtAuthenticationFilter;
 import com.utefit.security.JwtService;
+
 import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -60,6 +59,7 @@ public class SecurityConfig {
                 );
 
         http
+                // Không tắt CSRF vì JWT nằm trong cookie.
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(
                                 new HttpSessionCsrfTokenRepository()
@@ -77,6 +77,7 @@ public class SecurityConfig {
                                 "/forgot-password",
                                 "/reset-password",
                                 "/access-denied",
+
                                 "/css/**",
                                 "/js/**",
                                 "/images/**",
@@ -84,7 +85,15 @@ public class SecurityConfig {
                                 "/error",
                                 "/error/**",
 
-                                // PUBLIC PAGES
+                                // Guest - Giai đoạn 3
+                                "/branches",
+                                "/branches/**",
+                                "/membership-plans",
+                                "/membership-plans/**",
+                                "/classes",
+                                "/classes/**",
+
+                                // Public PT của B
                                 "/trainers",
                                 "/trainers/**"
                         ).permitAll()
@@ -107,13 +116,16 @@ public class SecurityConfig {
 
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(
-                                new LoginUrlAuthenticationEntryPoint("/login")
+                                new LoginUrlAuthenticationEntryPoint(
+                                        "/login"
+                                )
                         )
-                        .accessDeniedHandler((request, response, exception) -> {
-                            response.sendError(
-                                    HttpServletResponse.SC_FORBIDDEN
-                            );
-                        })
+                        .accessDeniedHandler(
+                                (request, response, exception) ->
+                                        response.sendError(
+                                                HttpServletResponse.SC_FORBIDDEN
+                                        )
+                        )
                 )
 
                 .formLogin(form -> form.disable())

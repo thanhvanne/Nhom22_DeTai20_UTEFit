@@ -1,0 +1,145 @@
+
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Gói tập - UTEFit')}">
+</head>
+
+<body>
+
+<header th:replace="~{fragments/header :: header}">
+</header>
+
+<main class="container ut-page">
+
+    <h1 class="ut-page-title">
+        Gói tập <span>UTEFit</span>
+    </h1>
+
+    <p class="ut-subtitle">
+        Các gói tập đang mở bán trên hệ thống.
+    </p>
+
+    <form th:action="@{/membership-plans}"
+          method="get"
+          class="ut-search row g-3">
+
+        <div class="col-md-9">
+            <input type="search"
+                   name="keyword"
+                   class="form-control"
+                   placeholder="Tìm tên hoặc mô tả gói tập..."
+                   th:value="${keyword}">
+        </div>
+
+        <div class="col-md-3">
+            <button class="btn btn-brand w-100"
+                    type="submit">
+                Tìm gói tập
+            </button>
+        </div>
+
+    </form>
+
+    <div class="row g-4">
+
+        <div class="col-md-6 col-lg-4"
+             th:each="p : ${planPage.content}">
+
+            <article class="ut-card">
+
+                <div class="ut-card-body">
+
+                    <span class="eyebrow">
+                        MEMBERSHIP PLAN
+                    </span>
+
+                    <h3 class="mt-3"
+                        th:text="${p.name}">
+                        Gói tập
+                    </h3>
+
+                    <p th:text="${p.description}">
+                        Mô tả gói
+                    </p>
+
+                    <h2 class="fw-bold mt-4"
+                        style="color:#ff326b"
+                        th:text="${p.price} + ' VND'">
+                        0 VND
+                    </h2>
+
+                    <p>
+                        Thời hạn:
+                        <strong th:text="${p.durationDays}">30</strong>
+                        ngày
+                    </p>
+
+                    <a class="btn btn-brand w-100 mt-3"
+                       th:href="@{/member/memberships(planId=${p.id})}">
+                        Chọn gói này
+                    </a>
+
+                </div>
+            </article>
+
+        </div>
+
+    </div>
+
+    <div th:if="${planPage.empty}"
+         class="ut-panel text-center mt-4">
+        Không tìm thấy gói tập phù hợp.
+    </div>
+
+    <nav th:if="${planPage.totalPages > 1}"
+         class="mt-5">
+
+        <ul class="pagination ut-pagination justify-content-center flex-wrap">
+
+            <li class="page-item"
+                th:classappend="${planPage.first} ? 'disabled'">
+
+                <a class="page-link"
+                   th:href="@{/membership-plans(page=${planPage.number - 1},keyword=${keyword})}">
+                    Trước
+                </a>
+
+            </li>
+
+            <li class="page-item"
+                th:each="i : ${#numbers.sequence(0,planPage.totalPages - 1)}"
+                th:classappend="${i == planPage.number} ? 'active'">
+
+                <a class="page-link"
+                   th:href="@{/membership-plans(page=${i},keyword=${keyword})}"
+                   th:text="${i + 1}">
+                    1
+                </a>
+
+            </li>
+
+            <li class="page-item"
+                th:classappend="${planPage.last} ? 'disabled'">
+
+                <a class="page-link"
+                   th:href="@{/membership-plans(page=${planPage.number + 1},keyword=${keyword})}">
+                    Sau
+                </a>
+
+            </li>
+
+        </ul>
+    </nav>
+
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}">
+</footer>
+
+<div th:replace="~{fragments/scripts :: scripts}">
+</div>
+
+</body>
+</html>
