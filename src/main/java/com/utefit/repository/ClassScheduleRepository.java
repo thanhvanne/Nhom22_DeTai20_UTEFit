@@ -109,4 +109,30 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
     );
 
     List<ClassSchedule> findByFitnessClassIdAndActiveTrue(Long fitnessClassId);
+
+    // === Thêm mới cho PT xem lịch lớp của mình ===
+    @EntityGraph(attributePaths = {
+            "fitnessClass",
+            "fitnessClass.branch",
+            "fitnessClass.category",
+            "fitnessClass.trainer",
+            "fitnessClass.trainer.user"
+    })
+    @Query("""
+            SELECT s FROM ClassSchedule s
+            JOIN s.fitnessClass fc
+            JOIN fc.trainer t
+            JOIN t.user u
+            WHERE u.id = :trainerUserId
+              AND s.active = true
+              AND fc.status <> :cancelledStatus
+              AND s.scheduleDate >= :fromDate
+            ORDER BY s.scheduleDate ASC, s.startTime ASC
+            """)
+    Page<ClassSchedule> findUpcomingSchedulesForTrainer(
+            @Param("trainerUserId") Long trainerUserId,
+            @Param("cancelledStatus") ClassStatus cancelledStatus,
+            @Param("fromDate") LocalDate fromDate,
+            Pageable pageable
+    );
 }

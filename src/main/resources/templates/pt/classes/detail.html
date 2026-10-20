@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Chi tiết lịch lớp - UTEFit')}"></head>
+
+<body>
+
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="container py-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold mb-1">
+                Chi tiết lịch lớp
+            </h1>
+            <p class="text-muted mb-0">
+                Xem thông tin lớp và danh sách học viên đã đăng ký.
+            </p>
+        </div>
+
+        <a th:href="@{/pt/classes}" class="btn btn-outline-secondary">
+            Quay lại danh sách
+        </a>
+    </div>
+
+    <!-- Thông tin lớp -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+
+            <h4 class="fw-semibold mb-3"
+                th:text="${schedule.className}">
+            </h4>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <p class="mb-1">
+                        <strong>Chi nhánh: </strong>
+                        <span th:text="${schedule.branchName}"></span>
+                    </p>
+                    <p class="mb-1">
+                        <strong>Loại lớp: </strong>
+                        <span th:text="${schedule.categoryName}"></span>
+                    </p>
+                    <p class="mb-1">
+                        <strong>Ngày: </strong>
+                        <span th:text="${#temporals.format(schedule.scheduleDate, 'dd/MM/yyyy')}"></span>
+                    </p>
+                    <p class="mb-1">
+                        <strong>Thời gian: </strong>
+                        <span th:text="${#temporals.format(schedule.startTime, 'HH:mm')}"></span>
+                        -
+                        <span th:text="${#temporals.format(schedule.endTime, 'HH:mm')}"></span>
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <p class="mb-1">
+                        <strong>Phòng: </strong>
+                        <span th:text="${schedule.room != null ? schedule.room : 'Chưa gán'}"></span>
+                    </p>
+                    <p class="mb-1">
+                        <strong>Sức chứa: </strong>
+                        <span th:text="${schedule.capacity}"></span>
+                    </p>
+                    <p class="mb-1">
+                        <strong>Số học viên đăng ký: </strong>
+                        <span th:text="${schedule.registeredCount}"></span>
+                    </p>
+                </div>
+            </div>
+
+            <div th:if="${schedule.classDescription != null}"
+                 class="mt-3">
+                <h6 class="fw-semibold">Mô tả lớp</h6>
+                <p class="mb-0" th:text="${schedule.classDescription}"></p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Danh sách học viên -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+            <h5 class="fw-semibold mb-3">Danh sách học viên đăng ký</h5>
+
+            <div th:if="${#lists.isEmpty(schedule.registrations)}">
+                <div class="alert alert-info mb-0">
+                    Chưa có học viên nào đăng ký lớp này.
+                </div>
+            </div>
+
+            <div th:if="${!#lists.isEmpty(schedule.registrations)}"
+                 class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th style="width: 60px;" class="text-center">#</th>
+                        <th>Họ tên</th>
+                        <th>Email</th>
+                        <th>Thời gian đăng ký</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="reg, stat : ${schedule.registrations}">
+                        <td class="text-center" th:text="${stat.index + 1}"></td>
+                        <td th:text="${reg.memberName}"></td>
+                        <td th:text="${reg.memberEmail}"></td>
+                        <td th:text="${#temporals.format(reg.registeredAt, 'dd/MM/yyyy HH:mm')}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<div th:replace="~{fragments/scripts :: scripts}"></div>
+
+</body>
+</html>

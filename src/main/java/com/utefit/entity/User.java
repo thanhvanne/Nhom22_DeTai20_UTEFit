@@ -92,4 +92,11 @@ public class User {
     public void preUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    // === Thêm tiện ích full name cho các chỗ hiển thị tên ===
+    public String getFullName() {
+        String fn = firstName != null ? firstName : "";
+        String ln = lastName != null ? lastName : "";
+        return (fn + " " + ln).trim();
+    }
 }
