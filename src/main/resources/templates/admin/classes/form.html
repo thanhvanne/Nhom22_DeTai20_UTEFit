@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/layout :: head(${isEdit ? 'Cập nhật Lớp tập' : 'Tạo Lớp tập mới'})}"></head>
+<body>
+<div class="d-flex">
+    <div th:replace="~{admin/fragments/layout :: sidebar}"></div>
+
+    <div class="flex-grow-1">
+        <div th:replace="~{admin/fragments/layout :: topbar(${isEdit ? 'Cập nhật Lớp tập' : 'Khởi tạo Lớp tập mới'})}"></div>
+
+        <main class="container-fluid px-4 pb-5">
+            <div class="mb-3">
+                <a th:href="@{/admin/classes}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                    <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách lớp tập
+                </a>
+            </div>
+
+            <div class="surface-card col-lg-8 p-4">
+                <div th:if="${errorMessage}" class="alert alert-danger rounded-3">
+                    <i class="bi bi-exclamation-octagon-fill me-2"></i> <span th:text="${errorMessage}"></span>
+                </div>
+
+                <form th:action="${isEdit ? '/admin/classes/' + classForm.id + '/edit' : '/admin/classes/create'}"
+                      th:object="${classForm}" method="post">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Tên lớp tập <span class="text-danger">*</span></label>
+                        <input type="text" th:field="*{name}" class="form-control"
+                               th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
+                               placeholder="VD: Yoga Hatha Sáng, Boxing Đốt Mỡ Chuyên Sâu...">
+                        <div class="text-danger small mt-1" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Chi nhánh tổ chức (Active) <span class="text-danger">*</span></label>
+                            <select th:field="*{branchId}" id="branchId" class="form-select"
+                                    th:classappend="${#fields.hasErrors('branchId')} ? 'is-invalid'">
+                                <option value="">-- Chọn chi nhánh --</option>
+                                <option th:each="b : ${branches}" th:value="${b.id}" th:text="${b.name}"></option>
+                            </select>
+                            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('branchId')}" th:errors="*{branchId}"></div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Danh mục Loại lớp (Active) <span class="text-danger">*</span></label>
+                            <select th:field="*{categoryId}" id="categoryId" class="form-select"
+                                    th:classappend="${#fields.hasErrors('categoryId')} ? 'is-invalid'">
+                                <option value="">-- Chọn loại lớp --</option>
+                                <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option>
+                            </select>
+                            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"></div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Huấn luyện viên phụ trách (PT Active)</label>
+                            <select th:field="*{trainerId}" id="trainerSelect" class="form-select">
+                                <option value="">-- Chưa phân công / Chọn PT --</option>
+                                <option th:each="t : ${trainers}"
+                                        th:value="${t.id}"
+                                        th:data-branch-id="${t.branch != null ? t.branch.id : ''}"
+                                        th:data-spec="${t.specialization != null ? t.specialization.toLowerCase() : ''}"
+                                        th:text="${t.user.firstName + ' ' + t.user.lastName + ' (' + (t.branch != null ? t.branch.name : 'Tự do') + ' - ' + (t.specialization ?: 'PT') + ')'}">
+                                </option>
+                            </select>
+                            <div class="form-text small">Lưu ý: PT phải thuộc đúng chi nhánh và có chuyên môn phù hợp với loại lớp tập.</div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Sức chứa tối đa <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="number" th:field="*{capacity}" min="0" class="form-control"
+                                       th:classappend="${#fields.hasErrors('capacity')} ? 'is-invalid'"
+                                       placeholder="VD: 25">
+                                <span class="input-group-text">người</span>
+                            </div>
+                            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('capacity')}" th:errors="*{capacity}"></div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Trạng thái lớp</label>
+                            <select th:field="*{status}" class="form-select">
+                                <option th:each="st : ${statuses}" th:value="${st}" th:text="${st}"></option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Mô tả nội dung lớp tập</label>
+                        <textarea th:field="*{description}" rows="4" class="form-control"
+                                  th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"
+                                  placeholder="Mô tả mục tiêu buổi tập, dụng cụ chuẩn bị, đối tượng phù hợp..."></textarea>
+                        <div class="text-danger small mt-1" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
+                    </div>
+
+                    <button type="submit" class="btn btn-utefit px-4 py-2 rounded-pill">
+                        <i class="bi bi-save me-1"></i> <span th:text="${isEdit ? 'Lưu thay đổi' : 'Tạo lớp tập'}"></span>
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+</div>
+<div th:replace="~{admin/fragments/layout :: scripts}"></div>
+
+<!-- Script lọc động danh sách PT theo Chi nhánh và Loại lớp -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const branchSelect = document.getElementById("branchId");
+        const categorySelect = document.getElementById("categoryId");
+        const trainerSelect = document.getElementById("trainerSelect");
+
+        if (!branchSelect || !categorySelect || !trainerSelect) return;
+
+        function filterTrainers() {
+            const selectedBranchId = branchSelect.value;
+            const selectedCategoryText = categorySelect.options[categorySelect.selectedIndex]?.text.trim().toLowerCase() || "";
+            const isCategorySelected = categorySelect.value !== "";
+
+            const options = trainerSelect.querySelectorAll("option");
+            let currentSelectedStillValid = false;
+
+            options.forEach(opt => {
+                if (opt.value === "") {
+                    opt.hidden = false;
+                    opt.disabled = false;
+                    return;
+                }
+
+                const ptBranchId = opt.getAttribute("data-branch-id") || "";
+                const ptSpec = (opt.getAttribute("data-spec") || "").toLowerCase();
+
+                // Điều kiện lọc: Khớp chi nhánh (hoặc PT tự do) và phù hợp chuyên môn
+                const matchBranch = !selectedBranchId || (ptBranchId === selectedBranchId || ptBranchId === "");
+                const matchCategory = !isCategorySelected ||
+                    ptSpec.includes(selectedCategoryText) ||
+                    selectedCategoryText.includes(ptSpec) ||
+                    ptSpec.includes("general") ||
+                    ptSpec.includes("đa năng");
+
+                if (matchBranch && matchCategory) {
+                    opt.hidden = false;
+                    opt.disabled = false;
+                    if (opt.value === trainerSelect.value) {
+                        currentSelectedStillValid = true;
+                    }
+                } else {
+                    opt.hidden = true;
+                    opt.disabled = true;
+                }
+            });
+
+            if (!currentSelectedStillValid && trainerSelect.value !== "") {
+                trainerSelect.value = "";
+            }
+        }
+
+        branchSelect.addEventListener("change", filterTrainers);
+        categorySelect.addEventListener("change", filterTrainers);
+
+        // Chạy lần đầu khi load trang
+        filterTrainers();
+    });
+</script>
+</body>
+</html>

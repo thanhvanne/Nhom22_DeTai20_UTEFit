@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/layout :: head('Quản lý Lịch lớp tập')}"></head>
+<body>
+<div class="d-flex">
+    <div th:replace="~{admin/fragments/layout :: sidebar}"></div>
+
+    <div class="flex-grow-1">
+        <div th:replace="~{admin/fragments/layout :: topbar('Quản lý Lịch lớp tập (Class Schedules)')}"></div>
+
+        <main class="container-fluid px-4 pb-5">
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm rounded-4 border-0">
+                <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm rounded-4 border-0">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- Bộ lọc lịch lớp -->
+            <div class="surface-card p-4 mb-4">
+                <form method="get" th:action="@{/admin/schedules}" class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Lớp tập</label>
+                        <select name="fitnessClassId" class="form-select">
+                            <option value="">-- Tất cả lớp tập --</option>
+                            <option th:each="fc : ${classes}" th:value="${fc.id}"
+                                    th:text="${fc.name + ' (' + fc.branch.name + ')'}"
+                                    th:selected="${selectedClassId != null and selectedClassId == fc.id}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Chi nhánh</label>
+                        <select name="branchId" class="form-select">
+                            <option value="">-- Tất cả chi nhánh --</option>
+                            <option th:each="b : ${branches}" th:value="${b.id}" th:text="${b.name}"
+                                    th:selected="${selectedBranchId != null and selectedBranchId == b.id}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Ngày học</label>
+                        <input type="date" name="scheduleDate" class="form-control" th:value="${selectedDate}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Trạng thái</label>
+                        <select name="active" class="form-select">
+                            <option value="">-- Tất cả --</option>
+                            <option value="true" th:selected="${selectedActive != null and selectedActive}">Đang mở</option>
+                            <option value="false" th:selected="${selectedActive != null and !selectedActive}">Đã đóng</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex gap-2">
+                        <button type="submit" class="btn btn-utefit px-3"><i class="bi bi-funnel-fill"></i></button>
+                        <a th:href="@{/admin/schedules}" class="btn btn-outline-secondary" title="Đặt lại"><i class="bi bi-arrow-counterclockwise"></i></a>
+                        <a th:href="@{/admin/schedules/create}" class="btn btn-dark flex-grow-1 fw-semibold">
+                            <i class="bi bi-plus-lg text-success"></i> Xếp lịch
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Bảng dữ liệu Lịch lớp -->
+            <div class="surface-card overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                        <tr>
+                            <th class="ps-4" style="width: 65px;">ID</th>
+                            <th>Ngày & Khung giờ</th>
+                            <th>Lớp tập & Chi nhánh</th>
+                            <th>Huấn luyện viên (PT)</th>
+                            <th>Phòng tập</th>
+                            <th>Trạng thái</th>
+                            <th class="text-end pe-4">Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:if="${schedulePage.empty}">
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="bi bi-calendar3-Event fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                                Chưa có lịch lớp tập nào. Hãy nhấn "Xếp lịch" để tạo ca tập mới!
+                            </td>
+                        </tr>
+                        <tr th:each="s : ${schedulePage.content}">
+                            <td class="ps-4 fw-bold text-secondary" th:text="'#' + ${s.id}">#1</td>
+                            <td>
+                                <div class="fw-bold text-dark">
+                                    <i class="bi bi-calendar-event text-success me-1"></i>
+                                    <span th:text="${#temporals.format(s.scheduleDate, 'dd/MM/yyyy')}">20/10/2026</span>
+                                </div>
+                                <span class="badge bg-dark text-white mt-1 px-2 py-1">
+                                    <i class="bi bi-clock me-1 text-warning"></i>
+                                    <span th:text="${#temporals.format(s.startTime, 'HH:mm') + ' - ' + #temporals.format(s.endTime, 'HH:mm')}">18:00 - 19:00</span>
+                                </span>
+                            </td>
+                            <td>
+                                <div class="fw-bold text-dark" th:text="${s.fitnessClass.name}">Yoga Sáng</div>
+                                <div class="text-muted small">
+                                    <i class="bi bi-geo-alt text-danger"></i>
+                                    <span th:text="${s.fitnessClass.branch.name}">UTEFit Thủ Đức</span>
+                                    • Sức chứa: <b th:text="${s.fitnessClass.capacity}">20</b>
+                                </div>
+                            </td>
+                            <td>
+                                <span th:if="${s.fitnessClass.trainer != null}" class="fw-semibold text-dark"
+                                      th:text="${s.fitnessClass.trainer.user.firstName + ' ' + s.fitnessClass.trainer.user.lastName}">
+                                </span>
+                                <span th:if="${s.fitnessClass.trainer == null}" class="text-muted small fst-italic">Chưa gán PT</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border px-3 py-2 rounded-pill"
+                                      th:text="${s.room != null and !#strings.isEmpty(s.room) ? s.room : 'Sảnh chính'}">Phòng Yoga Tầng 2</span>
+                            </td>
+                            <td>
+                                <span th:if="${s.active}" class="status-pill bg-success bg-opacity-10 text-success">
+                                    <span class="dot bg-success"></span> Đang mở
+                                </span>
+                                <span th:unless="${s.active}" class="status-pill bg-secondary bg-opacity-10 text-secondary">
+                                    <span class="dot bg-secondary"></span> Đã đóng
+                                </span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <a th:href="@{/admin/schedules/{id}/edit(id=${s.id})}"
+                                   class="btn btn-sm btn-outline-dark rounded-pill px-3 me-1">
+                                    <i class="bi bi-pencil-square me-1"></i> Sửa
+                                </a>
+                                <form th:action="@{/admin/schedules/{id}/toggle-active(id=${s.id})}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm rounded-pill px-3"
+                                            th:classappend="${s.active ? 'btn-outline-warning' : 'btn-outline-success'}">
+                                        <span th:text="${s.active ? 'Đóng ca' : 'Mở lại'}"></span>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card-footer bg-white d-flex justify-content-between align-items-center px-4 py-3" th:if="${schedulePage.totalPages > 1}">
+                    <span class="small text-muted">Trang <b th:text="${schedulePage.number + 1}"></b> / <b th:text="${schedulePage.totalPages}"></b></span>
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item" th:classappend="${schedulePage.first} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/schedules(page=${schedulePage.number - 1}, fitnessClassId=${selectedClassId}, branchId=${selectedBranchId}, scheduleDate=${selectedDate}, active=${selectedActive})}">Trước</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, schedulePage.totalPages - 1)}"
+                            th:classappend="${i == schedulePage.number} ? 'active'">
+                            <a class="page-link" th:href="@{/admin/schedules(page=${i}, fitnessClassId=${selectedClassId}, branchId=${selectedBranchId}, scheduleDate=${selectedDate}, active=${selectedActive})}" th:text="${i + 1}"></a>
+                        </li>
+                        <li class="page-item" th:classappend="${schedulePage.last} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/schedules(page=${schedulePage.number + 1}, fitnessClassId=${selectedClassId}, branchId=${selectedBranchId}, scheduleDate=${selectedDate}, active=${selectedActive})}">Sau</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+<div th:replace="~{admin/fragments/layout :: scripts}"></div>
+</body>
+</html>

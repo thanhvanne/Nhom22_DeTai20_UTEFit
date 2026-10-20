@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/layout :: head('Quản lý Lớp tập')}"></head>
+<body>
+<div class="d-flex">
+    <div th:replace="~{admin/fragments/layout :: sidebar}"></div>
+
+    <div class="flex-grow-1">
+        <div th:replace="~{admin/fragments/layout :: topbar('Quản lý Lớp tập (Fitness Classes)')}"></div>
+
+        <main class="container-fluid px-4 pb-5">
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm rounded-4 border-0">
+                <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm rounded-4 border-0">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- Bộ lọc tìm kiếm -->
+            <div class="surface-card p-4 mb-4">
+                <form method="get" th:action="@{/admin/classes}" class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Tên lớp tập</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                            <input type="text" name="keyword" class="form-control border-start-0"
+                                   placeholder="Tìm tên lớp..." th:value="${keyword}">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Chi nhánh</label>
+                        <select name="branchId" class="form-select">
+                            <option value="">-- Tất cả --</option>
+                            <option th:each="b : ${branches}" th:value="${b.id}" th:text="${b.name}"
+                                    th:selected="${selectedBranchId != null and selectedBranchId == b.id}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Loại lớp</label>
+                        <select name="categoryId" class="form-select">
+                            <option value="">-- Tất cả --</option>
+                            <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"
+                                    th:selected="${selectedCategoryId != null and selectedCategoryId == c.id}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold text-secondary text-uppercase">Trạng thái</label>
+                        <select name="status" class="form-select">
+                            <option value="">-- Tất cả --</option>
+                            <option th:each="st : ${statuses}" th:value="${st}" th:text="${st}"
+                                    th:selected="${selectedStatus != null and selectedStatus == st}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex gap-2">
+                        <button type="submit" class="btn btn-utefit px-3"><i class="bi bi-funnel-fill me-1"></i> Lọc</button>
+                        <a th:href="@{/admin/classes}" class="btn btn-outline-secondary" title="Đặt lại"><i class="bi bi-arrow-counterclockwise"></i></a>
+                        <a th:href="@{/admin/classes/create}" class="btn btn-dark flex-grow-1 fw-semibold">
+                            <i class="bi bi-plus-lg text-success me-1"></i> Tạo lớp mới
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Bảng dữ liệu Lớp tập -->
+            <div class="surface-card overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                        <tr>
+                            <th class="ps-4" style="width: 65px;">ID</th>
+                            <th>Thông tin lớp tập</th>
+                            <th>Chi nhánh & Bộ môn</th>
+                            <th>Huấn luyện viên (PT)</th>
+                            <th>Sức chứa</th>
+                            <th>Trạng thái</th>
+                            <th class="text-end pe-4">Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:if="${classPage.empty}">
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="bi bi-easel2 fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                                Chưa có lớp tập nào phù hợp. Hãy nhấn "Tạo lớp mới" để khởi tạo!
+                            </td>
+                        </tr>
+                        <tr th:each="fc : ${classPage.content}">
+                            <td class="ps-4 fw-bold text-secondary" th:text="'#' + ${fc.id}">#1</td>
+                            <td>
+                                <div class="fw-bold text-dark fs-6" th:text="${fc.name}">Yoga Phục Hồi</div>
+                                <div class="text-muted small text-truncate" style="max-width: 280px;"
+                                     th:text="${fc.description != null and !#strings.isEmpty(fc.description) ? fc.description : 'Chưa có mô tả'}"></div>
+                            </td>
+                            <td>
+                                <div class="fw-semibold text-dark">
+                                    <i class="bi bi-geo-alt-fill text-danger me-1"></i>
+                                    <span th:text="${fc.branch.name}">UTEFit Thủ Đức</span>
+                                </div>
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 mt-1"
+                                      th:text="${fc.category.name}">Yoga</span>
+                            </td>
+                            <td>
+                                <div th:if="${fc.trainer != null}" class="d-flex align-items-center">
+                                    <div>
+                                        <div class="fw-semibold text-dark"
+                                             th:text="${fc.trainer.user.firstName + ' ' + fc.trainer.user.lastName}">Nguyễn Trang</div>
+                                        <div class="text-muted small" th:text="${fc.trainer.specialization ?: 'PT'}"></div>
+                                    </div>
+                                </div>
+                                <span th:if="${fc.trainer == null}" class="text-muted small fst-italic">Chưa gán PT</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border px-3 py-2 rounded-pill fw-semibold">
+                                    <i class="bi bi-people-fill text-primary me-1"></i>
+                                    <span th:text="${fc.capacity + ' học viên'}">25 học viên</span>
+                                </span>
+                            </td>
+                            <td>
+                                <span th:if="${fc.status.name() == 'OPEN'}" class="status-pill bg-success bg-opacity-10 text-success">
+                                    <span class="dot bg-success"></span> OPEN
+                                </span>
+                                <span th:if="${fc.status.name() == 'FULL'}" class="status-pill bg-warning bg-opacity-15 text-dark">
+                                    <span class="dot bg-warning"></span> FULL
+                                </span>
+                                <span th:if="${fc.status.name() == 'CANCELLED'}" class="status-pill bg-danger bg-opacity-10 text-danger">
+                                    <span class="dot bg-danger"></span> CANCELLED
+                                </span>
+                                <span th:if="${fc.status.name() == 'COMPLETED'}" class="status-pill bg-secondary bg-opacity-10 text-secondary">
+                                    <span class="dot bg-secondary"></span> COMPLETED
+                                </span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <a th:if="${fc.status.name() != 'CANCELLED' and fc.status.name() != 'COMPLETED'}"
+                                   th:href="@{/admin/schedules/create(classId=${fc.id})}"
+                                   class="btn btn-sm btn-outline-success rounded-pill px-3 me-1" title="Xếp lịch cho lớp này">
+                                    <i class="bi bi-calendar-plus me-1"></i> Xếp lịch
+                                </a>
+                                <a th:href="@{/admin/classes/{id}/edit(id=${fc.id})}"
+                                   class="btn btn-sm btn-outline-dark rounded-pill px-3 me-1">
+                                    <i class="bi bi-pencil-square me-1"></i> Sửa
+                                </a>
+                                <form th:if="${fc.status.name() != 'CANCELLED'}"
+                                      th:action="@{/admin/classes/{id}/cancel(id=${fc.id})}" method="post" class="d-inline"
+                                      onsubmit="return confirm('Bạn có chắc chắn muốn HỦY lớp tập này? Các lịch học đang mở của lớp cũng sẽ bị đóng.');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                                        Hủy lớp
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card-footer bg-white d-flex justify-content-between align-items-center px-4 py-3" th:if="${classPage.totalPages > 1}">
+                    <span class="small text-muted">Trang <b th:text="${classPage.number + 1}"></b> / <b th:text="${classPage.totalPages}"></b></span>
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item" th:classappend="${classPage.first} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/classes(page=${classPage.number - 1}, keyword=${keyword}, branchId=${selectedBranchId}, categoryId=${selectedCategoryId}, status=${selectedStatus})}">Trước</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, classPage.totalPages - 1)}"
+                            th:classappend="${i == classPage.number} ? 'active'">
+                            <a class="page-link" th:href="@{/admin/classes(page=${i}, keyword=${keyword}, branchId=${selectedBranchId}, categoryId=${selectedCategoryId}, status=${selectedStatus})}" th:text="${i + 1}"></a>
+                        </li>
+                        <li class="page-item" th:classappend="${classPage.last} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/classes(page=${classPage.number + 1}, keyword=${keyword}, branchId=${selectedBranchId}, categoryId=${selectedCategoryId}, status=${selectedStatus})}">Sau</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+<div th:replace="~{admin/fragments/layout :: scripts}"></div>
+</body>
+</html>
