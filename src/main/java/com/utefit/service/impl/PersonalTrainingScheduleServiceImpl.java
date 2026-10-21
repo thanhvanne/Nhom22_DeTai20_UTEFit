@@ -50,6 +50,12 @@ public class PersonalTrainingScheduleServiceImpl implements PersonalTrainingSche
             throw new IllegalStateException("Thời gian bắt đầu phải trước thời gian kết thúc.");
         }
 
+        // KHÔNG cho tạo lịch ở ngày quá khứ
+        LocalDate today = LocalDate.now();
+        if (scheduleDate.isBefore(today)) {
+            throw new IllegalStateException("Ngày tập phải là hôm nay hoặc trong tương lai.");
+        }
+
         User member = userRepository.findById(memberUserId)
                 .orElseThrow(() ->
                         new EntityNotFoundException("Không tìm thấy thành viên."));
