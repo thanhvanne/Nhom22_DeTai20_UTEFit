@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Đánh giá của tôi - UTEFit')}"></head>
+
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="container ut-page">
+
+    <div class="d-flex justify-content-between
+                align-items-center flex-wrap gap-3 mb-4">
+
+        <div>
+            <h1 class="ut-page-title">
+                Đánh giá <span>của tôi</span>
+            </h1>
+
+            <p class="ut-subtitle">
+                Đánh giá chi nhánh và PT sau khi thực sự sử dụng dịch vụ.
+            </p>
+        </div>
+
+        <a class="btn btn-brand"
+           th:href="@{/member/reviews/new}">
+            Viết đánh giá
+        </a>
+    </div>
+
+    <div th:if="${success}"
+         class="alert alert-success"
+         th:text="${success}"></div>
+
+    <div th:if="${error}"
+         class="alert alert-danger"
+         th:text="${error}"></div>
+
+    <div class="row g-3">
+
+        <div class="col-12 col-lg-6"
+             th:each="r : ${reviewPage.content}">
+
+            <article class="ut-panel h-100">
+
+                <div class="d-flex justify-content-between
+                            gap-2 flex-wrap">
+
+                    <div>
+                        <h2 class="h5 mb-1"
+                            th:text="${r.branchName}"></h2>
+
+                        <p class="ut-subtitle mb-1"
+                           th:if="${r.trainerName != null}"
+                           th:text="|PT: ${r.trainerName}|"></p>
+                    </div>
+
+                    <span class="badge align-self-start"
+                          th:classappend="${r.visible}
+                              ? ' text-bg-success'
+                              : ' text-bg-secondary'"
+                          th:text="${r.visible}
+                              ? 'Đang hiển thị'
+                              : 'Admin đã ẩn'">
+                    </span>
+
+                </div>
+
+                <p class="text-warning mb-2"
+                   th:text="|${r.rating} / 5 sao|"></p>
+
+                <p class="review-text"
+                   th:text="${r.comment ?: 'Không có nhận xét'}"></p>
+
+                <img th:if="${r.imageUrl != null}"
+                     th:src="${r.imageUrl}"
+                     alt="Ảnh đánh giá"
+                     loading="lazy"
+                     class="img-fluid rounded review-photo mb-3">
+
+                <div class="d-flex justify-content-between
+                            align-items-center gap-2 flex-wrap">
+
+                    <small class="ut-subtitle"
+                           th:text="${#temporals.format(
+                               r.createdAt,
+                               'dd/MM/yyyy HH:mm'
+                           )}">
+                    </small>
+
+                    <a class="btn btn-outline-light btn-sm"
+                       th:href="@{/member/reviews/{id}/edit(id=${r.id})}">
+                        Chỉnh sửa
+                    </a>
+
+                </div>
+            </article>
+        </div>
+    </div>
+
+    <div th:if="${reviewPage.empty}"
+         class="ut-panel text-center">
+
+        <p>
+            Chưa có đánh giá nào.
+            Cần check-out hoặc có lớp ATTENDED trước khi đánh giá.
+        </p>
+
+        <a class="btn btn-outline-light"
+           th:href="@{/member/history}">
+            Xem lịch sử dịch vụ
+        </a>
+    </div>
+
+    <div class="d-flex justify-content-between mt-4"
+         th:if="${reviewPage.totalPages > 1}">
+
+        <a class="btn btn-outline-light"
+           th:if="${reviewPage.hasPrevious()}"
+           th:href="@{/member/reviews(page=${reviewPage.number - 1})}">
+            Trang trước
+        </a>
+
+        <span class="ut-subtitle"
+              th:text="|Trang ${reviewPage.number + 1} / ${reviewPage.totalPages}|">
+        </span>
+
+        <a class="btn btn-outline-light"
+           th:if="${reviewPage.hasNext()}"
+           th:href="@{/member/reviews(page=${reviewPage.number + 1})}">
+            Trang sau
+        </a>
+    </div>
+
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<div th:replace="~{fragments/scripts :: scripts}"></div>
+
+</body>
+</html>

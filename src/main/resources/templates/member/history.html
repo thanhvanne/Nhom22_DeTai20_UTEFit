@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Lịch sử hội viên - UTEFit')}"></head>
+
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="container ut-page">
+
+    <h1 class="ut-page-title mb-3">
+        Lịch sử <span>của tôi</span>
+    </h1>
+
+    <p class="ut-subtitle">
+        Tập hợp các gói tập, thanh toán, lịch lớp và đánh giá.
+    </p>
+
+    <section class="ut-panel mb-4"
+             aria-labelledby="history-memberships">
+
+        <h2 class="h4" id="history-memberships">
+            Membership
+        </h2>
+
+        <div class="table-responsive">
+            <table class="table table-dark table-striped align-middle">
+                <thead>
+                <tr>
+                    <th>Chi nhánh</th>
+                    <th>Gói</th>
+                    <th>Trạng thái</th>
+                    <th>Bắt đầu</th>
+                    <th>Kết thúc</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="m : ${history.memberships}">
+                    <td th:text="${m.branchName}"></td>
+                    <td th:text="${m.planName}"></td>
+                    <td th:text="${m.status}"></td>
+                    <td th:text="${m.startDate ?: '-'}"></td>
+                    <td th:text="${m.endDate ?: '-'}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p class="ut-subtitle"
+           th:if="${#lists.isEmpty(history.memberships)}">
+            Chưa có gói tập.
+        </p>
+    </section>
+
+    <section class="ut-panel mb-4"
+             aria-labelledby="history-payments">
+
+        <h2 class="h4" id="history-payments">
+            Thanh toán
+        </h2>
+
+        <div class="table-responsive">
+            <table class="table table-dark table-striped align-middle">
+                <thead>
+                <tr>
+                    <th>Gói</th>
+                    <th>Số tiền</th>
+                    <th>Phương thức</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày tạo</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="p : ${history.payments}">
+                    <td th:text="${p.planName}"></td>
+                    <td th:text="${p.amount}"></td>
+                    <td th:text="${p.method}"></td>
+                    <td th:text="${p.status}"></td>
+                    <td th:text="${#temporals.format(
+                            p.createdAt,
+                            'dd/MM/yyyy HH:mm'
+                        )}">
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p class="ut-subtitle"
+           th:if="${#lists.isEmpty(history.payments)}">
+            Chưa có giao dịch.
+        </p>
+    </section>
+
+    <section class="ut-panel mb-4"
+             aria-labelledby="history-classes">
+
+        <h2 class="h4" id="history-classes">
+            Lịch lớp
+        </h2>
+
+        <div class="table-responsive">
+            <table class="table table-dark table-striped align-middle">
+                <thead>
+                <tr>
+                    <th>Lớp</th>
+                    <th>Chi nhánh</th>
+                    <th>Ngày</th>
+                    <th>Giờ</th>
+                    <th>Trạng thái</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="c : ${history.classes}">
+                    <td th:text="${c.className}"></td>
+                    <td th:text="${c.branchName}"></td>
+                    <td th:text="${c.date}"></td>
+                    <td th:text="|${c.startTime} - ${c.endTime}|"></td>
+                    <td th:text="${c.status}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p class="ut-subtitle"
+           th:if="${#lists.isEmpty(history.classes)}">
+            Chưa có đăng ký lớp.
+        </p>
+    </section>
+
+    <section class="ut-panel"
+             aria-labelledby="history-reviews">
+
+        <h2 class="h4" id="history-reviews">
+            Đánh giá gần đây
+        </h2>
+
+        <div class="table-responsive">
+            <table class="table table-dark table-striped align-middle">
+                <thead>
+                <tr>
+                    <th>Chi nhánh</th>
+                    <th>PT</th>
+                    <th>Sao</th>
+                    <th>Trạng thái</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="r : ${history.reviews}">
+                    <td th:text="${r.branchName}"></td>
+                    <td th:text="${r.trainerName ?: '-'}"></td>
+                    <td th:text="|${r.rating}/5|"></td>
+                    <td th:text="${r.visible
+                            ? 'Đang hiển thị'
+                            : 'Đã ẩn'}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <a class="btn btn-brand"
+           th:href="@{/member/reviews}">
+            Xem tất cả đánh giá
+        </a>
+
+    </section>
+
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<div th:replace="~{fragments/scripts :: scripts}"></div>
+
+</body>
+</html>

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="vi"
       xmlns:th="http://www.thymeleaf.org">
@@ -231,6 +230,68 @@
                 <a class="btn btn-brand"
                    th:href="@{/trainers}">
                     Khám phá đội ngũ PT
+                </a>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Giai đoạn 6: Đánh giá từ Member -->
+    <section class="site-section" id="danh-gia">
+        <div class="container">
+
+            <div class="section-heading">
+                <span class="eyebrow">
+                    MEMBER REVIEWS
+                </span>
+
+                <h2>
+                    Hội viên <span>đánh giá</span>
+                </h2>
+
+                <p>
+                    Trải nghiệm thực tế từ người
+                    đã sử dụng dịch vụ UTEFit.
+                </p>
+            </div>
+
+            <div class="row g-4">
+
+                <div class="col-12 col-md-6 col-lg-4"
+                     th:each="r : ${featuredReviews}">
+
+                    <article class="program-card h-100">
+
+                        <p class="text-warning fw-bold"
+                           th:text="|${r.rating} / 5 sao|">
+                        </p>
+
+                        <h3 th:text="${r.branch}"></h3>
+
+                        <p th:if="${r.trainer != null}"
+                           th:text="|PT: ${r.trainer}|">
+                        </p>
+
+                        <p class="review-text"
+                           th:text="${r.comment ?: 'Không có nhận xét'}">
+                        </p>
+
+                        <img th:if="${r.imageUrl != null}"
+                             th:src="${r.imageUrl}"
+                             alt="Ảnh đánh giá"
+                             loading="lazy"
+                             class="review-photo img-fluid rounded mb-2">
+
+                        <small th:text="|Hội viên ${r.author}|"></small>
+
+                    </article>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a class="btn btn-outline-light"
+                   th:href="@{/reviews}">
+                    Xem tất cả đánh giá
                 </a>
             </div>
 

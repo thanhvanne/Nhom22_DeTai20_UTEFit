@@ -2,7 +2,7 @@ package com.utefit.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
+import org.hibernate.annotations.Nationalized;
 import java.time.LocalDateTime;
 
 @Entity
@@ -44,8 +44,16 @@ public class Review {
     @Column(nullable = false)
     private Integer rating;
 
+    @Nationalized
     @Column(length = 2000)
     private String comment;
+
+    @Nationalized
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
+
+    @Column(name = "image_public_id", length = 255)
+    private String imagePublicId;
 
     @Column(nullable = false)
     private Boolean visible;
@@ -57,19 +65,15 @@ public class Review {
     private LocalDateTime updatedAt;
 
     @PrePersist
-    public void prePersist() {
+    void prePersist() {
         LocalDateTime now = LocalDateTime.now();
-
-        createdAt = now;
+        if (createdAt == null) createdAt = now;
         updatedAt = now;
-
-        if (visible == null) {
-            visible = true;
-        }
+        if (visible == null) visible = true;
     }
 
     @PreUpdate
-    public void preUpdate() {
+    void preUpdate() {
         updatedAt = LocalDateTime.now();
     }
 }

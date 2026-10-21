@@ -58,12 +58,10 @@ public class SecurityConfig {
                 );
 
         http
-                // Không tắt CSRF vì JWT nằm trong cookie.
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(
                                 new HttpSessionCsrfTokenRepository()
                         )
-                        // SockJS dùng POST xhr_send, chỉ miễn CSRF tại đường WebSocket.
                         .ignoringRequestMatchers("/ws/**")
                 )
 
@@ -86,7 +84,7 @@ public class SecurityConfig {
                                 "/error",
                                 "/error/**",
 
-                                // Guest - Giai đoạn 3
+                                // Guest
                                 "/branches",
                                 "/branches/**",
                                 "/membership-plans",
@@ -94,13 +92,18 @@ public class SecurityConfig {
                                 "/classes",
                                 "/classes/**",
 
-                                // Public PT của B
+                                // Guest Review - Giai đoạn 6
+                                "/reviews",
+
+                                // Public Trainer
                                 "/trainers",
                                 "/trainers/**"
                         ).permitAll()
 
-                        // CHO PHÉP MỌI USER ĐÃ ĐĂNG NHẬP XEM /notifications
-                        .requestMatchers("/notifications", "/notifications/**")
+                        .requestMatchers(
+                                "/notifications",
+                                "/notifications/**"
+                        )
                         .authenticated()
 
                         .requestMatchers("/member/**")

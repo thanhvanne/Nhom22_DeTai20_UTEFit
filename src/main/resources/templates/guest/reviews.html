@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Đánh giá hội viên - UTEFit')}"></head>
+
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="container ut-page">
+
+    <h1 class="ut-page-title">
+        Trải nghiệm <span>hội viên</span>
+    </h1>
+
+    <p class="ut-subtitle">
+        Đánh giá đã được hiển thị công khai
+        từ người từng sử dụng dịch vụ.
+    </p>
+
+    <form th:action="@{/reviews}"
+          class="ut-panel row g-3 mb-4 align-items-end"
+          method="get">
+
+        <div class="col-12 col-md-5">
+            <label for="branchId" class="form-label">
+                Chi nhánh
+            </label>
+
+            <select id="branchId"
+                    name="branchId"
+                    class="form-select">
+
+                <option value="">Tất cả chi nhánh</option>
+
+                <option th:each="b : ${branches}"
+                        th:value="${b.id}"
+                        th:text="${b.name}"
+                        th:selected="${b.id == branchId}">
+                </option>
+            </select>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <label for="rating" class="form-label">
+                Điểm đánh giá
+            </label>
+
+            <select id="rating"
+                    name="rating"
+                    class="form-select">
+
+                <option value="">Tất cả</option>
+
+                <option th:each="n : ${#numbers.sequence(1,5)}"
+                        th:value="${n}"
+                        th:text="|${n} sao|"
+                        th:selected="${n == rating}">
+                </option>
+            </select>
+        </div>
+
+        <div class="col-12 col-md-3">
+            <button class="btn btn-brand w-100">
+                Lọc đánh giá
+            </button>
+        </div>
+    </form>
+
+    <div class="row g-3">
+
+        <div class="col-12 col-md-6 col-lg-4"
+             th:each="r : ${reviewPage.content}">
+
+            <article class="ut-card">
+                <div class="ut-card-body">
+
+                    <p class="text-warning fw-bold mb-1"
+                       th:text="|${r.rating} / 5 sao|">
+                    </p>
+
+                    <h2 class="h5"
+                        th:text="${r.branch}"></h2>
+
+                    <p class="ut-subtitle"
+                       th:if="${r.trainer != null}"
+                       th:text="|PT: ${r.trainer}|">
+                    </p>
+
+                    <p class="review-text"
+                       th:text="${r.comment ?: 'Không có nhận xét'}">
+                    </p>
+
+                    <img th:if="${r.imageUrl != null}"
+                         th:src="${r.imageUrl}"
+                         alt="Ảnh trải nghiệm"
+                         class="img-fluid rounded review-photo mb-3"
+                         loading="lazy">
+
+                    <small class="ut-subtitle"
+                           th:text="|${r.author} · ${#temporals.format(
+                               r.createdAt, 'dd/MM/yyyy')}|">
+                    </small>
+
+                </div>
+            </article>
+        </div>
+    </div>
+
+    <div th:if="${reviewPage.empty}"
+         class="ut-panel text-center">
+        Chưa có đánh giá phù hợp.
+    </div>
+
+    <nav class="d-flex justify-content-between
+                flex-wrap gap-3 mt-4"
+         th:if="${reviewPage.totalPages > 1}">
+
+        <a class="btn btn-outline-light"
+           th:if="${reviewPage.hasPrevious()}"
+           th:href="@{/reviews(
+               page=${reviewPage.number - 1},
+               branchId=${branchId},
+               rating=${rating}
+           )}">
+            Trang trước
+        </a>
+
+        <span class="ut-subtitle"
+              th:text="|Trang ${reviewPage.number + 1}
+                  / ${reviewPage.totalPages}|">
+        </span>
+
+        <a class="btn btn-outline-light"
+           th:if="${reviewPage.hasNext()}"
+           th:href="@{/reviews(
+               page=${reviewPage.number + 1},
+               branchId=${branchId},
+               rating=${rating}
+           )}">
+            Trang sau
+        </a>
+    </nav>
+
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<div th:replace="~{fragments/scripts :: scripts}"></div>
+
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Viết đánh giá - UTEFit')}"></head>
+
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="container ut-page">
+
+    <a class="btn btn-outline-light mb-3"
+       th:href="@{/member/reviews}">
+        ← Đánh giá của tôi
+    </a>
+
+    <div class="ut-panel review-form mx-auto">
+
+        <h1 class="h3"
+            th:text="${editId == null
+                ? 'Viết đánh giá'
+                : 'Chỉnh sửa đánh giá'}">
+        </h1>
+
+        <p class="ut-subtitle">
+            Một đánh giá cho mỗi chi nhánh hoặc PT.
+            Chỉ những dịch vụ bạn đã dùng mới xuất hiện.
+        </p>
+
+        <div class="alert alert-danger"
+             th:if="${error}"
+             th:text="${error}">
+        </div>
+
+        <form method="post"
+              enctype="multipart/form-data"
+              th:object="${form}"
+              th:action="${editId == null}
+                  ? @{/member/reviews/new}
+                  : @{/member/reviews/{id}/edit(id=${editId})}">
+
+            <input type="hidden"
+                   th:name="${_csrf.parameterName}"
+                   th:value="${_csrf.token}">
+
+            <div class="mb-3">
+
+                <label for="branchId" class="form-label">
+                    Chi nhánh đã sử dụng *
+                </label>
+
+                <select id="branchId"
+                        th:field="*{branchId}"
+                        class="form-select"
+                        th:disabled="${editId != null}"
+                        required>
+
+                    <option value="">
+                        -- Chọn chi nhánh --
+                    </option>
+
+                    <option th:each="b : ${targets.branches}"
+                            th:value="${b.id}"
+                            th:text="${b.name}">
+                    </option>
+                </select>
+
+                <input th:if="${editId != null}"
+                       type="hidden"
+                       name="branchId"
+                       th:value="${form.branchId}">
+
+                <div class="text-danger small"
+                     th:errors="*{branchId}"></div>
+            </div>
+
+            <div class="mb-3">
+
+                <label for="trainerId" class="form-label">
+                    Đối tượng đánh giá
+                </label>
+
+                <select id="trainerId"
+                        th:field="*{trainerId}"
+                        class="form-select"
+                        th:disabled="${editId != null}">
+
+                    <option value="">
+                        Đánh giá chi nhánh (không chọn PT)
+                    </option>
+
+                    <option th:each="pt : ${targets.trainers}"
+                            th:value="${pt.id}"
+                            th:attr="data-branch=${pt.branchId}"
+                            th:text="|PT: ${pt.name}|">
+                    </option>
+                </select>
+
+                <input th:if="${editId != null and form.trainerId != null}"
+                       type="hidden"
+                       name="trainerId"
+                       th:value="${form.trainerId}">
+
+                <small class="ut-subtitle">
+                    Nếu chọn PT thì phải đúng chi nhánh
+                    và có lịch sử sử dụng với PT.
+                </small>
+            </div>
+
+            <div class="mb-3">
+
+                <label for="rating" class="form-label">
+                    Số sao *
+                </label>
+
+                <select class="form-select"
+                        id="rating"
+                        th:field="*{rating}"
+                        required>
+
+                    <option value="">
+                        -- Chọn số sao --
+                    </option>
+
+                    <option th:each="n : ${#numbers.sequence(1,5)}"
+                            th:value="${n}"
+                            th:text="|${n} sao|">
+                    </option>
+                </select>
+
+                <div class="text-danger small"
+                     th:errors="*{rating}"></div>
+            </div>
+
+            <div class="mb-3">
+
+                <label for="comment" class="form-label">
+                    Nhận xét
+                </label>
+
+                <textarea id="comment"
+                          rows="5"
+                          maxlength="2000"
+                          th:field="*{comment}"
+                          class="form-control"
+                          placeholder="Trải nghiệm thực tế của bạn...">
+                </textarea>
+
+                <div class="text-danger small"
+                     th:errors="*{comment}"></div>
+            </div>
+
+            <div class="mb-3">
+
+                <label for="image" class="form-label">
+                    Ảnh minh họa (không bắt buộc)
+                </label>
+
+                <input class="form-control"
+                       id="image"
+                       type="file"
+                       name="image"
+                       accept="image/jpeg,image/png,image/gif">
+
+                <small class="ut-subtitle">
+                    JPG, PNG, GIF; tối đa 5 MB
+                    (được kiểm tra lại ở server).
+                </small>
+
+                <img th:if="${currentImage != null}"
+                     th:src="${currentImage}"
+                     alt="Ảnh hiện tại"
+                     class="review-photo img-fluid rounded d-block mt-2">
+
+                <small th:if="${currentImage != null}"
+                       class="ut-subtitle">
+                    Nếu tải ảnh mới, ảnh cũ sẽ được thay thế
+                    sau khi lưu thành công.
+                </small>
+            </div>
+
+            <button type="submit"
+                    class="btn btn-brand">
+                Lưu đánh giá
+            </button>
+        </form>
+
+        <p th:if="${editId == null and #lists.isEmpty(targets.branches)}"
+           class="alert alert-info mt-3">
+            Hiện chưa có chi nhánh đủ điều kiện đánh giá.
+            Hãy sử dụng dịch vụ trước.
+        </p>
+
+    </div>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<div th:replace="~{fragments/scripts :: scripts}"></div>
+<script th:src="@{/js/reviews.js}"></script>
+
+</body>
+</html>
