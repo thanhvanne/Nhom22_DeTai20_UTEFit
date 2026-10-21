@@ -1,4 +1,3 @@
-
 package com.utefit.config;
 
 import com.utefit.repository.UserRepository;
@@ -64,6 +63,8 @@ public class SecurityConfig {
                         .csrfTokenRepository(
                                 new HttpSessionCsrfTokenRepository()
                         )
+                        // SockJS dùng POST xhr_send, chỉ miễn CSRF tại đường WebSocket.
+                        .ignoringRequestMatchers("/ws/**")
                 )
 
                 .authorizeHttpRequests(auth -> auth
@@ -106,6 +107,9 @@ public class SecurityConfig {
 
                         .requestMatchers("/admin/**")
                         .hasRole("ADMIN")
+
+                        .requestMatchers("/ws", "/ws/**")
+                        .authenticated()
 
                         .requestMatchers("/auth/logout")
                         .authenticated()

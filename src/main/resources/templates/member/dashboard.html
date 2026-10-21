@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="vi"
       xmlns:th="http://www.thymeleaf.org">
@@ -181,6 +180,34 @@
                 </div>
             </div>
 
+        </div>
+
+
+        <!-- Giai đoạn 5: Member – PT -->
+        <div class="col-md-6 col-lg-4">
+            <div class="ut-card"><div class="ut-card-body">
+                <div class="program-icon">07</div>
+                <h3>Yêu cầu PT</h3>
+                <p>Gửi yêu cầu, xem PT chấp nhận hoặc từ chối.</p>
+                <a class="btn btn-brand mt-3" th:href="@{/member/trainer-requests}">Yêu cầu của tôi</a>
+            </div></div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="ut-card"><div class="ut-card-body">
+                <div class="program-icon">08</div>
+                <h3>Lịch PT 1:1</h3>
+                <p>Xem lịch tập cá nhân do huấn luyện viên tạo.</p>
+                <a class="btn btn-brand mt-3" th:href="@{/member/pt-schedules}">Xem lịch PT</a>
+            </div></div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="ut-card"><div class="ut-card-body">
+                <div class="program-icon">09</div>
+                <h3>Chat & thông báo</h3>
+                <p>Trò chuyện với PT và nhận thông tin lịch tập.</p>
+                <a class="btn btn-brand mt-3" th:href="@{/member/chats}">Tin nhắn</a>
+                <a class="btn btn-outline-light mt-3 ms-2" th:href="@{/member/notifications}">Thông báo</a>
+            </div></div>
         </div>
 
     </div>
