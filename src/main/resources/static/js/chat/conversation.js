@@ -1,213 +1,192 @@
 (function () {
-  const wsEndpoint = document.body.dataset.wsEndpoint || '/ws';
-  const conversationIdRaw = document.body.dataset.conversationId;
+  const root = document.getElementById('ptChat');
+  if (!root) return;
 
-  const conversationId = conversationIdRaw ? Number(conversationIdRaw) : null;
+  const wsEndpoint = root.dataset.wsUrl || '/ws';
+  const backUrl = root.dataset.backUrl || '/pt/chats';
+  const conversationIdStr = root.dataset.conversationId;
+  const conversationId = conversationIdStr ? Number(conversationIdStr) : null;
 
-  const container = document.getElementById('chatMessages');
-  const input = document.getElementById('messageInput');
-  const btn = document.getElementById('btnSend');
-  const statusEl = document.getElementById('chatStatus');
+  const messagesEl = document.getElementById('chatMessages');
+  const form = document.getElementById('ptChatForm');
+  const input = document.getElementById('ptChatInput');
+  const btn = document.getElementById('ptChatSend');
+  const statusEl = document.getElementById('chatConnection');
+  const errEl = document.getElementById('chatError');
 
   if (!conversationId) {
-    console.error('[CHAT] Missing conversationId');
-    if (statusEl) statusEl.textContent = 'Không tìm thấy conversationId.';
-    return;
-  }
-  if (!container || !input || !btn) {
-    console.error('[CHAT] Missing DOM elements');
-    return;
-  }
-  if (typeof SockJS === 'undefined' || typeof Stomp === 'undefined') {
-    console.error('[CHAT] SockJS/Stomp not loaded');
-    if (statusEl) statusEl.textContent = 'Thiếu thư viện SockJS/STOMP.';
+    console.error('[PT-CHAT] Missing conversationId');
+    if (statusEl) statusEl.textContent = 'Thiếu conversationId.';
     return;
   }
 
-  let stompClient = null;
+  let sock = null;
+  let stomp = null;
+  let sub = null;
   let connected = false;
-  let subscription = null;
-
-  // nếu user bấm gửi trước khi connect kịp -> queue
-  const pendingQueue = [];
-
   let attempt = 0;
-  const MAX_ATTEMPT = 20;
+  const MAX_ATTEMPT = 30;
 
-  function setStatus(text) {
-    if (statusEl) statusEl.textContent = text || '';
+  const queue = []; // tin nhắn chờ khi chưa connect
+
+  function setStatus(text) { if (statusEl) statusEl.textContent = text || ''; }
+  function setError(text) {
+    if (!errEl) return;
+    if (text) { errEl.hidden = false; errEl.textContent = text; }
+    else { errEl.hidden = true; errEl.textContent = ''; }
   }
-
-  function scrollBottom() {
-    container.scrollTop = container.scrollHeight;
+  function scrollBottom() { if (messagesEl) messagesEl.scrollTop = messagesEl.scrollHeight; }
+  function fmtTime(raw) {
+    if (!raw) return '';
+    try {
+      const d = /^\d+$/.test(String(raw)) ? new Date(Number(raw)) : new Date(String(raw));
+      return isNaN(d.getTime()) ? '' : d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+    } catch { return ''; }
   }
-
-  // format thời gian hiện có (server in raw)
   function formatExistingTimes() {
-    const nodes = container.querySelectorAll('.bubble-time[data-sent-at]');
-    nodes.forEach(n => {
-      const raw = n.getAttribute('data-sent-at');
-      const t = formatTime(raw);
+    messagesEl.querySelectorAll('[data-sent-at]').forEach(n => {
+      const t = fmtTime(n.getAttribute('data-sent-at'));
       if (t) n.textContent = t;
     });
   }
 
-  function formatTime(raw) {
-    if (!raw) return '';
-    try {
-      // raw có thể là ISO string hoặc epoch millis
-      let d;
-      if (/^\d+$/.test(raw)) d = new Date(Number(raw));
-      else d = new Date(raw);
-
-      if (isNaN(d.getTime())) return '';
-      return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-    } catch (e) {
-      return '';
-    }
-  }
-
   function appendMessage(msg) {
-    // nếu backend có gửi conversationId thì lọc đúng cuộc hội thoại
-    if (msg && msg.conversationId != null) {
-      if (String(msg.conversationId) !== String(conversationId)) return;
-    }
+    if (msg && msg.conversationId != null && String(msg.conversationId) !== String(conversationId)) return;
 
     const mine = !!msg.mine;
-
     const row = document.createElement('div');
-    row.className = 'bubble-row ' + (mine ? 'me' : 'other');
+    row.className = mine ? 'd-flex justify-content-end' : 'd-flex justify-content-start';
 
     const bubble = document.createElement('div');
-    bubble.className = 'bubble ' + (mine ? 'me' : 'other');
+    bubble.className = mine ? 'p-2 rounded-3 bg-primary text-white' : 'p-2 rounded-3 bg-light text-dark';
+    bubble.style.maxWidth = '70%';
 
-    const contentDiv = document.createElement('div');
-    contentDiv.textContent = msg.content || '';
-    bubble.appendChild(contentDiv);
+    const content = document.createElement('div');
+    content.textContent = msg.content || '';
+    bubble.appendChild(content);
 
-    const timeDiv = document.createElement('div');
-    timeDiv.className = 'bubble-time';
-    const timeText = formatTime(msg.sentAt);
-    timeDiv.textContent = timeText || '';
-    bubble.appendChild(timeDiv);
+    const time = document.createElement('div');
+    time.className = 'small opacity-75 mt-1 text-end';
+    time.textContent = fmtTime(msg.sentAt) || '';
+    bubble.appendChild(time);
 
     row.appendChild(bubble);
-    container.appendChild(row);
+    messagesEl.appendChild(row);
     scrollBottom();
   }
 
-  function setUiConnected(on) {
-    connected = on;
-    // không disable input để user vẫn gõ; nếu chưa connect sẽ queue
-    btn.disabled = false;
-    input.disabled = false;
+  function unsub() { try { if (sub) sub.unsubscribe(); } catch {} sub = null; }
+  function disconnect() {
+    unsub();
+    try { if (stomp) stomp.disconnect(); } catch {}
+    stomp = null;
+    try { if (sock) sock.close(); } catch {}
+    sock = null;
+    connected = false;
   }
 
   function subscribe() {
-    if (!stompClient || !stompClient.connected) return;
-
-    if (subscription) {
-      try { subscription.unsubscribe(); } catch (e) {}
-      subscription = null;
-    }
-
-    subscription = stompClient.subscribe('/user/queue/chat', function (message) {
-      const msg = JSON.parse(message.body);
-      appendMessage(msg);
+    unsub();
+    sub = stomp.subscribe('/user/queue/chat', function (frame) {
+      try { appendMessage(JSON.parse(frame.body)); }
+      catch (e) { console.error('[PT-CHAT] parse message error', e); }
     });
   }
 
   function flushQueue() {
-    while (pendingQueue.length > 0 && stompClient && stompClient.connected) {
-      const content = pendingQueue.shift();
-      stompClient.send('/app/chat.send', {}, JSON.stringify({
-        conversationId: conversationId,
-        content: content
-      }));
+    while (queue.length > 0 && stomp && stomp.connected) {
+      const content = queue.shift();
+      stomp.send('/app/chat.send', {}, JSON.stringify({ conversationId, content }));
     }
   }
 
+  function scheduleReconnect() {
+    connected = false; attempt++;
+    if (attempt > MAX_ATTEMPT) { setStatus('Không thể kết nối chat. Vui lòng tải lại trang.'); return; }
+    const delay = Math.min(2500, 400 + attempt * 120);
+    setStatus('Mất kết nối. Đang thử kết nối lại... (' + attempt + ')');
+    setTimeout(connect, delay);
+  }
+
   function connect() {
-    // tránh connect chồng
-    if (stompClient && stompClient.connected) return;
+    if (stomp && stomp.connected) return;
 
-    attempt++;
-    setStatus('Đang kết nối chat... (' + attempt + ')');
+    disconnect();
+    setError('');
+    setStatus(attempt === 0 ? 'Đang kết nối…' : 'Đang kết nối lại… (' + attempt + ')');
 
-    const socket = new SockJS(wsEndpoint);
-    stompClient = Stomp.over(socket);
-    stompClient.debug = null;
+    sock = new SockJS(wsEndpoint);
+    sock.onclose = function () {
+      if (connected) console.warn('[PT-CHAT] socket closed');
+      scheduleReconnect();
+    };
 
-    stompClient.connect({}, function () {
+    stomp = Stomp.over(sock);
+    stomp.debug = null;
+    stomp.heartbeat.outgoing = 10000;
+    stomp.heartbeat.incoming = 10000;
+
+    stomp.connect({}, function () {
       attempt = 0;
-      setUiConnected(true);
-      setStatus('Đã kết nối.');
+      connected = true;
+      setStatus('Đang kết nối trực tiếp');
       subscribe();
       flushQueue();
+      scrollBottom();
     }, function (err) {
-      console.error('[CHAT] connect error:', err);
-      setUiConnected(false);
-      setStatus('Mất kết nối. Đang thử kết nối lại...');
-
-      if (attempt < MAX_ATTEMPT) {
-        const delay = Math.min(2000, 400 + attempt * 150);
-        setTimeout(connect, delay);
-      } else {
-        setStatus('Không thể kết nối chat. Vui lòng tải lại trang.');
-      }
+      console.error('[PT-CHAT] connect error', err);
+      scheduleReconnect();
     });
   }
 
   function sendMessage() {
-    const content = (input.value || '').trim();
-    if (!content) return;
-
+    const val = (input.value || '').trim();
+    if (!val) return;
     input.value = '';
 
-    // chưa connected => queue + connect lại (khỏi cần reload)
-    if (!stompClient || !stompClient.connected || !connected) {
-      pendingQueue.push(content);
-      setStatus('Đang kết nối... tin nhắn sẽ được gửi khi kết nối xong.');
+    if (!stomp || !stomp.connected || !connected) {
+      queue.push(val);
+      setStatus('Đang kết nối… tin nhắn sẽ gửi khi kết nối xong.');
       connect();
       return;
     }
 
-    stompClient.send('/app/chat.send', {}, JSON.stringify({
-      conversationId: conversationId,
-      content: content
-    }));
+    try {
+      stomp.send('/app/chat.send', {}, JSON.stringify({ conversationId, content: val }));
+    } catch (e) {
+      console.error('[PT-CHAT] send error', e);
+      queue.push(val);
+      scheduleReconnect();
+    }
+  }
+
+  function bindEvents() {
+    // chặn submit tuyệt đối
+    form.addEventListener('submit', function (e) { e.preventDefault(); e.stopPropagation(); sendMessage(); return false; });
+    btn.addEventListener('click', function (e) { e.preventDefault(); sendMessage(); });
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); e.stopPropagation(); sendMessage(); }
+    });
+
+    // Nút/back + phím Esc
+    const backBtn = document.getElementById('ptChatBackBtn');
+    if (backBtn) backBtn.addEventListener('click', () => disconnect());
+    window.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { disconnect(); window.location.href = backUrl; }
+    });
+
+    // BFCache
+    window.addEventListener('pageshow', function (e) { if (e.persisted) { attempt = 0; connect(); } });
+    window.addEventListener('beforeunload', function () { disconnect(); });
   }
 
   function init() {
-    // event
-    btn.addEventListener('click', sendMessage);
-    input.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
-      }
-    });
-
+    bindEvents();
     formatExistingTimes();
     scrollBottom();
     connect();
   }
 
-  // chạy chắc chắn sau khi load xong
   if (document.readyState === 'complete') init();
   else window.addEventListener('load', init);
-
-  // back/forward cache: quay lại trang mà websocket chết => tự connect lại
-  window.addEventListener('pageshow', function (e) {
-    if (e.persisted) {
-      attempt = 0;
-      connect();
-    }
-  });
-
-  window.addEventListener('beforeunload', function () {
-    try {
-      if (stompClient) stompClient.disconnect();
-    } catch (e) {}
-  });
 })();
