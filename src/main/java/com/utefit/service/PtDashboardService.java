@@ -1,8 +1,8 @@
 package com.utefit.service;
 
-import com.utefit.dto.trainer.PtDashboardResponse;
+import com.utefit.dto.trainer.TrainerDashboardSummaryResponse;
 
 public interface PtDashboardService {
 
-    PtDashboardResponse getDashboardForTrainer(Long trainerUserId);
+    TrainerDashboardSummaryResponse getDashboardForTrainer(Long trainerUserId);
 }

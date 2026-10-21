@@ -1,10 +1,12 @@
 package com.utefit.controller.pt;
 
+import com.utefit.dto.trainer.PersonalTrainingScheduleResponse;
 import com.utefit.dto.trainer.PtClassScheduleDetailResponse;
 import com.utefit.dto.trainer.PtClassScheduleSummaryResponse;
 import com.utefit.dto.trainer.PtWeeklyDayScheduleResponse;
 import com.utefit.entity.User;
 import com.utefit.repository.UserRepository;
+import com.utefit.service.PersonalTrainingScheduleService;
 import com.utefit.service.PtClassService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,21 +24,21 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 @RequestMapping("/pt/classes")
 public class PtClassController {
 
     private final PtClassService ptClassService;
+    private final PersonalTrainingScheduleService personalTrainingScheduleService;
     private final UserRepository userRepository;
 
     public PtClassController(PtClassService ptClassService,
+                             PersonalTrainingScheduleService personalTrainingScheduleService,
                              UserRepository userRepository) {
         this.ptClassService = ptClassService;
+        this.personalTrainingScheduleService = personalTrainingScheduleService;
         this.userRepository = userRepository;
     }
 
@@ -47,7 +49,7 @@ public class PtClassController {
         return user.getId();
     }
 
-    // Lịch lớp dạng tuần cho PT
+    // Lịch dạng tuần cho PT: LỚP + PT 1:1
     @GetMapping
     public String listWeeklyClasses(Authentication authentication,
                                     @RequestParam(value = "weekStart", required = false)
@@ -64,7 +66,7 @@ public class PtClassController {
         LocalDate weekStart = baseDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDate weekEnd = weekStart.plusDays(6);
 
-        // Lấy lịch từ weekStart trở đi (giới hạn 200 bản ghi), rồi lọc lại trong tuần
+        // --------- LẤY LỊCH LỚP (CLASS) ---------
         Pageable pageable = PageRequest.of(0, 200);
         Page<PtClassScheduleSummaryResponse> page =
                 ptClassService.getSchedulesForTrainer(userId, weekStart, pageable);
@@ -72,14 +74,18 @@ public class PtClassController {
         final LocalDate filterStart = weekStart;
         final LocalDate filterEnd = weekEnd;
 
-        List<PtClassScheduleSummaryResponse> weekSchedules = page.getContent().stream()
+        List<PtClassScheduleSummaryResponse> weekClassSchedules = page.getContent().stream()
                 .filter(s -> {
                     LocalDate d = s.getScheduleDate();
                     return !d.isBefore(filterStart) && !d.isAfter(filterEnd);
                 })
                 .toList();
 
-        // Chuẩn bị cấu trúc 7 ngày trong tuần
+        // --------- LẤY LỊCH PT 1:1 ---------
+        List<PersonalTrainingScheduleResponse> weekPersonalSchedules =
+                personalTrainingScheduleService.getSchedulesForTrainer(userId, weekStart, weekEnd);
+
+        // --------- CHUẨN BỊ CẤU TRÚC 7 NGÀY ---------
         List<PtWeeklyDayScheduleResponse> weekDays = new ArrayList<>();
         Map<LocalDate, PtWeeklyDayScheduleResponse> dayMap = new HashMap<>();
 
@@ -93,13 +99,11 @@ public class PtClassController {
             dayMap.put(date, dayView);
         }
 
-        // Phân lớp vào các ô Sáng / Chiều / Tối của từng ngày
-        for (PtClassScheduleSummaryResponse schedule : weekSchedules) {
+        // --------- PHÂN LỚP VÀO SÁNG/CHIỀU/TỐI ---------
+        for (PtClassScheduleSummaryResponse schedule : weekClassSchedules) {
             LocalDate date = schedule.getScheduleDate();
             PtWeeklyDayScheduleResponse dayView = dayMap.get(date);
-            if (dayView == null) {
-                continue;
-            }
+            if (dayView == null) continue;
 
             LocalTime start = schedule.getStartTime();
             if (start.isBefore(LocalTime.NOON)) {
@@ -111,7 +115,23 @@ public class PtClassController {
             }
         }
 
-        boolean hasSchedules = !weekSchedules.isEmpty();
+        // --------- PHÂN LỊCH PT 1:1 VÀO SÁNG/CHIỀU/TỐI ---------
+        for (PersonalTrainingScheduleResponse ps : weekPersonalSchedules) {
+            LocalDate date = ps.getScheduleDate();
+            PtWeeklyDayScheduleResponse dayView = dayMap.get(date);
+            if (dayView == null) continue;
+
+            LocalTime start = ps.getStartTime();
+            if (start.isBefore(LocalTime.NOON)) {
+                dayView.getMorningPersonalSessions().add(ps);
+            } else if (start.isBefore(LocalTime.of(18, 0))) {
+                dayView.getAfternoonPersonalSessions().add(ps);
+            } else {
+                dayView.getEveningPersonalSessions().add(ps);
+            }
+        }
+
+        boolean hasSchedules = !weekClassSchedules.isEmpty() || !weekPersonalSchedules.isEmpty();
 
         model.addAttribute("today", today);
         model.addAttribute("weekStart", weekStart);

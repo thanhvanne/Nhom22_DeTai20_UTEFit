@@ -1,5 +1,6 @@
 package com.utefit.controller.pt;
 
+import com.utefit.dto.trainer.PersonalTrainingScheduleResponse;
 import com.utefit.entity.User;
 import com.utefit.repository.UserRepository;
 import com.utefit.service.PersonalTrainingScheduleService;
@@ -13,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Controller
 @RequestMapping("/pt/personal-schedules")
@@ -28,7 +30,41 @@ public class PtPersonalScheduleController {
     }
 
     /**
-     * Hiển thị form tạo lịch PT cá nhân cho một Member cụ thể.
+     * Danh sách lịch PT 1:1 của HLV đang đăng nhập.
+     * URL: /pt/personal-schedules?fromDate=yyyy-MM-dd&toDate=yyyy-MM-dd (optional)
+     */
+    @GetMapping
+    public String listSchedules(@RequestParam(value = "fromDate", required = false)
+                                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+                                @RequestParam(value = "toDate", required = false)
+                                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
+                                Principal principal,
+                                Model model) {
+
+        User trainerUser = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Không xác định được tài khoản HLV"));
+
+        LocalDate today = LocalDate.now();
+        if (fromDate == null) {
+            fromDate = today;
+        }
+        if (toDate == null) {
+            toDate = today.plusDays(14); // mặc định xem 2 tuần tới
+        }
+
+        List<PersonalTrainingScheduleResponse> schedules =
+                personalTrainingScheduleService.getSchedulesForTrainer(trainerUser.getId(), fromDate, toDate);
+
+        model.addAttribute("schedules", schedules);
+        model.addAttribute("fromDate", fromDate);
+        model.addAttribute("toDate", toDate);
+
+        return "pt/personal-schedules/list";
+    }
+
+    /**
+     * Form tạo lịch PT 1:1 cho một Member cụ thể.
      * URL: /pt/personal-schedules/create?memberId=...
      */
     @GetMapping("/create")
@@ -46,7 +82,7 @@ public class PtPersonalScheduleController {
     }
 
     /**
-     * Xử lý submit tạo lịch PT cá nhân.
+     * Xử lý submit tạo lịch PT 1:1.
      */
     @PostMapping("/create")
     public String createSchedule(@RequestParam("memberId") Long memberId,
@@ -59,16 +95,14 @@ public class PtPersonalScheduleController {
                                  @RequestParam("endTime")
                                  @DateTimeFormat(pattern = "HH:mm")
                                  LocalTime endTime,
-                                 @RequestParam(name = "title", required = false)
-                                 String title,
-                                 @RequestParam(name = "note", required = false)
-                                 String note,
+                                 @RequestParam(name = "title", required = false) String title,
+                                 @RequestParam(name = "note", required = false) String note,
                                  Principal principal,
                                  Model model) {
 
-        // Lấy user PT hiện tại
         User trainerUser = userRepository.findByEmail(principal.getName())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Không xác định được tài khoản HLV"));
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Không xác định được tài khoản HLV"));
 
         if (title == null || title.isBlank()) {
             title = "Buổi tập cá nhân";
@@ -86,7 +120,6 @@ public class PtPersonalScheduleController {
             );
             model.addAttribute("successMessage", "Tạo lịch tập cá nhân thành công.");
         } catch (RuntimeException ex) {
-            // Service đã validate start < end, trùng lịch PT/Member, TrainerRequest ACCEPTED...
             model.addAttribute("errorMessage", ex.getMessage());
         }
 

@@ -99,6 +99,10 @@ public class SecurityConfig {
                                 "/trainers/**"
                         ).permitAll()
 
+                        // CHO PHÉP MỌI USER ĐÃ ĐĂNG NHẬP XEM /notifications
+                        .requestMatchers("/notifications", "/notifications/**")
+                        .authenticated()
+
                         .requestMatchers("/member/**")
                         .hasRole("MEMBER")
 

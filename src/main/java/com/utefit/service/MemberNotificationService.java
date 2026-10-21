@@ -14,20 +14,22 @@ public class MemberNotificationService {
     private final NotificationService notificationService; // B sở hữu
 
     public List<NotificationResponse> getMyNotifications(String email) {
-        return notificationService.getRecentNotifications(
-                accounts.requireMemberId(email), 20);
+        Long userId = accounts.requireMemberId(email);
+        return notificationService.getRecentNotifications(userId, 20);
     }
 
     public long countUnread(String email) {
-        return notificationService.countUnreadNotifications(
-                accounts.requireMemberId(email));
+        Long userId = accounts.requireMemberId(email);
+        return notificationService.countUnreadNotifications(userId);
     }
 
     public void markRead(String email, Long notificationId) {
-        notificationService.markAsRead(accounts.requireMemberId(email), notificationId);
+        Long userId = accounts.requireMemberId(email);
+        notificationService.markAsRead(notificationId, userId);
     }
 
     public void markAllRead(String email) {
-        notificationService.markAllAsRead(accounts.requireMemberId(email));
+        Long userId = accounts.requireMemberId(email);
+        notificationService.markAllAsRead(userId);
     }
 }

@@ -57,10 +57,10 @@
 
     </div>
 
-    <!-- Thông báo nếu tuần này chưa có lớp -->
+    <!-- Thông báo nếu tuần này chưa có lịch -->
     <div class="alert alert-info mb-3"
          th:if="${!hasSchedules}">
-        Tuần này hiện chưa có lịch lớp nào được phân công cho bạn.
+        Tuần này hiện chưa có lịch lớp hoặc buổi PT cá nhân nào được phân công cho bạn.
     </div>
 
     <!-- Bảng thời khóa biểu tuần -->
@@ -94,11 +94,13 @@
 
                         <!-- Ô buổi sáng -->
                         <td class="align-top">
-                            <div th:if="${#lists.isEmpty(day.morningClasses)}"
+                            <div th:if="${#lists.isEmpty(day.morningClasses)} 
+                                         and ${#lists.isEmpty(day.morningPersonalSessions)}"
                                  class="small text-muted">
                                 —
                             </div>
 
+                            <!-- LỚP NHÓM -->
                             <div th:each="cls : ${day.morningClasses}"
                                  class="mb-2 p-2 rounded border bg-white text-start">
 
@@ -130,15 +132,38 @@
                                     </a>
                                 </div>
                             </div>
+
+                            <!-- PT 1:1 -->
+                            <div th:each="pt : ${day.morningPersonalSessions}"
+                                 class="mb-2 p-2 rounded border bg-light text-start">
+
+                                <div class="small fw-semibold">
+                                    <span class="badge bg-success-subtle text-success me-1">PT 1:1</span>
+                                    <span th:text="${pt.memberName}">Member</span>
+                                </div>
+
+                                <div class="small text-muted">
+                                    <span th:text="${#temporals.format(pt.startTime, 'HH:mm')}">10:00</span>
+                                    -
+                                    <span th:text="${#temporals.format(pt.endTime, 'HH:mm')}">11:00</span>
+                                </div>
+
+                                <div class="small text-muted"
+                                     th:text="${pt.title != null ? pt.title : 'Buổi tập cá nhân'}">
+                                    Buổi tập cá nhân
+                                </div>
+                            </div>
                         </td>
 
                         <!-- Ô buổi chiều -->
                         <td class="align-top">
-                            <div th:if="${#lists.isEmpty(day.afternoonClasses)}"
+                            <div th:if="${#lists.isEmpty(day.afternoonClasses)} 
+                                         and ${#lists.isEmpty(day.afternoonPersonalSessions)}"
                                  class="small text-muted">
                                 —
                             </div>
 
+                            <!-- LỚP NHÓM -->
                             <div th:each="cls : ${day.afternoonClasses}"
                                  class="mb-2 p-2 rounded border bg-white text-start">
 
@@ -170,15 +195,38 @@
                                     </a>
                                 </div>
                             </div>
+
+                            <!-- PT 1:1 -->
+                            <div th:each="pt : ${day.afternoonPersonalSessions}"
+                                 class="mb-2 p-2 rounded border bg-light text-start">
+
+                                <div class="small fw-semibold">
+                                    <span class="badge bg-success-subtle text-success me-1">PT 1:1</span>
+                                    <span th:text="${pt.memberName}">Member</span>
+                                </div>
+
+                                <div class="small text-muted">
+                                    <span th:text="${#temporals.format(pt.startTime, 'HH:mm')}">10:00</span>
+                                    -
+                                    <span th:text="${#temporals.format(pt.endTime, 'HH:mm')}">11:00</span>
+                                </div>
+
+                                <div class="small text-muted"
+                                     th:text="${pt.title != null ? pt.title : 'Buổi tập cá nhân'}">
+                                    Buổi tập cá nhân
+                                </div>
+                            </div>
                         </td>
 
                         <!-- Ô buổi tối -->
                         <td class="align-top">
-                            <div th:if="${#lists.isEmpty(day.eveningClasses)}"
+                            <div th:if="${#lists.isEmpty(day.eveningClasses)} 
+                                         and ${#lists.isEmpty(day.eveningPersonalSessions)}"
                                  class="small text-muted">
                                 —
                             </div>
 
+                            <!-- LỚP NHÓM -->
                             <div th:each="cls : ${day.eveningClasses}"
                                  class="mb-2 p-2 rounded border bg-white text-start">
 
@@ -208,6 +256,27 @@
                                        th:href="@{|/pt/classes/${cls.scheduleId}|}">
                                         Xem
                                     </a>
+                                </div>
+                            </div>
+
+                            <!-- PT 1:1 -->
+                            <div th:each="pt : ${day.eveningPersonalSessions}"
+                                 class="mb-2 p-2 rounded border bg-light text-start">
+
+                                <div class="small fw-semibold">
+                                    <span class="badge bg-success-subtle text-success me-1">PT 1:1</span>
+                                    <span th:text="${pt.memberName}">Member</span>
+                                </div>
+
+                                <div class="small text-muted">
+                                    <span th:text="${#temporals.format(pt.startTime, 'HH:mm')}">10:00</span>
+                                    -
+                                    <span th:text="${#temporals.format(pt.endTime, 'HH:mm')}">11:00</span>
+                                </div>
+
+                                <div class="small text-muted"
+                                     th:text="${pt.title != null ? pt.title : 'Buổi tập cá nhân'}">
+                                    Buổi tập cá nhân
                                 </div>
                             </div>
                         </td>

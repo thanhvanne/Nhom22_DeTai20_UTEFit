@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Thông báo - UTEFit')}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Thông báo</h2>
+        <form th:action="@{/notifications/read-all}" method="post">
+            <button type="submit" class="btn btn-sm btn-outline-primary">
+                Đánh dấu tất cả đã đọc
+            </button>
+        </form>
+    </div>
+
+    <div th:if="${notifications == null or #lists.isEmpty(notifications)}">
+        <p>Không có thông báo nào.</p>
+    </div>
+
+    <div th:each="n : ${notifications}" class="card mb-2"
+         th:classappend="${!n.read} ? ' border-primary shadow-sm'">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+                <h6 class="mb-1" th:text="${n.title}">Tiêu đề</h6>
+                <p class="mb-1 small text-muted"
+                   th:text="${#temporals.format(n.createdAt, 'dd/MM/yyyy HH:mm')}">
+                    01/01/2024 10:00
+                </p>
+                <p class="mb-0" th:text="${n.content}">Nội dung</p>
+            </div>
+
+            <div class="text-end">
+
+                <!-- Nút cho PT: nhảy tới trang Yêu cầu từ Member để Accept/Reject -->
+                <div class="mb-2" sec:authorize="hasRole('PT')">
+                    <a class="btn btn-sm btn-outline-info"
+                       th:href="@{/pt/trainer-requests}">
+                        Xử lý yêu cầu
+                    </a>
+                </div>
+
+                <span class="badge bg-success mb-2" th:if="${!n.read}">Mới</span>
+
+                <form th:if="${!n.read}"
+                      th:action="@{'/notifications/' + ${n.id} + '/read'}"
+                      method="post">
+                    <button type="submit" class="btn btn-sm btn-outline-secondary">
+                        Đã đọc
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<div th:replace="~{fragments/scripts :: scripts}"></div>
+</body>
+</html>

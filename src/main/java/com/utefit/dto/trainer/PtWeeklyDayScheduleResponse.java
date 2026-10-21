@@ -1,29 +1,24 @@
 package com.utefit.dto.trainer;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Data
 public class PtWeeklyDayScheduleResponse {
 
     private LocalDate date;
-
-    // Nhãn hiển thị: "Thứ 2", "Thứ 3", ..., "Chủ nhật"
     private String dayLabel;
 
-    private List<PtClassScheduleSummaryResponse> morningClasses = new ArrayList<>();
-
+    // LỚP NHÓM
+    private List<PtClassScheduleSummaryResponse> morningClasses  = new ArrayList<>();
     private List<PtClassScheduleSummaryResponse> afternoonClasses = new ArrayList<>();
+    private List<PtClassScheduleSummaryResponse> eveningClasses  = new ArrayList<>();
 
-    private List<PtClassScheduleSummaryResponse> eveningClasses = new ArrayList<>();
+    // BUỔI PT 1:1
+    private List<PersonalTrainingScheduleResponse> morningPersonalSessions  = new ArrayList<>();
+    private List<PersonalTrainingScheduleResponse> afternoonPersonalSessions = new ArrayList<>();
+    private List<PersonalTrainingScheduleResponse> eveningPersonalSessions  = new ArrayList<>();
 }
