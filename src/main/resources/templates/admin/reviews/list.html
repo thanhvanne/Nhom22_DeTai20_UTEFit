@@ -1,0 +1,135 @@
+
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/layout :: head('Quản lý đánh giá')}"></head>
+<body>
+<div class="d-flex">
+    <aside th:replace="~{admin/fragments/layout :: sidebar}"></aside>
+    <div class="flex-grow-1 min-vh-100" style="min-width:0">
+        <nav th:replace="~{admin/fragments/layout :: topbar('Quản lý đánh giá')}"></nav>
+
+        <main class="container-fluid px-4 pb-5">
+            <div class="admin-hero-banner mb-4">
+                <h2 class="fw-bold">Đánh giá từ hội viên</h2>
+                <p class="mb-0 text-white-50">
+                    Theo dõi đánh giá và ẩn những nội dung vi phạm.
+                </p>
+            </div>
+
+            <div th:if="${success}" class="alert alert-success"
+                 th:text="${success}"></div>
+            <div th:if="${error}" class="alert alert-danger"
+                 th:text="${error}"></div>
+
+            <div class="surface-card p-4">
+                <form th:action="@{/admin/reviews}"
+                      method="get" class="row g-2 mb-4">
+                    <div class="col-md-5">
+                        <select name="branchId" class="form-select">
+                            <option value="">Tất cả chi nhánh</option>
+                            <option th:each="b : ${branches}"
+                                    th:value="${b.id}"
+                                    th:text="${b.name}"
+                                    th:selected="${b.id == branchId}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <select name="rating" class="form-select">
+                            <option value="">Tất cả rating</option>
+                            <option th:each="n : ${#numbers.sequence(1,5)}"
+                                    th:value="${n}"
+                                    th:text="|${n} sao|"
+                                    th:selected="${n == rating}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100">
+                            Lọc đánh giá
+                        </button>
+                    </div>
+                </form>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                        <tr>
+                            <th>ID</th><th>Member</th><th>Chi nhánh / PT</th>
+                            <th>Rating</th><th>Nội dung</th>
+                            <th>Trạng thái</th><th>Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="r : ${reviews.content}">
+                            <td th:text="${r.id}"></td>
+                            <td th:text="${r.memberEmail}"></td>
+                            <td>
+                                <div class="fw-semibold"
+                                     th:text="${r.branchName}"></div>
+                                <small class="text-muted"
+                                       th:text="${r.trainerName}"></small>
+                            </td>
+                            <td>
+                                <span class="badge text-bg-warning"
+                                      th:text="|${r.rating} ★|"></span>
+                            </td>
+                            <td style="max-width:280px;white-space:pre-wrap;overflow-wrap:anywhere"
+                                th:text="${r.comment}"></td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${r.visible ?
+                                          'text-bg-success' : 'text-bg-secondary'}"
+                                      th:text="${r.visible ? 'Đang hiển thị' : 'Đã ẩn'}">
+                                </span>
+                            </td>
+                            <td>
+                                <form th:action="@{/admin/reviews/{id}/toggle-visibility(id=${r.id})}"
+                                      method="post">
+                                    <input type="hidden"
+                                           th:name="${_csrf.parameterName}"
+                                           th:value="${_csrf.token}">
+                                    <button type="submit"
+                                            class="btn btn-sm"
+                                            th:classappend="${r.visible ?
+                                              'btn-outline-danger' : 'btn-outline-success'}"
+                                            th:text="${r.visible ? 'Ẩn đánh giá' : 'Hiện lại'}"
+                                            onclick="return confirm('Xác nhận thay đổi hiển thị?')">
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr th:if="${reviews.empty}">
+                            <td colspan="7" class="text-center text-muted py-4">
+                                Chưa có đánh giá phù hợp.
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted small"
+                          th:text="|Tổng ${reviews.totalElements} đánh giá|"></span>
+                    <div class="d-flex gap-2">
+                        <a class="btn btn-outline-secondary btn-sm"
+                           th:if="${reviews.hasPrevious()}"
+                           th:href="@{/admin/reviews(page=${reviews.number - 1},
+                                                rating=${rating},branchId=${branchId})}">
+                            Trước
+                        </a>
+                        <a class="btn btn-outline-secondary btn-sm"
+                           th:if="${reviews.hasNext()}"
+                           th:href="@{/admin/reviews(page=${reviews.number + 1},
+                                                rating=${rating},branchId=${branchId})}">
+                            Sau
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+<div th:replace="~{admin/fragments/layout :: scripts}"></div>
+</body>
+</html>

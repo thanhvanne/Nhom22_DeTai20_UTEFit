@@ -1,194 +1,159 @@
+
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/layout :: head('Dashboard')}"></head>
 <body>
 <div class="d-flex">
-    <div th:replace="~{admin/fragments/layout :: sidebar}"></div>
-
-    <div class="flex-grow-1">
-        <div th:replace="~{admin/fragments/layout :: topbar('Tổng quan hệ thống (Admin Dashboard)')}"></div>
+    <aside th:replace="~{admin/fragments/layout :: sidebar}"></aside>
+    <div class="flex-grow-1 min-vh-100" style="min-width:0">
+        <nav th:replace="~{admin/fragments/layout :: topbar('Dashboard tổng quan')}"></nav>
 
         <main class="container-fluid px-4 pb-5">
-
-            <!-- HERO BANNER ĐẶC SẮC ĐỒNG BỘ TRANG CHỦ -->
             <div class="admin-hero-banner mb-4">
-                <div class="row align-items-center">
-                    <div class="col-lg-8">
-                        <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 px-3 py-2 rounded-pill mb-3 fw-bold">
-                            ⚡ SYSTEM ONLINE • UTEFIT CENTER
-                        </span>
-                        <h2 class="fw-bolder mb-2" style="letter-spacing: -0.5px;">
-                            Chào mừng đến Trung tâm Điều hành <span style="color: #10b981;">UTEFit</span>
-                        </h2>
-                        <p class="text-light text-opacity-75 mb-0" style="max-width: 640px;">
-                            Quản lý tập trung toàn bộ hệ sinh thái phòng tập: Hội viên, Hệ thống chi nhánh, Đội ngũ huấn luyện viên cá nhân (PT), Lịch lớp và Báo cáo doanh thu thời gian thực.
-                        </p>
-                    </div>
-                    <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                        <a th:href="@{/admin/branches/create}" class="btn btn-utefit px-4 py-2 rounded-pill me-2">
-                            <i class="bi bi-plus-circle me-1"></i> Thêm Chi nhánh
-                        </a>
-                        <a th:href="@{/admin/users}" class="btn btn-outline-light px-4 py-2 rounded-pill">
-                            <i class="bi bi-people me-1"></i> Duyệt User
-                        </a>
-                    </div>
-                </div>
+                <span class="admin-eyebrow">UTEFIT ADMIN PORTAL</span>
+                <h2 class="fw-bold">Tổng quan hệ thống</h2>
+                <p class="mb-0 text-white-50">
+                    Theo dõi hoạt động phòng tập và hiệu quả kinh doanh.
+                </p>
             </div>
 
-            <!-- 4 THẺ KPI HIỆN ĐẠI -->
-            <div class="row g-4 mb-4">
-                <div class="col-12 col-sm-6 col-xl-3">
+            <div class="row g-3 mb-4">
+                <div class="col-md-3 col-sm-6">
                     <div class="kpi-card h-100">
-                        <div class="d-flex align-items-center justify-content-between mb-3">
-                            <div>
-                                <div class="text-secondary small fw-bold text-uppercase" style="letter-spacing: 0.6px;">Tổng Người Dùng</div>
-                                <div class="display-6 fw-bolder text-dark mt-1" th:text="${totalUsers}">0</div>
-                            </div>
-                            <div class="kpi-icon-box bg-primary bg-opacity-10 text-primary">
-                                <i class="bi bi-people-fill"></i>
-                            </div>
-                        </div>
-                        <div class="progress" style="height: 5px;">
-                            <div class="progress-bar bg-primary" style="width: 75%"></div>
-                        </div>
-                        <div class="mt-2 small text-muted">
-                            <i class="bi bi-check-circle-fill text-success me-1"></i> Tài khoản Member, PT & Admin
-                        </div>
+                        <div class="text-muted small">Tổng tài khoản</div>
+                        <div class="display-6 fw-bold"
+                             th:text="${totalUsers}">0</div>
                     </div>
                 </div>
-
-                <div class="col-12 col-sm-6 col-xl-3">
+                <div class="col-md-3 col-sm-6">
                     <div class="kpi-card h-100">
-                        <div class="d-flex align-items-center justify-content-between mb-3">
-                            <div>
-                                <div class="text-secondary small fw-bold text-uppercase" style="letter-spacing: 0.6px;">Chi Nhánh</div>
-                                <div class="display-6 fw-bolder text-dark mt-1" th:text="${totalBranches}">0</div>
-                            </div>
-                            <div class="kpi-icon-box bg-success bg-opacity-10 text-success">
-                                <i class="bi bi-buildings-fill"></i>
-                            </div>
-                        </div>
-                        <div class="progress" style="height: 5px;">
-                            <div class="progress-bar bg-success" style="width: 85%"></div>
-                        </div>
-                        <div class="mt-2 small text-muted">
-                            <i class="bi bi-cloud-check-fill text-success me-1"></i> Đã tích hợp ảnh Cloudinary
-                        </div>
+                        <div class="text-muted small">Tổng PT</div>
+                        <div class="display-6 fw-bold"
+                             th:text="${totalTrainers}">0</div>
                     </div>
                 </div>
-
-                <div class="col-12 col-sm-6 col-xl-3">
+                <div class="col-md-3 col-sm-6">
                     <div class="kpi-card h-100">
-                        <div class="d-flex align-items-center justify-content-between mb-3">
-                            <div>
-                                <div class="text-secondary small fw-bold text-uppercase" style="letter-spacing: 0.6px;">Huấn Luyện Viên (PT)</div>
-                                <div class="display-6 fw-bolder text-dark mt-1" th:text="${totalTrainers}">0</div>
-                            </div>
-                            <div class="kpi-icon-box bg-warning bg-opacity-15 text-warning">
-                                <i class="bi bi-person-badge-fill"></i>
-                            </div>
-                        </div>
-                        <div class="progress" style="height: 5px;">
-                            <div class="progress-bar bg-warning" style="width: 60%"></div>
-                        </div>
-                        <div class="mt-2 small text-muted">
-                            <i class="bi bi-award-fill text-warning me-1"></i> Đội ngũ PT chuyên nghiệp
-                        </div>
+                        <div class="text-muted small">Chi nhánh</div>
+                        <div class="display-6 fw-bold"
+                             th:text="${totalBranches}">0</div>
                     </div>
                 </div>
-
-                <div class="col-12 col-sm-6 col-xl-3">
+                <div class="col-md-3 col-sm-6">
                     <div class="kpi-card h-100">
-                        <div class="d-flex align-items-center justify-content-between mb-3">
-                            <div>
-                                <div class="text-secondary small fw-bold text-uppercase" style="letter-spacing: 0.6px;">Lớp Tập Thể Thao</div>
-                                <div class="display-6 fw-bolder text-dark mt-1" th:text="${totalClasses}">0</div>
-                            </div>
-                            <div class="kpi-icon-box bg-info bg-opacity-10 text-info">
-                                <i class="bi bi-easel2-fill"></i>
-                            </div>
-                        </div>
-                        <div class="progress" style="height: 5px;">
-                            <div class="progress-bar bg-info" style="width: 50%"></div>
-                        </div>
-                        <div class="mt-2 small text-muted">
-                            <i class="bi bi-calendar2-check-fill text-info me-1"></i> Chương trình huấn luyện
-                        </div>
+                        <div class="text-muted small">Lớp tập</div>
+                        <div class="display-6 fw-bold"
+                             th:text="${totalClasses}">0</div>
                     </div>
-                </div>
-            </div>
-
-            <!-- CÁC PHÂN HỆ QUẢN TRỊ TRỌNG TÂM -->
-            <div class="mb-3">
-                <span class="admin-eyebrow">CORE MODULES</span>
-                <h5 class="fw-bold text-dark">Phân hệ quản trị nhanh</h5>
-            </div>
-
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <a th:href="@{/admin/users}" class="action-module-card">
-                        <div>
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <div class="kpi-icon-box bg-primary bg-opacity-10 text-primary">
-                                    <i class="bi bi-person-gear"></i>
-                                </div>
-                                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2">Module 01</span>
-                            </div>
-                            <h5 class="fw-bold text-dark mb-2">Quản lý Người dùng</h5>
-                            <p class="text-secondary small mb-3">
-                                Tra cứu hội viên, lọc theo vai trò (ADMIN, PT, MEMBER), kiểm soát trạng thái hoạt động và khóa/mở khóa bảo mật tài khoản.
-                            </p>
-                        </div>
-                        <div class="fw-bold text-primary small d-flex align-items-center">
-                            Truy cập Quản lý User <i class="bi bi-arrow-right ms-2 module-arrow"></i>
-                        </div>
-                    </a>
                 </div>
 
                 <div class="col-md-4">
-                    <a th:href="@{/admin/branches}" class="action-module-card">
-                        <div>
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <div class="kpi-icon-box bg-success bg-opacity-10 text-success">
-                                    <i class="bi bi-building-check"></i>
-                                </div>
-                                <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">Module 02</span>
-                            </div>
-                            <h5 class="fw-bold text-dark mb-2">Hệ thống Chi nhánh</h5>
-                            <p class="text-secondary small mb-3">
-                                Thêm mới cơ sở tập luyện, cập nhật khung giờ mở/đóng cửa, tải ảnh chi nhánh lên Cloudinary và bật/tắt trạng thái hoạt động.
-                            </p>
+                    <div class="kpi-card h-100">
+                        <div class="text-muted small">
+                            Membership còn hiệu lực
                         </div>
-                        <div class="fw-bold text-success small d-flex align-items-center">
-                            Quản lý Chi nhánh <i class="bi bi-arrow-right ms-2 module-arrow"></i>
-                        </div>
-                    </a>
+                        <div class="display-6 fw-bold text-success"
+                             th:text="${activeMemberships}">0</div>
+                    </div>
                 </div>
-
                 <div class="col-md-4">
-                    <a th:href="@{/trainers}" class="action-module-card">
-                        <div>
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <div class="kpi-icon-box bg-warning bg-opacity-15 text-warning">
-                                    <i class="bi bi-award"></i>
-                                </div>
-                                <span class="badge bg-warning bg-opacity-15 text-dark rounded-pill px-3 py-2">Public View</span>
-                            </div>
-                            <h5 class="fw-bold text-dark mb-2">Danh sách Huấn luyện viên</h5>
-                            <p class="text-secondary small mb-3">
-                                Xem giao diện hiển thị đội ngũ PT ngoài cổng thông tin công khai, kiểm tra bộ lọc theo chi nhánh và hồ sơ chuyên môn.
-                            </p>
+                    <div class="kpi-card h-100">
+                        <div class="text-muted small">
+                            Lượt check-in tháng này
                         </div>
-                        <div class="fw-bold text-dark small d-flex align-items-center">
-                            Xem trang Trainers <i class="bi bi-arrow-right ms-2 module-arrow"></i>
+                        <div class="display-6 fw-bold"
+                             th:text="${checkinsThisMonth}">0</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="kpi-card h-100">
+                        <div class="text-muted small">Tổng doanh thu</div>
+                        <div class="fs-3 fw-bold text-success"
+                             th:text="|${#numbers.formatDecimal(revenueTotal,1,0)} đ|">
+                            0 đ
                         </div>
-                    </a>
+                    </div>
                 </div>
             </div>
 
+            <div class="surface-card p-4 mb-4">
+                <div class="d-flex justify-content-between
+                            align-items-center flex-wrap gap-2 mb-3">
+                    <h5 class="fw-bold mb-0">
+                        Biểu đồ doanh thu 6 tháng gần nhất
+                    </h5>
+                    <a th:href="@{/admin/statistics}"
+                       class="btn btn-outline-success btn-sm">
+                        Xem báo cáo chi tiết
+                    </a>
+                </div>
+                <div style="height:280px;position:relative">
+                    <canvas id="dashboardRevenue"></canvas>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-sm-6 col-lg-3">
+                    <a th:href="@{/admin/checkins}"
+                       class="btn btn-outline-success w-100 py-3">
+                        <i class="bi bi-person-check"></i>
+                        Quản lý Check-in
+                    </a>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <a th:href="@{/admin/payments}"
+                       class="btn btn-outline-primary w-100 py-3">
+                        <i class="bi bi-credit-card"></i>
+                        Thanh toán
+                    </a>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <a th:href="@{/admin/promotions}"
+                       class="btn btn-outline-warning w-100 py-3">
+                        <i class="bi bi-ticket-perforated"></i>
+                        Khuyến mãi
+                    </a>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <a th:href="@{/admin/reviews}"
+                       class="btn btn-outline-secondary w-100 py-3">
+                        <i class="bi bi-star"></i>
+                        Đánh giá
+                    </a>
+                </div>
+            </div>
         </main>
     </div>
 </div>
+
 <div th:replace="~{admin/fragments/layout :: scripts}"></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+<script th:inline="javascript">
+    const labels = /*[[${monthlyLabels}]]*/ [];
+    const values = /*[[${monthlyRevenue}]]*/ [];
+
+    new Chart(document.getElementById('dashboardRevenue'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Doanh thu (VND)',
+                data: values,
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16,185,129,.12)',
+                fill: true,
+                tension: 0.35,
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+</script>
 </body>
 </html>

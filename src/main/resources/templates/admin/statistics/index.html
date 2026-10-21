@@ -1,0 +1,216 @@
+
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/layout :: head('Thống kê hệ thống')}"></head>
+<body>
+<div class="d-flex">
+    <aside th:replace="~{admin/fragments/layout :: sidebar}"></aside>
+    <div class="flex-grow-1 min-vh-100" style="min-width:0">
+        <nav th:replace="~{admin/fragments/layout :: topbar('Thống kê hệ thống')}"></nav>
+
+        <main class="container-fluid px-4 pb-5">
+            <div class="admin-hero-banner mb-4">
+                <h2 class="fw-bold">Báo cáo & Thống kê</h2>
+                <p class="mb-0 text-white-50">
+                    Phân tích hội viên, doanh thu và hoạt động phòng tập.
+                </p>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-sm-6 col-xl-3">
+                    <div class="kpi-card h-100">
+                        <div class="text-secondary small">Tổng Member</div>
+                        <div class="display-6 fw-bold"
+                             th:text="${totalMembers}">0</div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="kpi-card h-100">
+                        <div class="text-secondary small">PT</div>
+                        <div class="display-6 fw-bold"
+                             th:text="${totalTrainers}">0</div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="kpi-card h-100">
+                        <div class="text-secondary small">Chi nhánh</div>
+                        <div class="display-6 fw-bold"
+                             th:text="${totalBranches}">0</div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="kpi-card h-100">
+                        <div class="text-secondary small">Lớp tập</div>
+                        <div class="display-6 fw-bold"
+                             th:text="${totalClasses}">0</div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-xl-3">
+                    <div class="kpi-card h-100">
+                        <div class="text-secondary small">
+                            Membership còn hiệu lực
+                        </div>
+                        <div class="display-6 fw-bold text-success"
+                             th:text="${activeMemberships}">0</div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="kpi-card h-100">
+                        <div class="text-secondary small">
+                            Check-in tháng này
+                        </div>
+                        <div class="display-6 fw-bold"
+                             th:text="${checkinsThisMonth}">0</div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="kpi-card h-100">
+                        <div class="text-secondary small">
+                            Member mới tháng này
+                        </div>
+                        <div class="display-6 fw-bold"
+                             th:text="${newMembersThisMonth}">0</div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="kpi-card h-100">
+                        <div class="text-secondary small">
+                            Tổng doanh thu đã thu
+                        </div>
+                        <div class="fs-3 fw-bold text-success"
+                             th:text="|${#numbers.formatDecimal(revenueTotal,1,0)} đ|">
+                            0 đ
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="surface-card p-4 mb-4">
+                <h5 class="fw-bold mb-3">
+                    Doanh thu theo tháng (6 tháng gần nhất)
+                </h5>
+                <div style="height:320px;position:relative">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="surface-card p-4 h-100">
+                        <h5 class="fw-bold">Top 5 gói tập</h5>
+                        <div style="height:300px;position:relative">
+                            <canvas id="planChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="surface-card p-4 h-100">
+                        <h5 class="fw-bold">Top 5 chi nhánh</h5>
+                        <div style="height:300px;position:relative">
+                            <canvas id="branchChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<div th:replace="~{admin/fragments/layout :: scripts}"></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+
+<script th:inline="javascript">
+    const months = /*[[${monthlyLabels}]]*/ [];
+    const revenue = /*[[${monthlyRevenue}]]*/ [];
+
+    const planNames = /*[[${topPlanLabels}]]*/ [];
+    const planRevenue = /*[[${topPlanValues}]]*/ [];
+
+    const branchNames = /*[[${topBranchLabels}]]*/ [];
+    const branchRevenue = /*[[${topBranchValues}]]*/ [];
+
+    const formatMoney = value =>
+        new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND',
+            maximumFractionDigits: 0
+        }).format(value);
+
+    const moneyOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    label: context => formatMoney(context.parsed.y ?? 0)
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: value => formatMoney(value)
+                }
+            }
+        }
+    };
+
+    new Chart(document.getElementById('revenueChart'), {
+        type: 'bar',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Doanh thu VND',
+                data: revenue,
+                backgroundColor: '#10b981',
+                borderRadius: 7
+            }]
+        },
+        options: moneyOptions
+    });
+
+    function horizontalChart(elementId, labels, values, color) {
+        new Chart(document.getElementById(elementId), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Doanh thu VND',
+                    data: values,
+                    backgroundColor: color,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                ...moneyOptions,
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: value => formatMoney(value)
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: context =>
+                                formatMoney(context.parsed.x ?? 0)
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    horizontalChart(
+        'planChart', planNames, planRevenue, '#3b82f6');
+
+    horizontalChart(
+        'branchChart', branchNames, branchRevenue, '#8b5cf6');
+</script>
+</body>
+</html>

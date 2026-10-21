@@ -1,0 +1,128 @@
+
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/layout :: head('Quản lý thanh toán')}"></head>
+<body>
+<div class="d-flex">
+    <aside th:replace="~{admin/fragments/layout :: sidebar}"></aside>
+    <div class="flex-grow-1 min-vh-100" style="min-width:0">
+        <nav th:replace="~{admin/fragments/layout :: topbar('Quản lý thanh toán')}"></nav>
+        <main class="container-fluid px-4 pb-5">
+
+            <div class="admin-hero-banner mb-4">
+                <h2 class="fw-bold">Lịch sử giao dịch</h2>
+                <p class="mb-0 text-white-50">
+                    Tra cứu và đối soát thanh toán của toàn hệ thống.
+                </p>
+            </div>
+
+            <div th:if="${success}" class="alert alert-success"
+                 th:text="${success}"></div>
+            <div th:if="${error}" class="alert alert-danger"
+                 th:text="${error}"></div>
+
+            <div class="surface-card p-4">
+                <div class="d-flex justify-content-between
+                            align-items-center mb-3 flex-wrap gap-2">
+                    <h5 class="fw-bold mb-0">Danh sách thanh toán</h5>
+                    <a class="btn btn-success"
+                       th:href="@{/admin/payments/cash-pending}">
+                        Duyệt thanh toán CASH
+                    </a>
+                </div>
+
+                <form th:action="@{/admin/payments}" method="get"
+                      class="row g-2 mb-4">
+                    <div class="col-md-5">
+                        <input class="form-control" name="keyword"
+                               placeholder="Tìm theo email Member"
+                               th:value="${keyword}">
+                    </div>
+                    <div class="col-md-3">
+                        <select name="method" class="form-select">
+                            <option value="">Tất cả phương thức</option>
+                            <option th:each="m : ${methods}"
+                                    th:value="${m}"
+                                    th:text="${m}"
+                                    th:selected="${m == selectedMethod}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select name="status" class="form-select">
+                            <option value="">Tất cả trạng thái</option>
+                            <option th:each="s : ${statuses}"
+                                    th:value="${s}"
+                                    th:text="${s}"
+                                    th:selected="${s == selectedStatus}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <button class="btn btn-primary w-100">Lọc</button>
+                    </div>
+                </form>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                        <tr>
+                            <th>ID</th><th>Member</th><th>Gói tập</th>
+                            <th>Số tiền</th><th>Phương thức</th>
+                            <th>Trạng thái</th><th>Chi tiết</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="p : ${paymentPage.content}">
+                            <td th:text="${p.id}"></td>
+                            <td th:text="${p.memberEmail}"></td>
+                            <td th:text="${p.planName}"></td>
+                            <td class="fw-bold"
+                                th:text="|${#numbers.formatDecimal(p.amount,1,0)} đ|">
+                            </td>
+                            <td th:text="${p.method}"></td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${p.status.name() == 'PAID' ?
+                                          'text-bg-success' :
+                                          (p.status.name() == 'PENDING' ?
+                                          'text-bg-warning' : 'text-bg-secondary')}"
+                                      th:text="${p.status}"></span>
+                            </td>
+                            <td>
+                                <a class="btn btn-outline-primary btn-sm"
+                                   th:href="@{/admin/payments/{id}(id=${p.id})}">
+                                    Xem
+                                </a>
+                            </td>
+                        </tr>
+                        <tr th:if="${paymentPage.empty}">
+                            <td colspan="7" class="text-center text-muted">
+                                Không có giao dịch phù hợp.
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <span th:text="|Tổng: ${paymentPage.totalElements} giao dịch|"
+                          class="text-muted small"></span>
+                    <div class="d-flex gap-2">
+                        <a th:if="${paymentPage.hasPrevious()}"
+                           class="btn btn-outline-secondary btn-sm"
+                           th:href="@{/admin/payments(page=${paymentPage.number - 1},
+                                   keyword=${keyword},method=${selectedMethod},
+                                   status=${selectedStatus})}">Trước</a>
+                        <a th:if="${paymentPage.hasNext()}"
+                           class="btn btn-outline-secondary btn-sm"
+                           th:href="@{/admin/payments(page=${paymentPage.number + 1},
+                                   keyword=${keyword},method=${selectedMethod},
+                                   status=${selectedStatus})}">Sau</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+<div th:replace="~{admin/fragments/layout :: scripts}"></div>
+</body>
+</html>
