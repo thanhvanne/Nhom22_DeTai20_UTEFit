@@ -1,5 +1,6 @@
 package com.utefit.service.impl;
 
+import com.utefit.dto.notification.NotificationDto;
 import com.utefit.dto.notification.NotificationResponse;
 import com.utefit.entity.Notification;
 import com.utefit.entity.User;
@@ -26,58 +27,101 @@ public class NotificationServiceImpl implements NotificationService {
     private final SimpMessagingTemplate messagingTemplate;
 
     @Override
-    public NotificationResponse createNotificationForUser(
-            Long userId,
-            NotificationType type,
-            String title,
-            String content,
-            Long relatedId
-    ) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() ->
-                        new EntityNotFoundException("Không tìm thấy người nhận thông báo."));
+    public void createNotificationForUser(Long userId,
+                                          NotificationType type,
+                                          String title,
+                                          String content,
+                                          Long referenceId) {
 
-        Notification notification = Notification.builder()
-                .user(user)
-                .type(type)
-                .title(title)
-                .content(content)
-                .relatedId(relatedId)
-                .read(false)
-                .createdAt(LocalDateTime.now())
-                .build();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy người dùng."));
+
+        Notification notification = new Notification();
+        notification.setUser(user);
+        notification.setType(type);
+        notification.setTitle(title);
+        notification.setContent(content);
+
+        // LƯU relatedId để client build URL khi click thông báo
+        if (referenceId != null) {
+            notification.setRelatedId(referenceId); // <-- entity Notification cần có field relatedId
+        }
+
+        notification.setRead(false);
+        notification.setCreatedAt(LocalDateTime.now());
 
         Notification saved = notificationRepository.save(notification);
 
-        NotificationResponse response = toResponse(saved);
-
-        // Gửi realtime qua STOMP (nếu client đang connect WebSocket)
+        // Đẩy realtime qua STOMP (principal = email, giống ChatServiceImpl)
         try {
-            // principal name = email → dùng email làm "user"
+            NotificationDto dto = mapToDto(saved);
             messagingTemplate.convertAndSendToUser(
                     user.getEmail(),
                     "/queue/notifications",
-                    response
+                    dto
             );
         } catch (Exception ignored) {
-            // Không để lỗi WebSocket làm hỏng luồng lưu DB
         }
-
-        return response;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<NotificationResponse> getRecentNotifications(Long userId, int limit) {
-        List<Notification> list = notificationRepository
-                .findTop20ByUser_IdOrderByCreatedAtDesc(userId);
+    public List<NotificationDto> getNotificationsForUser(Long userId) {
+        return notificationRepository.findByUser_IdOrderByCreatedAtDesc(userId)
+                .stream()
+                .map(this::mapToDto)
+                .toList();
+    }
 
-        if (limit > 0 && limit < list.size()) {
+    @Override
+    @Transactional(readOnly = true)
+    public long countUnreadForUser(Long userId) {
+        return notificationRepository.countByUser_IdAndReadIsFalse(userId);
+    }
+
+    @Override
+    public void markAsRead(Long notificationId, Long userId) {
+        Notification noti = notificationRepository.findByIdAndUser_Id(notificationId, userId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy thông báo."));
+
+        if (!Boolean.TRUE.equals(noti.getRead())) {
+            noti.setRead(true);
+            noti.setReadAt(LocalDateTime.now());
+            notificationRepository.save(noti);
+        }
+    }
+
+    @Override
+    public void markAllAsRead(Long userId) {
+        List<Notification> unread =
+                notificationRepository.findByUser_IdAndReadIsFalseOrderByCreatedAtDesc(userId);
+        if (unread.isEmpty()) return;
+
+        LocalDateTime now = LocalDateTime.now();
+        unread.forEach(n -> {
+            n.setRead(true);
+            n.setReadAt(now);
+        });
+        notificationRepository.saveAll(unread);
+    }
+
+    // ================== DÙNG CHO MEMBER ==================
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<NotificationResponse> getRecentNotifications(Long userId, int limit) {
+        if (limit <= 0) {
+            limit = 20;
+        }
+        List<Notification> list =
+                notificationRepository.findTop20ByUser_IdOrderByCreatedAtDesc(userId);
+
+        if (list.size() > limit) {
             list = list.subList(0, limit);
         }
 
         return list.stream()
-                .map(this::toResponse)
+                .map(this::mapToResponse)
                 .toList();
     }
 
@@ -87,43 +131,31 @@ public class NotificationServiceImpl implements NotificationService {
         return notificationRepository.countByUser_IdAndReadIsFalse(userId);
     }
 
-    @Override
-    public void markAsRead(Long userId, Long notificationId) {
-        Notification notification = notificationRepository
-                .findByIdAndUser_Id(notificationId, userId)
-                .orElseThrow(() ->
-                        new EntityNotFoundException("Không tìm thấy thông báo."));
+    // ================== MAPPERS ==================
 
-        if (!Boolean.TRUE.equals(notification.getRead())) {
-            notification.setRead(true);
-            notification.setReadAt(LocalDateTime.now());
-        }
+    private NotificationDto mapToDto(Notification n) {
+        NotificationDto dto = new NotificationDto();
+        dto.setId(n.getId());
+        dto.setTitle(n.getTitle());
+        dto.setContent(n.getContent());
+        dto.setType(n.getType() != null ? n.getType().name() : null);
+        dto.setRead(Boolean.TRUE.equals(n.getRead()));
+        dto.setCreatedAt(n.getCreatedAt());
+        return dto;
     }
 
-    @Override
-    public void markAllAsRead(Long userId) {
-        List<Notification> unreadList = notificationRepository
-                .findByUser_IdAndReadIsFalseOrderByCreatedAtDesc(userId);
-
-        LocalDateTime now = LocalDateTime.now();
-
-        for (Notification n : unreadList) {
-            n.setRead(true);
-            n.setReadAt(now);
-        }
-    }
-
-    private NotificationResponse toResponse(Notification entity) {
+    private NotificationResponse mapToResponse(Notification n) {
         return NotificationResponse.builder()
-                .id(entity.getId())
-                .userId(entity.getUser().getId())
-                .type(entity.getType())
-                .title(entity.getTitle())
-                .content(entity.getContent())
-                .relatedId(entity.getRelatedId())
-                .read(Boolean.TRUE.equals(entity.getRead()))
-                .createdAt(entity.getCreatedAt())
-                .readAt(entity.getReadAt())
+                .id(n.getId())
+                .userId(n.getUser() != null ? n.getUser().getId() : null)
+                .type(n.getType())
+                .title(n.getTitle())
+                .content(n.getContent())
+                // map entity.relatedId -> DTO.relatedId
+                .relatedId(n.getRelatedId())
+                .read(Boolean.TRUE.equals(n.getRead()))
+                .createdAt(n.getCreatedAt())
+                .readAt(n.getReadAt())
                 .build();
     }
 }

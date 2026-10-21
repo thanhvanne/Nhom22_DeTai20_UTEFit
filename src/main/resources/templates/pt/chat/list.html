@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Tin nhắn - UTEFit PT')}"></head>
+<body class="bg-dark text-white">
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="container py-4">
+
+    <h2 class="mb-4">Tin nhắn</h2>
+
+    <div th:if="${#lists.isEmpty(conversations)}" class="text-muted">
+        Chưa có cuộc trò chuyện nào.
+    </div>
+
+    <div class="list-group">
+        <a th:each="c : ${conversations}"
+           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+           th:href="@{'/pt/chat/member/' + ${c.partnerUserId}}">
+            <div>
+                <div class="fw-semibold" th:text="${c.partnerName}">Tên hội viên</div>
+                <div class="small text-muted" th:text="${c.lastMessagePreview}">
+                    Nội dung tin nhắn gần nhất
+                </div>
+            </div>
+            <div class="text-end">
+                <div class="small text-muted"
+                     th:text="${c.lastMessageAt != null ? #temporals.format(c.lastMessageAt, 'dd/MM HH:mm') : ''}">
+                    21/10 18:00
+                </div>
+                <span th:if="${c.unreadCount > 0}"
+                      class="badge bg-primary"
+                      th:text="${c.unreadCount}">1</span>
+            </div>
+        </a>
+    </div>
+
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<div th:replace="~{fragments/scripts :: scripts}"></div>
+</body>
+</html>

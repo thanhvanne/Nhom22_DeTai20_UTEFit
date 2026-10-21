@@ -187,19 +187,20 @@
 
                     <!-- Tin nhắn + Thông báo (chỉ PT, dùng ở dashboard khi có biến dashboard) -->
                     <a sec:authorize="hasRole('PT')"
-                       th:if="${dashboard != null}"
-                       class="btn btn-outline-light btn-sm d-flex align-items-center gap-1"
-                       href="#"
-                       role="button">
+   th:if="${dashboard != null}"
+   class="btn btn-outline-light btn-sm d-flex align-items-center gap-1"
+   th:href="@{/pt/chats}"
+   role="button">
                         Tin nhắn
                         <span class="badge bg-primary"
                               th:text="${dashboard.unreadMessageCount}">0</span>
                     </a>
 
+                    <!-- ĐÃ SỬA: link Thông báo dẫn tới /notifications -->
                     <a sec:authorize="hasRole('PT')"
                        th:if="${dashboard != null}"
                        class="btn btn-outline-light btn-sm d-flex align-items-center gap-1"
-                       href="#"
+                       th:href="@{/notifications}"
                        role="button">
                         Thông báo
                         <span class="badge bg-danger"

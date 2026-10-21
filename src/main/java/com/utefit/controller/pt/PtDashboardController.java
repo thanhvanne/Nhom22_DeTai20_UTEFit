@@ -1,40 +1,51 @@
 package com.utefit.controller.pt;
 
-import com.utefit.dto.trainer.PtDashboardResponse;
+import com.utefit.dto.trainer.TrainerDashboardSummaryResponse;
 import com.utefit.entity.User;
 import com.utefit.repository.UserRepository;
 import com.utefit.service.PtDashboardService;
-import org.springframework.security.core.Authentication;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.security.Principal;
+
 @Controller
-@RequestMapping("/pt/dashboard")
+@RequestMapping("/pt")
+@RequiredArgsConstructor
 public class PtDashboardController {
 
     private final PtDashboardService ptDashboardService;
     private final UserRepository userRepository;
 
-    public PtDashboardController(PtDashboardService ptDashboardService,
-                                 UserRepository userRepository) {
-        this.ptDashboardService = ptDashboardService;
-        this.userRepository = userRepository;
-    }
+    @GetMapping("/dashboard")
+    public String dashboard(Model model, Principal principal) {
+        Long trainerUserId = getCurrentUserId(principal);
 
-    private Long getCurrentUserId(Authentication authentication) {
-        String email = authentication.getName();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalStateException("Không tìm thấy tài khoản đăng nhập."));
-        return user.getId();
-    }
+        // Lấy summary từ service
+        TrainerDashboardSummaryResponse dashboard =
+                ptDashboardService.getDashboardForTrainer(trainerUserId);
 
-    @GetMapping
-    public String viewDashboard(Authentication authentication, Model model) {
-        Long userId = getCurrentUserId(authentication);
-        PtDashboardResponse dashboard = ptDashboardService.getDashboardForTrainer(userId);
+        // Đặt đúng tên attribute mà view đang dùng: "dashboard"
         model.addAttribute("dashboard", dashboard);
+
+        // Nếu sau này anh muốn dùng thêm summary.* khác, có thể add thêm attribute "summary"
+        // model.addAttribute("summary", dashboard);
+
         return "pt/dashboard";
+    }
+
+    private Long getCurrentUserId(Principal principal) {
+        if (principal == null) {
+            throw new EntityNotFoundException("Không tìm thấy người dùng đăng nhập.");
+        }
+        String email = principal.getName(); // username = email
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Không tìm thấy người dùng với email: " + email));
+        return user.getId();
     }
 }
