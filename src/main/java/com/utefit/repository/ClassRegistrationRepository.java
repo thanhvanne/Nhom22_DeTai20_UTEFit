@@ -3,6 +3,7 @@ package com.utefit.repository;
 
 import com.utefit.entity.ClassRegistration;
 import com.utefit.enums.RegistrationStatus;
+
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,28 +16,65 @@ import java.util.Optional;
 public interface ClassRegistrationRepository
         extends JpaRepository<ClassRegistration, Long> {
 
-    // Hàm cũ: PT đếm Member đang đăng ký.
+    // =====================================================
+    // GIAI DOAN 5 - ADMIN NOTIFICATION
+    // =====================================================
+
+    // Lay danh sach ID Member da dang ky mot lich hoc.
+    // Chi lay Member co trang thai REGISTERED.
+    // Khong lay Member da huy dang ky.
+    @Query("""
+            SELECT DISTINCT r.user.id
+            FROM ClassRegistration r
+            WHERE r.schedule.id = :scheduleId
+              AND r.status = :status
+            """)
+    List<Long> findDistinctUserIdsByScheduleAndStatus(
+            @Param("scheduleId") Long scheduleId,
+            @Param("status") RegistrationStatus status
+    );
+
+    // Lay danh sach ID Member da dang ky lop hoc.
+    // Mot FitnessClass co the co nhieu ClassSchedule.
+    // DISTINCT giup moi Member chi nhan mot thong bao
+    // khi Admin huy toan bo lop hoc.
+    @Query("""
+            SELECT DISTINCT r.user.id
+            FROM ClassRegistration r
+            WHERE r.schedule.fitnessClass.id = :fitnessClassId
+              AND r.status = :status
+            """)
+    List<Long> findDistinctUserIdsByClassAndStatus(
+            @Param("fitnessClassId") Long fitnessClassId,
+            @Param("status") RegistrationStatus status
+    );
+
+    // =====================================================
+    // CAC PHUONG THUC CU - GIU NGUYEN
+    // =====================================================
+
+    // PT dem so Member dang dang ky.
     long countBySchedule_IdAndStatus(
             Long scheduleId,
             RegistrationStatus status
     );
 
-    // Hàm cũ: PT xem danh sách Member.
+    // PT xem danh sach Member.
     @EntityGraph(attributePaths = {"user"})
     List<ClassRegistration> findBySchedule_IdAndStatusOrderByRegisteredAtAsc(
             Long scheduleId,
             RegistrationStatus status
     );
 
-    // Tìm bản ghi cũ, kể cả CANCELLED.
-    // Phục vụ đăng ký lại cùng lịch.
+    // Tim ban ghi cu, ke ca CANCELLED.
+    // Phuc vu dang ky lai cung lich.
     Optional<ClassRegistration> findByUser_IdAndSchedule_Id(
             Long userId,
             Long scheduleId
     );
 
-    // Các lớp Member đã đăng ký trong cùng ngày.
-    // Dùng để kiểm tra trùng giờ.
+    // Cac lop Member da dang ky trong cung ngay.
+    // Dung de kiem tra trung gio.
     @EntityGraph(attributePaths = {
             "schedule",
             "schedule.fitnessClass"
@@ -56,7 +94,7 @@ public interface ClassRegistrationRepository
             @Param("excludeScheduleId") Long excludeScheduleId
     );
 
-    // Lịch sử đặt lớp của chính Member.
+    // Lich su dat lop cua chinh Member.
     @EntityGraph(attributePaths = {
             "schedule",
             "schedule.fitnessClass",
