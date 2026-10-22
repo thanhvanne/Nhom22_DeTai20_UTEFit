@@ -41,7 +41,9 @@ public class TrainerRequestServiceImpl implements TrainerRequestService {
                 .orElseThrow(() ->
                         new EntityNotFoundException("Không tìm thấy thành viên"));
 
-        if (member.getRole() != UserRole.MEMBER) {
+        if (member.getRole() != UserRole.MEMBER || member.getStatus() != UserStatus.ACTIVE
+                || !Boolean.TRUE.equals(member.getEnabled())) {
+
             throw new IllegalStateException("Chỉ thành viên mới được gửi yêu cầu PT.");
         }
 
@@ -61,6 +63,13 @@ public class TrainerRequestServiceImpl implements TrainerRequestService {
             throw new IllegalStateException("Huấn luyện viên hiện không khả dụng.");
         }
 
+        if (message != null && message.trim().length() > 2000) {
+            throw new IllegalArgumentException("Lời nhắn tối đa 2000 ký tự.");
+        }
+        if (trainerRequestRepository.existsByMember_IdAndTrainer_IdAndStatus(
+                memberUserId, trainerId, TrainerRequestStatus.ACCEPTED)) {
+            throw new IllegalStateException("Bạn đã có quan hệ PT được chấp nhận. Không gửi yêu cầu trùng.");
+        }
         boolean existedPending = trainerRequestRepository
                 .existsByMember_IdAndTrainer_IdAndStatus(
                         memberUserId,
@@ -98,6 +107,17 @@ public class TrainerRequestServiceImpl implements TrainerRequestService {
         );
 
         return toResponse(saved);
+    }
+
+    @Override
+    public void cancelPendingRequest(Long memberUserId, Long requestId) {
+        TrainerRequest request = trainerRequestRepository.findByIdAndMember_Id(requestId, memberUserId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy yêu cầu thuộc tài khoản của bạn."));
+        if (request.getStatus() != TrainerRequestStatus.PENDING) {
+            throw new IllegalStateException("Chỉ hủy được yêu cầu đang PENDING.");
+        }
+        request.setStatus(TrainerRequestStatus.CANCELLED);
+        request.setRespondedAt(LocalDateTime.now());
     }
 
     @Override

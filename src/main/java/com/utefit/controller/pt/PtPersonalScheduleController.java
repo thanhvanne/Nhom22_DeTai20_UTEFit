@@ -2,7 +2,8 @@ package com.utefit.controller.pt;
 
 import com.utefit.dto.trainer.PersonalTrainingScheduleResponse;
 import com.utefit.entity.User;
-import com.utefit.repository.UserRepository;
+import com.utefit.service.PtPersonalScheduleViewService;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.utefit.service.PersonalTrainingScheduleService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -21,12 +22,12 @@ import java.util.List;
 public class PtPersonalScheduleController {
 
     private final PersonalTrainingScheduleService personalTrainingScheduleService;
-    private final UserRepository userRepository;
+    private final PtPersonalScheduleViewService viewService;
 
     public PtPersonalScheduleController(PersonalTrainingScheduleService personalTrainingScheduleService,
-                                        UserRepository userRepository) {
+                                        PtPersonalScheduleViewService viewService) {
         this.personalTrainingScheduleService = personalTrainingScheduleService;
-        this.userRepository = userRepository;
+        this.viewService = viewService;
     }
 
     /**
@@ -41,9 +42,7 @@ public class PtPersonalScheduleController {
                                 Principal principal,
                                 Model model) {
 
-        User trainerUser = userRepository.findByEmail(principal.getName())
-                .orElseThrow(() ->
-                        new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Không xác định được tài khoản HLV"));
+        Long trainerUserId = viewService.trainerUserId(principal.getName());
 
         LocalDate today = LocalDate.now();
         if (fromDate == null) {
@@ -54,13 +53,35 @@ public class PtPersonalScheduleController {
         }
 
         List<PersonalTrainingScheduleResponse> schedules =
-                personalTrainingScheduleService.getSchedulesForTrainer(trainerUser.getId(), fromDate, toDate);
+                personalTrainingScheduleService.getSchedulesForTrainer(trainerUserId, fromDate, toDate);
 
         model.addAttribute("schedules", schedules);
         model.addAttribute("fromDate", fromDate);
         model.addAttribute("toDate", toDate);
 
         return "pt/personal-schedules/list";
+    }
+
+    @PostMapping("/{id}/cancel")
+    public String cancel(@PathVariable Long id, Principal principal, RedirectAttributes redirect) {
+        try {
+            personalTrainingScheduleService.cancelSchedule(viewService.trainerUserId(principal.getName()), id);
+            redirect.addFlashAttribute("successMessage", "Đã hủy lịch PT.");
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            redirect.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/pt/personal-schedules";
+    }
+
+    @PostMapping("/{id}/complete")
+    public String complete(@PathVariable Long id, Principal principal, RedirectAttributes redirect) {
+        try {
+            personalTrainingScheduleService.completeSchedule(viewService.trainerUserId(principal.getName()), id);
+            redirect.addFlashAttribute("successMessage", "Đã xác nhận hoàn thành buổi PT.");
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            redirect.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/pt/personal-schedules";
     }
 
     /**
@@ -73,8 +94,7 @@ public class PtPersonalScheduleController {
                                  Model model) {
 
         // Lấy thông tin Member để hiển thị trên form
-        User member = userRepository.findById(memberId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy hội viên"));
+        User member = viewService.member(memberId);
 
         model.addAttribute("member", member);
 
@@ -100,9 +120,7 @@ public class PtPersonalScheduleController {
                                  Principal principal,
                                  Model model) {
 
-        User trainerUser = userRepository.findByEmail(principal.getName())
-                .orElseThrow(() ->
-                        new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Không xác định được tài khoản HLV"));
+        Long trainerUserId = viewService.trainerUserId(principal.getName());
 
         if (title == null || title.isBlank()) {
             title = "Buổi tập cá nhân";
@@ -110,7 +128,7 @@ public class PtPersonalScheduleController {
 
         try {
             personalTrainingScheduleService.createScheduleForMember(
-                    trainerUser.getId(),
+                    trainerUserId,
                     memberId,
                     scheduleDate,
                     startTime,
@@ -124,8 +142,7 @@ public class PtPersonalScheduleController {
         }
 
         // Load lại thông tin member cho view
-        User member = userRepository.findById(memberId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy hội viên"));
+        User member = viewService.member(memberId);
         model.addAttribute("member", member);
 
         return "pt/personal-schedules/create";

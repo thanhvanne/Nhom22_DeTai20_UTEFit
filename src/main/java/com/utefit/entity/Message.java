@@ -1,7 +1,9 @@
+
 package com.utefit.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Nationalized;
 
 import java.time.LocalDateTime;
 
@@ -34,7 +36,9 @@ public class Message {
     )
     private User sender;
 
-    @Column(nullable = false, length = 2000)
+    // Lưu tiếng Việt bằng NVARCHAR trên SQL Server.
+    @Nationalized
+    @Column(name = "content", nullable = false, length = 2000)
     private String content;
 
     @Column(name = "sent_at", nullable = false)

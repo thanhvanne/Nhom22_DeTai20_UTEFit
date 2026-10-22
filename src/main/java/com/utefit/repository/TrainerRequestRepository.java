@@ -32,6 +32,8 @@ public interface TrainerRequestRepository extends JpaRepository<TrainerRequest, 
             Pageable pageable
     );
 
+    Optional<TrainerRequest> findByIdAndMember_Id(Long requestId, Long memberId);
+
     Optional<TrainerRequest> findByIdAndTrainer_User_Id(
             Long id,
             Long trainerUserId

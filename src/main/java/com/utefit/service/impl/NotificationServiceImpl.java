@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -52,15 +54,23 @@ public class NotificationServiceImpl implements NotificationService {
 
         Notification saved = notificationRepository.save(notification);
 
-        // Đẩy realtime qua STOMP (principal = email, giống ChatServiceImpl)
-        try {
-            NotificationDto dto = mapToDto(saved);
-            messagingTemplate.convertAndSendToUser(
-                    user.getEmail(),
-                    "/queue/notifications",
-                    dto
-            );
-        } catch (Exception ignored) {
+        // Không đẩy thông báo của một transaction có thể rollback.
+        NotificationDto dto = mapToDto(saved);
+        String receiver = user.getEmail();
+        Runnable deliver = () -> {
+            try {
+                messagingTemplate.convertAndSendToUser(receiver, "/queue/notifications", dto);
+            } catch (RuntimeException ignored) {
+                // DB là nguồn sự thật; client có thể truy vấn lại notifications.
+            }
+        };
+        if (TransactionSynchronizationManager.isSynchronizationActive()
+                && TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override public void afterCommit() { deliver.run(); }
+            });
+        } else {
+            deliver.run();
         }
     }
 

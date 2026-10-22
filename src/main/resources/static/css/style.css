@@ -449,3 +449,41 @@ a {
         transition: none;
     }
 }
+
+
+/* =========================================
+   UTEFIT - ĐỒNG BỘ NAVBAR TOÀN WEBSITE
+   ========================================= */
+
+/* Không để navbar kế thừa font từ từng trang */
+.ut-site-header .ut-horizontal-nav {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    min-height: 72px;
+    padding-block: .65rem;
+}
+
+/* Logo có cùng kích thước trên tất cả trang */
+.ut-site-header .ut-horizontal-nav .navbar-brand {
+    font-family: inherit;
+    font-size: 1.55rem;
+    line-height: 1.2;
+    letter-spacing: 1px;
+}
+
+/* Đồng bộ font của menu, dropdown và các nút */
+.ut-site-header .ut-horizontal-nav .nav-link,
+.ut-site-header .ut-horizontal-nav .dropdown-item,
+.ut-site-header .ut-horizontal-nav .ut-nav-actions .btn,
+.ut-site-header .ut-horizontal-nav .ut-account {
+    font-family: inherit;
+}
+
+/* Menu Guest và các role khác */
+.ut-site-header .ut-horizontal-nav .ut-public-menu .nav-link {
+    font-size: 1rem;
+    line-height: 1.5;
+    font-weight: 500;
+}
+

@@ -40,7 +40,12 @@
                         </form>
                         <a th:href="@{/member/pt-schedules}" class="btn btn-outline-primary btn-sm">Lịch PT 1:1</a>
                     </div>
-                    <span th:if="${req.status.name() == 'PENDING'}" class="text-muted small">Chờ PT phản hồi</span>
+                    <form th:if="${req.status.name() == 'PENDING'}"
+                          th:action="@{/member/trainer-requests/{id}/cancel(id=${req.id})}"
+                          method="post" onsubmit="return confirm('Hủy yêu cầu PT này?');">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <button class="btn btn-outline-danger btn-sm">Hủy yêu cầu</button>
+                    </form>
                     <span th:if="${req.status.name() == 'REJECTED'}" class="text-muted small">PT đã từ chối</span>
                     <span th:if="${req.status.name() == 'CANCELLED'}" class="text-muted small">Đã hủy</span>
                 </td>

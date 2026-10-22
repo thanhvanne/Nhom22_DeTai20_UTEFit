@@ -6,6 +6,13 @@ import com.utefit.entity.Trainer;
 import com.utefit.entity.User;
 import com.utefit.enums.NotificationType;
 import com.utefit.enums.TrainerRequestStatus;
+import com.utefit.enums.PersonalTrainingStatus;
+import com.utefit.enums.UserRole;
+import com.utefit.enums.UserStatus;
+import com.utefit.repository.CheckinRepository;
+import com.utefit.service.ScheduleConflictService;
+import com.utefit.service.MembershipEligibilityService;
+import java.time.LocalDateTime;
 import com.utefit.repository.PersonalTrainingScheduleRepository;
 import com.utefit.repository.TrainerRepository;
 import com.utefit.repository.TrainerRequestRepository;
@@ -31,6 +38,9 @@ public class PersonalTrainingScheduleServiceImpl implements PersonalTrainingSche
     private final UserRepository userRepository;
     private final TrainerRequestRepository trainerRequestRepository;
     private final NotificationService notificationService;
+    private final MembershipEligibilityService eligibility;
+    private final ScheduleConflictService conflicts;
+    private final CheckinRepository checkins;
 
     @Override
     public PersonalTrainingScheduleResponse createScheduleForMember(
@@ -52,17 +62,46 @@ public class PersonalTrainingScheduleServiceImpl implements PersonalTrainingSche
 
         // KHÔNG cho tạo lịch ở ngày quá khứ
         LocalDate today = LocalDate.now();
-        if (scheduleDate.isBefore(today)) {
+        if (scheduleDate.isBefore(today) || !scheduleDate.atTime(startTime).isAfter(LocalDateTime.now())) {
             throw new IllegalStateException("Ngày tập phải là hôm nay hoặc trong tương lai.");
         }
 
-        User member = userRepository.findById(memberUserId)
+        // Khóa PT trước, Member sau: tránh hai lịch 1:1 đồng thời trùng nhau.
+        userRepository.lockByIdForBooking(trainerUserId)
+                .orElseThrow(() -> new EntityNotFoundException("PT không tồn tại."));
+        User member = userRepository.lockByIdForBooking(memberUserId)
                 .orElseThrow(() ->
                         new EntityNotFoundException("Không tìm thấy thành viên."));
 
+        if (member.getRole() != UserRole.MEMBER || member.getStatus() != UserStatus.ACTIVE
+                || !Boolean.TRUE.equals(member.getEnabled())) {
+            throw new IllegalStateException("Tài khoản Member không hoạt động.");
+        }
         Trainer trainer = trainerRepository.findByUserId(trainerUserId)
                 .orElseThrow(() ->
                         new IllegalStateException("Không tìm thấy hồ sơ huấn luyện viên."));
+
+        if (trainer.getUser().getRole() != UserRole.PT || trainer.getUser().getStatus() != UserStatus.ACTIVE
+                || !Boolean.TRUE.equals(trainer.getUser().getEnabled())
+                || !Boolean.TRUE.equals(trainer.getActive()) || trainer.getBranch() == null
+                || !Boolean.TRUE.equals(trainer.getBranch().getActive())) {
+            throw new IllegalStateException("PT phải ACTIVE và được Admin gán chi nhánh đang hoạt động.");
+        }
+        if (title != null && title.trim().length() > 255
+                || note != null && note.trim().length() > 2000) {
+            throw new IllegalArgumentException("Tiêu đề tối đa 255 và ghi chú tối đa 2000 ký tự.");
+        }
+        if (trainer.getBranch().getOpeningTime() != null
+                && startTime.isBefore(trainer.getBranch().getOpeningTime())) {
+            throw new IllegalStateException("Giờ tập trước giờ mở cửa chi nhánh.");
+        }
+        if (trainer.getBranch().getClosingTime() != null
+                && endTime.isAfter(trainer.getBranch().getClosingTime())) {
+            throw new IllegalStateException("Giờ tập sau giờ đóng cửa chi nhánh.");
+        }
+        eligibility.requireAccess(member.getId(), trainer.getBranch().getId(), scheduleDate);
+        conflicts.assertTrainerFreeForPersonal(trainer.getId(), scheduleDate, startTime, endTime);
+        conflicts.assertMemberFree(member.getId(), scheduleDate, startTime, endTime, null);
 
         boolean hasAcceptedRequest = trainerRequestRepository
                 .existsByMember_IdAndTrainer_IdAndStatus(
@@ -110,6 +149,8 @@ public class PersonalTrainingScheduleServiceImpl implements PersonalTrainingSche
         PersonalTrainingSchedule schedule = PersonalTrainingSchedule.builder()
                 .trainer(trainer)
                 .member(member)
+                .branch(trainer.getBranch())
+                .status(PersonalTrainingStatus.SCHEDULED)
                 .scheduleDate(scheduleDate)
                 .startTime(startTime)
                 .endTime(endTime)
@@ -160,6 +201,51 @@ public class PersonalTrainingScheduleServiceImpl implements PersonalTrainingSche
     }
 
     @Override
+    public void cancelSchedule(Long trainerUserId, Long scheduleId) {
+        PersonalTrainingSchedule s = ownedSchedule(trainerUserId, scheduleId);
+        if (!Boolean.TRUE.equals(s.getActive()) || s.getStatus() == PersonalTrainingStatus.COMPLETED
+                || s.getStatus() == PersonalTrainingStatus.CANCELLED) {
+            throw new IllegalStateException("Buổi này không thể hủy.");
+        }
+        if (!s.getScheduleDate().atTime(s.getStartTime()).isAfter(LocalDateTime.now())) {
+            throw new IllegalStateException("Không thể hủy buổi tập đã bắt đầu.");
+        }
+        s.setActive(false);
+        s.setStatus(PersonalTrainingStatus.CANCELLED);
+        notificationService.createNotificationForUser(s.getMember().getId(),
+                NotificationType.PERSONAL_SCHEDULE_CANCELLED,
+                "Lịch PT đã hủy", "PT đã hủy lịch cá nhân ngày " + s.getScheduleDate() + ".", s.getId());
+    }
+
+    @Override
+    public void completeSchedule(Long trainerUserId, Long scheduleId) {
+        PersonalTrainingSchedule s = ownedSchedule(trainerUserId, scheduleId);
+        if (!Boolean.TRUE.equals(s.getActive()) || s.getStatus() == PersonalTrainingStatus.COMPLETED
+                || s.getStatus() == PersonalTrainingStatus.CANCELLED) {
+            throw new IllegalStateException("Trạng thái buổi tập không cho phép hoàn thành.");
+        }
+        LocalDateTime start = s.getScheduleDate().atTime(s.getStartTime());
+        LocalDateTime end = s.getScheduleDate().atTime(s.getEndTime());
+        if (LocalDateTime.now().isBefore(end)) {
+            throw new IllegalStateException("Buổi tập chưa kết thúc.");
+        }
+        if (s.getBranch() == null || checkins.findCompletedDuringSession(s.getMember().getId(),
+                s.getBranch().getId(), start, end).isEmpty()) {
+            throw new IllegalStateException("Cần có Check-in/Check-out hoàn tất, trùng giờ và đúng chi nhánh.");
+        }
+        s.setStatus(PersonalTrainingStatus.COMPLETED);
+    }
+
+    private PersonalTrainingSchedule ownedSchedule(Long trainerUserId, Long scheduleId) {
+        PersonalTrainingSchedule s = personalTrainingScheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy lịch PT cá nhân."));
+        if (!s.getTrainer().getUser().getId().equals(trainerUserId)) {
+            throw new org.springframework.security.access.AccessDeniedException("Không phải lịch PT của bạn.");
+        }
+        return s;
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<PersonalTrainingScheduleResponse> getSchedulesForTrainer(
             Long trainerUserId,
@@ -202,7 +288,7 @@ public class PersonalTrainingScheduleServiceImpl implements PersonalTrainingSche
 
         List<PersonalTrainingSchedule> schedules =
                 personalTrainingScheduleRepository
-                        .findByMember_IdAndScheduleDateBetweenAndActiveTrueOrderByScheduleDateAscStartTimeAsc(
+                        .findByMember_IdAndScheduleDateBetweenOrderByScheduleDateAscStartTimeAsc(
                                 memberUserId,
                                 fromDate,
                                 toDate
@@ -221,9 +307,9 @@ public class PersonalTrainingScheduleServiceImpl implements PersonalTrainingSche
         String trainerName = trainerUser.getFullName();
         String memberName = member.getFullName();
 
-        String branchName = trainer.getBranch() != null
-                ? trainer.getBranch().getName()
-                : null;
+        String branchName = entity.getBranch() != null
+                ? entity.getBranch().getName()
+                : (trainer.getBranch() != null ? trainer.getBranch().getName() : null);
 
         return PersonalTrainingScheduleResponse.builder()
                 .id(entity.getId())
@@ -234,9 +320,11 @@ public class PersonalTrainingScheduleServiceImpl implements PersonalTrainingSche
                 .scheduleDate(entity.getScheduleDate())
                 .startTime(entity.getStartTime())
                 .endTime(entity.getEndTime())
-                .title(entity.getTitle())
+                .title(entity.getStatus() == PersonalTrainingStatus.CANCELLED
+                        ? "[Đã hủy] " + entity.getTitle() : entity.getTitle())
                 .note(entity.getNote())
                 .branchName(branchName)
+                .status(entity.getStatus() == null ? "SCHEDULED" : entity.getStatus().name())
                 .build();
     }
 }

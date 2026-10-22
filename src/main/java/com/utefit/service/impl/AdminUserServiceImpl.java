@@ -52,14 +52,20 @@ public class AdminUserServiceImpl implements AdminUserService {
             throw new IllegalStateException("Bạn không thể tự khóa tài khoản Admin đang đăng nhập!");
         }
 
+        // Không thể dùng nút mở khóa để bỏ qua xác minh OTP.
+        if (user.getStatus() == UserStatus.UNVERIFIED) {
+            throw new IllegalStateException("Tài khoản chưa xác minh OTP; không thể khóa/mở bằng chức năng này.");
+        }
         if (user.getStatus() == UserStatus.LOCKED) {
             user.setStatus(UserStatus.ACTIVE);
             user.setEnabled(true);
-        } else {
+        } else if (user.getStatus() == UserStatus.ACTIVE) {
             user.setStatus(UserStatus.LOCKED);
             user.setEnabled(false);
+        } else {
+            throw new IllegalStateException("Trạng thái tài khoản không hỗ trợ khóa/mở.");
         }
-
+        user.setTokenVersion((user.getTokenVersion() == null ? 0 : user.getTokenVersion()) + 1);
         userRepository.save(user);
     }
 }

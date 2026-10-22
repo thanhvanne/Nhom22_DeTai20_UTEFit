@@ -1,6 +1,7 @@
 package com.utefit.entity;
 
 import jakarta.persistence.*;
+import com.utefit.enums.PersonalTrainingStatus;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -38,6 +39,16 @@ public class PersonalTrainingSchedule {
     )
     private User member;
 
+    // Chi nhánh gốc tại thời điểm tạo lịch, không suy luận theo PT.branch thay đổi về sau.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "branch_id")
+    private Branch branch;
+
+    // Nullable để Hibernate đọc được lịch cũ trước khi chạy migration backfill.
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", length = 20)
+    private PersonalTrainingStatus status;
+
     @Column(name = "schedule_date", nullable = false)
     private LocalDate scheduleDate;
 
@@ -74,6 +85,7 @@ public class PersonalTrainingSchedule {
         if (active == null) {
             active = true;
         }
+        if (status == null) status = PersonalTrainingStatus.SCHEDULED;
     }
 
     @PreUpdate

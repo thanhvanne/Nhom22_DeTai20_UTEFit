@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "memberships")
@@ -43,6 +44,13 @@ public class Membership {
             foreignKey = @ForeignKey(name = "fk_membership_plan")
     )
     private MembershipPlan plan;
+
+    /** Giá và số ngày cam kết khi Member tạo đơn; nullable cho gói cũ. */
+    @Column(name = "quoted_price", precision = 15, scale = 2)
+    private BigDecimal quotedPrice;
+
+    @Column(name = "quoted_duration_days")
+    private Integer quotedDurationDays;
 
     @Column(name = "start_date")
     private LocalDate startDate;

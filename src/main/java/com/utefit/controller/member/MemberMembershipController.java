@@ -120,6 +120,18 @@ public class MemberMembershipController {
         return "redirect:/member/memberships";
     }
 
+    @PostMapping("/memberships/{id}/cancel")
+    public String cancelPending(@PathVariable Long id, Principal principal,
+                                RedirectAttributes redirect) {
+        try {
+            billing.cancelPendingMembership(principal.getName(), id);
+            redirect.addFlashAttribute("success", "Đã hủy gói đang chờ thanh toán.");
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            redirect.addFlashAttribute("error", ex.getMessage());
+        }
+        return "redirect:/member/memberships";
+    }
+
     @GetMapping("/payments")
     public String paymentHistory(
             Principal principal,

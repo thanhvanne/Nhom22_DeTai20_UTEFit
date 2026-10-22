@@ -13,13 +13,21 @@ public class MemberHistoryService {
     private final MembershipPaymentService billing;
     private final MemberClassBookingService booking;
     private final MemberReviewService reviews;
+    private final MemberAccountService accounts;
+    private final com.utefit.repository.CheckinRepository checkins;
+    private final PersonalTrainingScheduleService personalSchedules;
 
     public record History(
             List<MembershipPaymentService.MembershipView> memberships,
             List<MembershipPaymentService.PaymentView> payments,
             List<MemberClassBookingService.BookingView> classes,
-            List<MemberReviewService.ReviewView> reviews
+            List<MemberReviewService.ReviewView> reviews,
+            List<CheckinHistory> checkins,
+            List<com.utefit.dto.trainer.PersonalTrainingScheduleResponse> personalSchedules
     ) {}
+
+    public record CheckinHistory(String branch, java.time.LocalDateTime inAt,
+                                 java.time.LocalDateTime outAt) {}
 
     @Transactional(readOnly = true)
     public History getHistory(String email) {
@@ -27,7 +35,12 @@ public class MemberHistoryService {
                 billing.myMemberships(email),
                 billing.myPayments(email),
                 booking.mySchedule(email),
-                reviews.myReviews(email, 0).getContent()
+                reviews.myReviews(email, 0).getContent(),
+                checkins.findByUser_IdOrderByCheckInAtDesc(accounts.requireMemberId(email)).stream()
+                        .map(c -> new CheckinHistory(c.getBranch().getName(), c.getCheckInAt(), c.getCheckOutAt()))
+                        .toList(),
+                personalSchedules.getSchedulesForMember(accounts.requireMemberId(email),
+                        java.time.LocalDate.now().minusYears(3), java.time.LocalDate.now().plusYears(1))
         );
     }
 }

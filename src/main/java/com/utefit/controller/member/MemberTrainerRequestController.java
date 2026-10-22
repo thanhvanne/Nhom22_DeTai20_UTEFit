@@ -24,6 +24,17 @@ public class MemberTrainerRequestController {
         return "member/trainer-requests";
     }
 
+    @PostMapping("/{id}/cancel")
+    public String cancel(@PathVariable Long id, Principal principal, RedirectAttributes redirect) {
+        try {
+            requests.cancelRequest(principal.getName(), id);
+            redirect.addFlashAttribute("successMessage", "Đã hủy yêu cầu PT đang chờ.");
+        } catch (IllegalArgumentException | IllegalStateException | EntityNotFoundException ex) {
+            redirect.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/member/trainer-requests";
+    }
+
     @GetMapping("/new")
     public String newForm(@RequestParam Long trainerId, Model model,
                           RedirectAttributes redirect) {

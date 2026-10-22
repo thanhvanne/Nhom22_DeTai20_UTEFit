@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="vi"
       xmlns:th="http://www.thymeleaf.org"
@@ -33,6 +34,10 @@
     <!-- Trainer Detail CSS -->
     <link rel="stylesheet"
           th:href="@{/css/trainers.css}">
+
+    <!-- CSS navbar ngang 1 hàng, sticky và dropdown -->
+    <link rel="stylesheet"
+          th:href="@{/css/member-dashboard.css}">
 </head>
 
 <body class="trainer-detail-page">
@@ -102,8 +107,8 @@
 
                     <img
                             th:src="${trainer.avatarUrl != null and !#strings.isEmpty(trainer.avatarUrl)
-                                    ? trainer.avatarUrl
-                                    : '/images/default-trainer.png'}"
+                                ? trainer.avatarUrl
+                                : '/images/default-trainer.png'}"
                             th:alt="${trainer.fullName}">
 
                 </div>
@@ -151,8 +156,8 @@
 
                         <strong
                                 th:text="${trainer.yearsExperience != null
-                                          ? trainer.yearsExperience
-                                          : '—'}">
+                                      ? trainer.yearsExperience
+                                      : '—'}">
 
                             5
 
@@ -238,8 +243,8 @@
 
                             <strong
                                     th:text="${trainer.branchName != null
-                                              ? trainer.branchName
-                                              : 'Chưa cập nhật chi nhánh'}">
+                                          ? trainer.branchName
+                                          : 'Chưa cập nhật chi nhánh'}">
 
                                 UTEFit Thủ Đức
 
@@ -276,10 +281,14 @@
 
                     <!-- Chỉ MEMBER đã đăng nhập mới thấy nút này -->
                     <div sec:authorize="hasRole('MEMBER')">
+
                         <a th:href="@{/member/trainer-requests/new(trainerId=${trainer.id})}"
                            class="btn btn-brand btn-lg">
+
                             Gửi yêu cầu huấn luyện viên
+
                         </a>
+
                     </div>
 
                 </div>

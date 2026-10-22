@@ -42,6 +42,10 @@ public class MemberTrainerRequestService {
                 trainerId, clean.isBlank() ? null : clean);
     }
 
+    public void cancelRequest(String email, Long requestId) {
+        trainerRequests.cancelPendingRequest(accounts.requireMemberId(email), requestId);
+    }
+
     public List<AcceptedTrainer> getAcceptedTrainers(String email) {
         Long memberId = accounts.requireMemberId(email);
         LinkedHashMap<Long, AcceptedTrainer> unique = new LinkedHashMap<>();

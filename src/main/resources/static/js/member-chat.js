@@ -125,7 +125,7 @@
             } catch (_) { /* Lần poll sau vẫn cập nhật. */ }
         }, status);
         refresh();
-        setInterval(() => { if (!document.hidden) refresh(); }, 10000);
+        setInterval(() => { if (!document.hidden) refresh(); }, 3000);
     }
 
     const notifications = document.getElementById('memberNotifications');

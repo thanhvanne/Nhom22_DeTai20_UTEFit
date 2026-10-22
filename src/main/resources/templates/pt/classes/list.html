@@ -1,298 +1,54 @@
 <!DOCTYPE html>
-<html lang="vi"
-      xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tin nhắn PT - UTEFIT</title>
 
-<head th:replace="~{fragments/head :: head('Lịch lớp của huấn luyện viên - UTEFit')}"></head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
 
-<body>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/stage3.css}">
+    <link rel="stylesheet" th:href="@{/css/member-dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/utefit-chat.css(v=2)}">
+</head>
+
+<body class="uf-chat-page">
 
 <header th:replace="~{fragments/header :: header}"></header>
 
-<main class="container py-5">
+<!-- Trang này chỉ xuất hiện khi PT chưa có hội thoại nào. -->
+<main class="uf-chat-workspace"
+      th:with="memberSide=false,activeConversationId=${null},acceptedTrainers=${null}">
 
-    <!-- Header + bộ lọc tuần -->
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <aside th:replace="~{fragments/chat-sidebar :: sidebar}"></aside>
 
-        <div>
-            <h1 class="fw-bold mb-1">Lịch lớp của huấn luyện viên</h1>
-            <p class="text-muted mb-0">
-                Tuần:
-                <strong th:text="${#temporals.format(weekStart, 'dd/MM/yyyy')}"></strong>
-                -
-                <strong th:text="${#temporals.format(weekEnd, 'dd/MM/yyyy')}"></strong>
-            </p>
-        </div>
+    <section class="uf-chat-main" aria-label="Nội dung hội thoại">
+        <div class="uf-chat-empty-main">
+            <div>
+                <div class="uf-chat-empty-symbol"
+                     aria-hidden="true">✉</div>
 
-        <div class="d-flex flex-wrap align-items-center gap-2">
+                <h2>Chưa có cuộc trò chuyện</h2>
 
-            <!-- Chọn ngày bất kỳ -> xem tuần chứa ngày đó (auto submit) -->
-            <form class="d-flex align-items-center gap-2"
-                  th:action="@{/pt/classes}" method="get">
-                <label class="form-label mb-0">Chọn ngày</label>
-                <input type="date"
-                       name="weekStart"
-                       class="form-control form-control-sm"
-                       style="max-width: 180px;"
-                       th:value="${#temporals.format(weekStart, 'yyyy-MM-dd')}"
-                       onchange="this.form.submit()">
-            </form>
+                <p>
+                    Khi có hội thoại với Member đã được chấp nhận yêu cầu PT,
+                    tin nhắn sẽ hiển thị tại đây.
+                </p>
 
-            <!-- Điều hướng tuần trước / hiện tại / tuần sau -->
-            <div class="btn-group ms-sm-2">
-                <a class="btn btn-sm btn-outline-primary"
-                   th:href="@{/pt/classes(weekStart=${weekStart.minusWeeks(1)})}">
-                    «
-                </a>
-                <a class="btn btn-sm btn-outline-primary"
-                   th:href="@{/pt/classes}">
-                    Hôm nay
-                </a>
-                <a class="btn btn-sm btn-outline-primary"
-                   th:href="@{/pt/classes(weekStart=${weekStart.plusWeeks(1)})}">
-                    »
+                <a class="btn btn-brand"
+                   th:href="@{/pt/trainer-requests}">
+                    Xem yêu cầu Member
                 </a>
             </div>
-
         </div>
-
-    </div>
-
-    <!-- Thông báo nếu tuần này chưa có lịch -->
-    <div class="alert alert-info mb-3"
-         th:if="${!hasSchedules}">
-        Tuần này hiện chưa có lịch lớp hoặc buổi PT cá nhân nào được phân công cho bạn.
-    </div>
-
-    <!-- Bảng thời khóa biểu tuần -->
-    <div class="card shadow-sm border-0">
-        <div class="card-body p-0">
-
-            <div class="table-responsive">
-                <table class="table mb-0 align-middle text-center">
-                    <thead class="table-primary text-white">
-                    <tr>
-                        <th style="width: 180px;">Ngày</th>
-                        <th>Sáng</th>
-                        <th>Chiều</th>
-                        <th>Tối</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="day : ${weekDays}">
-
-                        <!-- Cột ngày -->
-                        <td class="align-middle fw-semibold"
-                            th:classappend="${day.date.equals(today)} ? ' table-warning text-danger' : ' bg-light'">
-                            <div th:text="${day.dayLabel}"></div>
-                            <div class="small text-muted"
-                                 th:text="${#temporals.format(day.date, 'dd/MM/yyyy')}"></div>
-                            <div class="small"
-                                 th:if="${day.date.equals(today)}">
-                                (Hôm nay)
-                            </div>
-                        </td>
-
-                        <!-- Ô buổi sáng -->
-                        <td class="align-top">
-                            <div th:if="${#lists.isEmpty(day.morningClasses)} 
-                                         and ${#lists.isEmpty(day.morningPersonalSessions)}"
-                                 class="small text-muted">
-                                —
-                            </div>
-
-                            <!-- LỚP NHÓM -->
-                            <div th:each="cls : ${day.morningClasses}"
-                                 class="mb-2 p-2 rounded border bg-white text-start">
-
-                                <div class="small fw-semibold"
-                                     th:text="${cls.className}"></div>
-
-                                <div class="small text-muted">
-                                    <span th:text="${#temporals.format(cls.startTime, 'HH:mm')}"></span>
-                                    -
-                                    <span th:text="${#temporals.format(cls.endTime, 'HH:mm')}"></span>
-                                </div>
-
-                                <div class="small text-muted">
-                                    <span th:text="${cls.branchName}"></span>
-                                    <span th:if="${cls.room != null}">
-                                        · Phòng <span th:text="${cls.room}"></span>
-                                    </span>
-                                </div>
-
-                                <div class="small mt-1 d-flex justify-content-between align-items-center">
-                                    <span class="badge bg-secondary-subtle text-dark">
-                                        <span th:text="${cls.registeredCount}"></span>
-                                        /
-                                        <span th:text="${cls.capacity}"></span>
-                                    </span>
-                                    <a class="btn btn-link btn-sm p-0"
-                                       th:href="@{|/pt/classes/${cls.scheduleId}|}">
-                                        Xem
-                                    </a>
-                                </div>
-                            </div>
-
-                            <!-- PT 1:1 -->
-                            <div th:each="pt : ${day.morningPersonalSessions}"
-                                 class="mb-2 p-2 rounded border bg-light text-start">
-
-                                <div class="small fw-semibold">
-                                    <span class="badge bg-success-subtle text-success me-1">PT 1:1</span>
-                                    <span th:text="${pt.memberName}">Member</span>
-                                </div>
-
-                                <div class="small text-muted">
-                                    <span th:text="${#temporals.format(pt.startTime, 'HH:mm')}">10:00</span>
-                                    -
-                                    <span th:text="${#temporals.format(pt.endTime, 'HH:mm')}">11:00</span>
-                                </div>
-
-                                <div class="small text-muted"
-                                     th:text="${pt.title != null ? pt.title : 'Buổi tập cá nhân'}">
-                                    Buổi tập cá nhân
-                                </div>
-                            </div>
-                        </td>
-
-                        <!-- Ô buổi chiều -->
-                        <td class="align-top">
-                            <div th:if="${#lists.isEmpty(day.afternoonClasses)} 
-                                         and ${#lists.isEmpty(day.afternoonPersonalSessions)}"
-                                 class="small text-muted">
-                                —
-                            </div>
-
-                            <!-- LỚP NHÓM -->
-                            <div th:each="cls : ${day.afternoonClasses}"
-                                 class="mb-2 p-2 rounded border bg-white text-start">
-
-                                <div class="small fw-semibold"
-                                     th:text="${cls.className}"></div>
-
-                                <div class="small text-muted">
-                                    <span th:text="${#temporals.format(cls.startTime, 'HH:mm')}"></span>
-                                    -
-                                    <span th:text="${#temporals.format(cls.endTime, 'HH:mm')}"></span>
-                                </div>
-
-                                <div class="small text-muted">
-                                    <span th:text="${cls.branchName}"></span>
-                                    <span th:if="${cls.room != null}">
-                                        · Phòng <span th:text="${cls.room}"></span>
-                                    </span>
-                                </div>
-
-                                <div class="small mt-1 d-flex justify-content-between align-items-center">
-                                    <span class="badge bg-secondary-subtle text-dark">
-                                        <span th:text="${cls.registeredCount}"></span>
-                                        /
-                                        <span th:text="${cls.capacity}"></span>
-                                    </span>
-                                    <a class="btn btn-link btn-sm p-0"
-                                       th:href="@{|/pt/classes/${cls.scheduleId}|}">
-                                        Xem
-                                    </a>
-                                </div>
-                            </div>
-
-                            <!-- PT 1:1 -->
-                            <div th:each="pt : ${day.afternoonPersonalSessions}"
-                                 class="mb-2 p-2 rounded border bg-light text-start">
-
-                                <div class="small fw-semibold">
-                                    <span class="badge bg-success-subtle text-success me-1">PT 1:1</span>
-                                    <span th:text="${pt.memberName}">Member</span>
-                                </div>
-
-                                <div class="small text-muted">
-                                    <span th:text="${#temporals.format(pt.startTime, 'HH:mm')}">10:00</span>
-                                    -
-                                    <span th:text="${#temporals.format(pt.endTime, 'HH:mm')}">11:00</span>
-                                </div>
-
-                                <div class="small text-muted"
-                                     th:text="${pt.title != null ? pt.title : 'Buổi tập cá nhân'}">
-                                    Buổi tập cá nhân
-                                </div>
-                            </div>
-                        </td>
-
-                        <!-- Ô buổi tối -->
-                        <td class="align-top">
-                            <div th:if="${#lists.isEmpty(day.eveningClasses)} 
-                                         and ${#lists.isEmpty(day.eveningPersonalSessions)}"
-                                 class="small text-muted">
-                                —
-                            </div>
-
-                            <!-- LỚP NHÓM -->
-                            <div th:each="cls : ${day.eveningClasses}"
-                                 class="mb-2 p-2 rounded border bg-white text-start">
-
-                                <div class="small fw-semibold"
-                                     th:text="${cls.className}"></div>
-
-                                <div class="small text-muted">
-                                    <span th:text="${#temporals.format(cls.startTime, 'HH:mm')}"></span>
-                                    -
-                                    <span th:text="${#temporals.format(cls.endTime, 'HH:mm')}"></span>
-                                </div>
-
-                                <div class="small text-muted">
-                                    <span th:text="${cls.branchName}"></span>
-                                    <span th:if="${cls.room != null}">
-                                        · Phòng <span th:text="${cls.room}"></span>
-                                    </span>
-                                </div>
-
-                                <div class="small mt-1 d-flex justify-content-between align-items-center">
-                                    <span class="badge bg-secondary-subtle text-dark">
-                                        <span th:text="${cls.registeredCount}"></span>
-                                        /
-                                        <span th:text="${cls.capacity}"></span>
-                                    </span>
-                                    <a class="btn btn-link btn-sm p-0"
-                                       th:href="@{|/pt/classes/${cls.scheduleId}|}">
-                                        Xem
-                                    </a>
-                                </div>
-                            </div>
-
-                            <!-- PT 1:1 -->
-                            <div th:each="pt : ${day.eveningPersonalSessions}"
-                                 class="mb-2 p-2 rounded border bg-light text-start">
-
-                                <div class="small fw-semibold">
-                                    <span class="badge bg-success-subtle text-success me-1">PT 1:1</span>
-                                    <span th:text="${pt.memberName}">Member</span>
-                                </div>
-
-                                <div class="small text-muted">
-                                    <span th:text="${#temporals.format(pt.startTime, 'HH:mm')}">10:00</span>
-                                    -
-                                    <span th:text="${#temporals.format(pt.endTime, 'HH:mm')}">11:00</span>
-                                </div>
-
-                                <div class="small text-muted"
-                                     th:text="${pt.title != null ? pt.title : 'Buổi tập cá nhân'}">
-                                    Buổi tập cá nhân
-                                </div>
-                            </div>
-                        </td>
-
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-
-        </div>
-    </div>
+    </section>
 
 </main>
 
-<footer th:replace="~{fragments/footer :: footer}"></footer>
 <div th:replace="~{fragments/scripts :: scripts}"></div>
+<script th:src="@{/js/utefit-chat-sidebar.js(v=1)}"></script>
 
 </body>
 </html>

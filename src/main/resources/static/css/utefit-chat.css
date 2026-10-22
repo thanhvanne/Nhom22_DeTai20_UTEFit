@@ -1,0 +1,626 @@
+/* UTEFIT Chat - Hai cột: KHÔNG cuộn cả trang.
+   Chỉ danh sách hội thoại và vùng tin nhắn cuộn độc lập. */
+
+html:has(body.uf-chat-page) {
+    overflow: hidden;
+}
+
+body.uf-chat-page {
+    height: 100dvh;
+    min-height: 0;
+    margin: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: #080e1d;
+    color: #f4f7ff;
+}
+
+body.uf-chat-page > .ut-site-header {
+    flex: 0 0 auto;
+}
+
+/* Workspace chiếm phần còn lại của viewport,
+   không cộng thêm chiều cao navbar. */
+
+body.uf-chat-page main.uf-chat-workspace {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    width: min(1750px, 100%);
+    margin: 0 auto;
+    padding: 12px;
+    display: grid;
+    grid-template-columns: minmax(270px, 335px) minmax(0, 1fr);
+    gap: 12px;
+    overflow: hidden;
+}
+
+.uf-chat-sidebar,
+.uf-chat-main {
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+    border: 1px solid #263754;
+    border-radius: 18px;
+    background: linear-gradient(150deg, #101c33, #0b152a);
+    overflow: hidden;
+}
+
+.uf-chat-sidebar,
+.uf-chat-main {
+    display: flex;
+    flex-direction: column;
+}
+
+/* ======================================
+   SIDEBAR
+   ====================================== */
+
+/* Phần trên sidebar đứng yên */
+.uf-chat-sidebar-top {
+    flex: 0 0 auto;
+    padding: 21px 17px 14px;
+    border-bottom: 1px solid #293853;
+}
+
+.uf-chat-sidebar-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.uf-chat-eyebrow {
+    margin: 0 0 4px;
+    color: #ff79a1;
+    font-size: .64rem;
+    font-weight: 800;
+    letter-spacing: .15em;
+}
+
+.uf-chat-sidebar h1 {
+    color: #fff;
+    font-size: 1.58rem;
+    font-weight: 850;
+    margin: 0 0 16px;
+}
+
+.uf-chat-side-icon {
+    display: grid;
+    place-items: center;
+    width: 39px;
+    height: 39px;
+    background: #f02c70;
+    border-radius: 12px;
+    font-size: 19px;
+}
+
+/* Tìm kiếm */
+.uf-chat-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+    background: #1b2944;
+    border: 1px solid #344563;
+    border-radius: 11px;
+    color: #9badca;
+}
+
+.uf-chat-search:focus-within {
+    border-color: #ff4f89;
+    box-shadow: 0 0 0 3px #ff3a7024;
+}
+
+.uf-chat-search > span:not(.visually-hidden) {
+    font-size: 23px;
+}
+
+.uf-chat-search input {
+    border: 0;
+    outline: 0;
+    min-width: 0;
+    width: 100%;
+    height: 44px;
+    background: transparent;
+    color: #f6f7ff;
+    font-size: .86rem;
+}
+
+.uf-chat-search input::placeholder {
+    color: #9baec9;
+}
+
+/* Bộ lọc */
+.uf-chat-filters {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.uf-chat-filter {
+    padding: 8px 12px;
+    background: transparent;
+    border: 0;
+    border-radius: 9px;
+    color: #a3b3ce;
+    font-weight: 750;
+    font-size: .82rem;
+}
+
+.uf-chat-filter.is-active,
+.uf-chat-filter:hover {
+    color: #ff82aa;
+    background: #ff367520;
+}
+
+/* Chỉ danh sách hội thoại có thanh cuộn */
+.uf-chat-sidebar-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #405675 transparent;
+    padding: 12px 10px 20px;
+}
+
+.uf-chat-list {
+    display: grid;
+    gap: 5px;
+}
+
+.uf-chat-item {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 12px 10px;
+    min-width: 0;
+    border-radius: 13px;
+    color: white;
+    border: 1px solid transparent;
+    transition: .16s;
+}
+
+.uf-chat-item[hidden] {
+    display: none !important;
+}
+
+.uf-chat-item:hover {
+    background: #203150;
+    color: white;
+}
+
+.uf-chat-item.is-active {
+    background: linear-gradient(100deg, #66213f, #30233c);
+    border-color: #bc3670;
+}
+
+/* Avatar */
+.uf-chat-avatar {
+    display: block;
+    width: 47px;
+    height: 47px;
+    flex: none;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #263753;
+}
+
+.uf-chat-avatar-empty {
+    display: grid;
+    place-items: center;
+    color: #ff98b9;
+    font-size: 23px;
+}
+
+/* Thông tin hội thoại */
+.uf-chat-item-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.uf-chat-item-title {
+    display: block;
+    color: #fff;
+    font-size: .9rem;
+    font-weight: 800;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.uf-chat-item-preview {
+    display: block;
+    color: #a9bad4;
+    margin-top: 5px;
+    font-size: .76rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.uf-chat-item-meta {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 7px;
+}
+
+.uf-chat-item-meta time {
+    color: #9caec8;
+    font-size: .66rem;
+    white-space: nowrap;
+}
+
+.uf-chat-unread {
+    color: #fff;
+    background: #f72a69;
+    border-radius: 20px;
+    padding: 2px 7px;
+    min-width: 22px;
+    text-align: center;
+    font-size: .69rem;
+    font-weight: 800;
+}
+
+.uf-chat-side-empty {
+    padding: 16px;
+    color: #abbcd7;
+    font-size: .85rem;
+    text-align: center;
+}
+
+/* Mở chat với PT đã chấp nhận yêu cầu */
+.uf-chat-new {
+    margin: 14px 5px 0;
+    border-top: 1px solid #293750;
+    padding-top: 12px;
+}
+
+.uf-chat-new summary {
+    color: #ff81a6;
+    font-size: .83rem;
+    font-weight: 750;
+    cursor: pointer;
+    padding: 9px 5px;
+}
+
+.uf-chat-new-list {
+    display: grid;
+    gap: 7px;
+    margin-top: 7px;
+}
+
+.uf-chat-new-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 9px;
+    border-radius: 9px;
+    background: #1a2944;
+}
+
+.uf-chat-new-row > span {
+    min-width: 0;
+}
+
+.uf-chat-new-row strong,
+.uf-chat-new-row small {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.uf-chat-new-row strong {
+    color: white;
+    font-size: .79rem;
+}
+
+.uf-chat-new-row small {
+    color: #aabbd5;
+    font-size: .69rem;
+}
+
+.uf-chat-new-row button {
+    background: #ef2e6c;
+    color: #fff;
+    border: 0;
+    padding: 7px 10px;
+    border-radius: 8px;
+    white-space: nowrap;
+}
+
+.uf-chat-discover {
+    padding: 15px;
+}
+
+.uf-chat-discover a {
+    color: #ff82aa;
+}
+
+/* ======================================
+   KHUNG CHAT BÊN PHẢI
+   ====================================== */
+
+/* Tên PT / Member luôn đứng yên */
+.uf-chat-main-header {
+    flex: 0 0 auto;
+    min-height: 83px;
+    padding: 15px 22px;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    border-bottom: 1px solid #2b3955;
+    background: #131f37;
+}
+
+.uf-chat-main-header .uf-chat-avatar {
+    width: 49px;
+    height: 49px;
+}
+
+.uf-chat-partner {
+    flex: 1;
+    min-width: 0;
+}
+
+.uf-chat-partner h2 {
+    color: #fff;
+    font-size: 1.03rem;
+    font-weight: 800;
+    margin: 0 0 4px;
+    overflow-wrap: anywhere;
+}
+
+.uf-chat-partner p {
+    margin: 0;
+    color: #a9bbd6;
+    font-size: .76rem;
+}
+
+.uf-chat-back {
+    color: #ff8aad;
+    font-size: .8rem;
+    font-weight: 750;
+    white-space: nowrap;
+}
+
+.uf-chat-back:hover {
+    color: #fff;
+}
+
+/* CHỈ VÙNG TIN NHẮN CUỘN */
+.uf-chat-body {
+    flex: 1 1 0;
+    min-height: 0;
+    height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    overflow-anchor: none;
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+    padding: 22px clamp(14px, 2vw, 28px);
+    color: #f7f9ff;
+    background:
+            radial-gradient(
+                    ellipse at 65% 16%,
+                    #eb2d6910,
+                    transparent 53%
+            ),
+            #0a1428;
+    scrollbar-width: thin;
+    scrollbar-color: #3b5172 transparent;
+}
+
+.uf-chat-body .text-muted {
+    color: #a1b1ce !important;
+}
+
+/* Bong bóng tin nhắn */
+.uf-chat-body .d-flex > div {
+    max-width: min(77%, 600px) !important;
+    padding: 10px 14px !important;
+    border-radius: 16px !important;
+    line-height: 1.5;
+    font-size: .89rem;
+    box-shadow: 0 3px 15px #0002;
+}
+
+/* Tin người kia */
+.uf-chat-body .justify-content-start > div {
+    color: #f6f8ff !important;
+    background: #1d2c47 !important;
+    border: 1px solid #2b3a57;
+}
+
+/* Tin của mình */
+.uf-chat-body .justify-content-end > div {
+    color: #fff !important;
+    background: #f0296d !important;
+    border: 1px solid #e42c68;
+}
+
+.uf-chat-body small {
+    opacity: .8;
+    font-size: .68rem;
+}
+
+/* ======================================
+   Ô NHẬP TIN NHẮN
+   ====================================== */
+
+/* Composer không cuộn theo lịch sử */
+.uf-chat-composer {
+    flex: 0 0 auto;
+    padding: 12px 20px 13px;
+    background: #131f37;
+    border-top: 1px solid #2a3954;
+}
+
+.uf-chat-error {
+    color: #ffd7e4;
+    background: #4c192f;
+    border: 1px solid #9b4163;
+    border-radius: 9px;
+    padding: 8px 11px;
+    margin-bottom: 9px;
+}
+
+.uf-chat-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.uf-chat-form input[name="content"] {
+    flex: 1;
+    min-width: 0;
+    height: 47px;
+    padding: 0 18px;
+    border: 1px solid #415172;
+    border-radius: 999px;
+    background: #1e2d4a;
+    color: #fff;
+}
+
+.uf-chat-form input[name="content"]::placeholder {
+    color: #9cacc9;
+}
+
+.uf-chat-form input[name="content"]:focus {
+    background: #1e2d4a;
+    color: white;
+    border-color: #ff4483;
+    box-shadow: 0 0 0 3px #ff3c7525;
+}
+
+.uf-chat-send {
+    display: grid;
+    place-items: center;
+    width: 47px;
+    height: 47px;
+    flex: none;
+    border: 0;
+    border-radius: 50%;
+    background: #f72a6b;
+    color: white;
+    font-weight: 800;
+    font-size: 1.25rem;
+}
+
+.uf-chat-send:hover:not(:disabled) {
+    background: #d91e5b;
+}
+
+.uf-chat-send:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+.uf-chat-safety-note {
+    color: #91a7c7;
+    font-size: .7rem;
+    margin: 8px 8px 0;
+}
+
+/* Chưa chọn hội thoại */
+.uf-chat-empty-main {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 24px;
+}
+
+.uf-chat-empty-main h2 {
+    color: white;
+    font-size: 1.4rem;
+    font-weight: 800;
+}
+
+.uf-chat-empty-main p {
+    color: #b1c0d8;
+    font-size: .88rem;
+}
+
+.uf-chat-empty-symbol {
+    color: #ff4987;
+    font-size: 3rem;
+    margin-bottom: 8px;
+}
+
+/* ======================================
+   RESPONSIVE
+   ====================================== */
+
+@media (max-width: 991.98px) {
+    body.uf-chat-page main.uf-chat-workspace {
+        grid-template-columns: minmax(245px, 295px) minmax(0, 1fr);
+    }
+
+    .uf-chat-main-header {
+        padding-inline: 14px;
+    }
+
+    .uf-chat-item {
+        padding: 10px 7px;
+        gap: 8px;
+    }
+}
+
+/* Mobile: hiển thị sidebar HOẶC chat */
+@media (max-width: 767.98px) {
+    body.uf-chat-page main.uf-chat-workspace {
+        grid-template-columns: minmax(0, 1fr);
+        padding: 7px;
+        gap: 0;
+    }
+
+    .uf-chat-workspace.has-active-chat .uf-chat-sidebar {
+        display: none;
+    }
+
+    .uf-chat-workspace:not(.has-active-chat) .uf-chat-main {
+        display: none;
+    }
+
+    .uf-chat-sidebar,
+    .uf-chat-main {
+        border-radius: 12px;
+    }
+
+    .uf-chat-main-header {
+        min-height: 70px;
+        gap: 9px;
+    }
+
+    .uf-chat-main-header .uf-chat-avatar {
+        width: 41px;
+        height: 41px;
+    }
+
+    .uf-chat-body {
+        padding: 16px 12px;
+    }
+
+    .uf-chat-body .d-flex > div {
+        max-width: 88% !important;
+    }
+
+    .uf-chat-composer {
+        padding: 10px;
+    }
+
+    .uf-chat-back {
+        font-size: .75rem;
+    }
+}

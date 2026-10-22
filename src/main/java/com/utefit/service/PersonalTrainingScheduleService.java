@@ -22,6 +22,10 @@ public interface PersonalTrainingScheduleService {
             String note
     );
 
+    void cancelSchedule(Long trainerUserId, Long scheduleId);
+
+    void completeSchedule(Long trainerUserId, Long scheduleId);
+
     /**
      * Lịch PT cá nhân của PT trong khoảng ngày [fromDate, toDate]
      */

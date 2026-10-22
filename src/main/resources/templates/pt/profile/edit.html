@@ -66,9 +66,7 @@
                         <input type="hidden" th:field="*{specialization}"/>
                         <input type="hidden" th:field="*{yearsExperience}"/>
                         <input type="hidden" th:field="*{bio}"/>
-                        <input type="hidden"
-                               name="branchId"
-                               th:value="${trainer.branch != null ? trainer.branch.id : ''}"/>
+
 
                         <div class="mb-3">
                             <label class="form-label">Đổi ảnh đại diện</label>
@@ -105,20 +103,9 @@
                         <!-- Ẩn avatarFile để form này không bắt buộc upload -->
                         <input type="hidden" name="avatarFile"/>
 
-                        <!-- Chi nhánh làm việc -->
-                        <div class="mb-3">
-                            <label class="form-label">Chi nhánh làm việc</label>
-                            <select class="form-select"
-                                    id="branchId"
-                                    name="branchId">
-                                <option value="">-- Chọn chi nhánh --</option>
-                                <option th:each="b : ${branches}"
-                                        th:value="${b.id}"
-                                        th:text="${b.name}"
-                                        th:selected="${trainer.branch != null and trainer.branch.id == b.id}">
-                                </option>
-                            </select>
-                        </div>
+                        <p class="form-text">Chi nhánh do Admin phân công:
+                            <strong th:text="${trainer.branch != null ? trainer.branch.name : 'Chưa phân công'}"></strong>
+                        </p>
 
                         <!-- Chuyên môn -->
                         <div class="mb-3">

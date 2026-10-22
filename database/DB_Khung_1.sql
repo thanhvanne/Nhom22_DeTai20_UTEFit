@@ -3,8 +3,9 @@
 -- FILE: DB_Khung_1.sql
 -- DATABASE: UTEFitDB
 -- SQL SERVER 2022
--- SPRING BOOT 4.1.1 / HIBERNATE 7.4.5.Final
--- TOTAL TABLES: 18
+-- SPRING BOOT 4.1.1
+-- HIBERNATE 7.4.5.Final
+-- TOTAL TABLES: 19
 --
 -- WARNING:
 -- THIS SCRIPT DROPS THE EXISTING DATABASE AND ALL ITS DATA.
@@ -56,6 +57,7 @@ CREATE TABLE dbo.users (
                            updated_at DATETIME2(7),
 
                            CONSTRAINT PK_users PRIMARY KEY (id),
+
                            CONSTRAINT UK_users_email UNIQUE (email),
 
                            CONSTRAINT CK_users_role CHECK (
@@ -172,7 +174,12 @@ CREATE TABLE dbo.fitness_classes (
                                      CONSTRAINT PK_fitness_classes PRIMARY KEY (id),
 
                                      CONSTRAINT CK_fitness_classes_status CHECK (
-                                         status IN ('OPEN', 'FULL', 'CANCELLED', 'COMPLETED')
+                                         status IN (
+                                                    'OPEN',
+                                                    'FULL',
+                                                    'CANCELLED',
+                                                    'COMPLETED'
+                                             )
                                          ),
 
                                      CONSTRAINT fk_class_branch
@@ -248,12 +255,18 @@ GO
 
 -- ============================================================
 -- 9. MEMBERSHIPS
+-- UPDATED: QUOTED PRICE AND DURATION
 -- ============================================================
 
 CREATE TABLE dbo.memberships (
                                  id BIGINT IDENTITY(1,1) NOT NULL,
                                  created_at DATETIME2(7) NOT NULL,
                                  end_date DATE,
+
+    -- Snapshot of the purchased plan
+                                 quoted_duration_days INT,
+                                 quoted_price NUMERIC(15,2),
+
                                  start_date DATE,
                                  status VARCHAR(20) NOT NULL,
                                  updated_at DATETIME2(7),
@@ -328,7 +341,6 @@ GO
 
 -- ============================================================
 -- 11. REVIEWS
--- UPDATED: NVARCHAR + IMAGE FIELDS
 -- ============================================================
 
 CREATE TABLE dbo.reviews (
@@ -389,6 +401,7 @@ GO
 
 -- ============================================================
 -- 13. TRAINER REQUESTS
+-- UPDATED: CANCELLED STATUS
 -- ============================================================
 
 CREATE TABLE dbo.trainer_requests (
@@ -403,7 +416,12 @@ CREATE TABLE dbo.trainer_requests (
                                       CONSTRAINT PK_trainer_requests PRIMARY KEY (id),
 
                                       CONSTRAINT CK_trainer_requests_status CHECK (
-                                          status IN ('PENDING', 'ACCEPTED', 'REJECTED')
+                                          status IN (
+                                                     'PENDING',
+                                                     'ACCEPTED',
+                                                     'REJECTED',
+                                                     'CANCELLED'
+                                              )
                                           ),
 
                                       CONSTRAINT fk_trainer_requests_member
@@ -418,7 +436,6 @@ GO
 
 -- ============================================================
 -- 14. CHECKINS
--- NEW
 -- ============================================================
 
 CREATE TABLE dbo.checkins (
@@ -454,7 +471,6 @@ GO
 
 -- ============================================================
 -- 15. CONVERSATIONS
--- NEW
 -- ============================================================
 
 CREATE TABLE dbo.conversations (
@@ -481,12 +497,11 @@ GO
 
 -- ============================================================
 -- 16. MESSAGES
--- NEW
 -- ============================================================
 
 CREATE TABLE dbo.messages (
                               id BIGINT IDENTITY(1,1) NOT NULL,
-                              content VARCHAR(2000) NOT NULL,
+                              content NVARCHAR(2000) NOT NULL,
                               read_at DATETIME2(7),
                               sent_at DATETIME2(7) NOT NULL,
                               conversation_id BIGINT NOT NULL,
@@ -506,7 +521,7 @@ GO
 
 -- ============================================================
 -- 17. NOTIFICATIONS
--- NEW
+-- UPDATED: 2 NEW NOTIFICATION TYPES
 -- ============================================================
 
 CREATE TABLE dbo.notifications (
@@ -529,7 +544,9 @@ CREATE TABLE dbo.notifications (
                                                 'TRAINER_REQUEST_REJECTED',
                                                 'PERSONAL_SCHEDULE_CREATED',
                                                 'CLASS_SCHEDULE_CANCELLED',
-                                                'MESSAGE_RECEIVED'
+                                                'MESSAGE_RECEIVED',
+                                                'MEMBERSHIP_ACTIVATED',
+                                                'PERSONAL_SCHEDULE_CANCELLED'
                                            )
                                        ),
 
@@ -541,7 +558,7 @@ GO
 
 -- ============================================================
 -- 18. PERSONAL TRAINING SCHEDULES
--- NEW
+-- UPDATED: STATUS + BRANCH
 -- ============================================================
 
 CREATE TABLE dbo.personal_training_schedules (
@@ -552,12 +569,29 @@ CREATE TABLE dbo.personal_training_schedules (
                                                  note VARCHAR(2000),
                                                  schedule_date DATE NOT NULL,
                                                  start_time TIME(7) NOT NULL,
+
+                                                 status VARCHAR(20),
+
                                                  title VARCHAR(255),
                                                  updated_at DATETIME2(7),
+
+                                                 branch_id BIGINT,
                                                  member_id BIGINT NOT NULL,
                                                  trainer_id BIGINT NOT NULL,
 
                                                  CONSTRAINT PK_personal_training_schedules PRIMARY KEY (id),
+
+                                                 CONSTRAINT CK_personal_training_schedules_status CHECK (
+                                                     status IN (
+                                                                'SCHEDULED',
+                                                                'COMPLETED',
+                                                                'CANCELLED'
+                                                         )
+                                                     ),
+
+                                                 CONSTRAINT fk_pts_branch
+                                                     FOREIGN KEY (branch_id)
+                                                         REFERENCES dbo.branches(id),
 
                                                  CONSTRAINT fk_pts_member
                                                      FOREIGN KEY (member_id)
@@ -571,7 +605,6 @@ GO
 
 -- ============================================================
 -- 19. PROMOTIONS
--- NEW
 -- ============================================================
 
 CREATE TABLE dbo.promotions (

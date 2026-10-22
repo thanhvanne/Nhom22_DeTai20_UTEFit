@@ -29,4 +29,5 @@ public class PersonalTrainingScheduleResponse {
 
     // Lấy từ trainer.branch cho tiện hiển thị
     private String branchName;
+    private String status;
 }

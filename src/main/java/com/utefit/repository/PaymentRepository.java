@@ -26,6 +26,8 @@ public interface PaymentRepository
             Long userId
     );
 
+    List<Payment> findByMembership_IdAndStatus(Long membershipId, PaymentStatus status);
+
     boolean existsByMembership_IdAndStatus(
             Long membershipId,
             PaymentStatus status

@@ -1,3 +1,4 @@
+
 package com.utefit.repository;
 
 import com.utefit.entity.PersonalTrainingSchedule;
@@ -9,13 +10,9 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-public interface PersonalTrainingScheduleRepository extends JpaRepository<PersonalTrainingSchedule, Long> {
+public interface PersonalTrainingScheduleRepository
+        extends JpaRepository<PersonalTrainingSchedule, Long> {
 
-    /**
-     * Kiểm tra các lịch trùng của HLV trong cùng ngày.
-     * Dùng native SQL + CAST cả cột lẫn tham số về time để tránh lỗi
-     * "The data types time and datetime are incompatible in the less than or equal to operator."
-     */
     @Query(value = """
             SELECT *
             FROM personal_training_schedules pts
@@ -24,12 +21,10 @@ public interface PersonalTrainingScheduleRepository extends JpaRepository<Person
               AND pts.active = 1
               AND (:excludeId IS NULL OR pts.id <> :excludeId)
               AND NOT (
-                    CAST(pts.end_time   AS time) <= CAST(:startTime AS time)
-                    OR
-                    CAST(pts.start_time AS time) >= CAST(:endTime   AS time)
+                  CAST(pts.end_time AS time) <= CAST(:startTime AS time)
+                  OR CAST(pts.start_time AS time) >= CAST(:endTime AS time)
               )
-            """,
-            nativeQuery = true)
+            """, nativeQuery = true)
     List<PersonalTrainingSchedule> findOverlappingForTrainer(
             @Param("trainerId") Long trainerId,
             @Param("date") LocalDate date,
@@ -38,9 +33,23 @@ public interface PersonalTrainingScheduleRepository extends JpaRepository<Person
             @Param("excludeId") Long excludeId
     );
 
-    /**
-     * Kiểm tra các lịch trùng của Member trong cùng ngày.
-     */
+    List<PersonalTrainingSchedule>
+    findByMember_IdAndScheduleDateAndActiveTrue(
+            Long memberId,
+            LocalDate scheduleDate
+    );
+
+    boolean existsByTrainer_IdAndActiveTrueAndScheduleDateAfter(
+            Long trainerId,
+            LocalDate date
+    );
+
+    List<PersonalTrainingSchedule>
+    findByTrainer_IdAndScheduleDateAndActiveTrue(
+            Long trainerId,
+            LocalDate scheduleDate
+    );
+
     @Query(value = """
             SELECT *
             FROM personal_training_schedules pts
@@ -49,12 +58,10 @@ public interface PersonalTrainingScheduleRepository extends JpaRepository<Person
               AND pts.active = 1
               AND (:excludeId IS NULL OR pts.id <> :excludeId)
               AND NOT (
-                    CAST(pts.end_time   AS time) <= CAST(:startTime AS time)
-                    OR
-                    CAST(pts.start_time AS time) >= CAST(:endTime   AS time)
+                  CAST(pts.end_time AS time) <= CAST(:startTime AS time)
+                  OR CAST(pts.start_time AS time) >= CAST(:endTime AS time)
               )
-            """,
-            nativeQuery = true)
+            """, nativeQuery = true)
     List<PersonalTrainingSchedule> findOverlappingForMember(
             @Param("memberId") Long memberId,
             @Param("date") LocalDate date,
@@ -63,9 +70,6 @@ public interface PersonalTrainingScheduleRepository extends JpaRepository<Person
             @Param("excludeId") Long excludeId
     );
 
-    /**
-     * Lấy lịch active của HLV trong khoảng ngày [fromDate, toDate].
-     */
     List<PersonalTrainingSchedule>
     findByTrainer_User_IdAndScheduleDateBetweenAndActiveTrueOrderByScheduleDateAscStartTimeAsc(
             Long trainerUserId,
@@ -73,11 +77,8 @@ public interface PersonalTrainingScheduleRepository extends JpaRepository<Person
             LocalDate toDate
     );
 
-    /**
-     * Lấy lịch active của Member trong khoảng ngày [fromDate, toDate].
-     */
     List<PersonalTrainingSchedule>
-    findByMember_IdAndScheduleDateBetweenAndActiveTrueOrderByScheduleDateAscStartTimeAsc(
+    findByMember_IdAndScheduleDateBetweenOrderByScheduleDateAscStartTimeAsc(
             Long memberId,
             LocalDate fromDate,
             LocalDate toDate

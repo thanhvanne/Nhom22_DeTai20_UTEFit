@@ -10,11 +10,24 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface CheckinRepository
         extends JpaRepository<Checkin, Long> {
 
     boolean existsByUser_IdAndCheckOutAtIsNull(Long userId);
+
+    @EntityGraph(attributePaths = {"branch"})
+    List<Checkin> findByUser_IdOrderByCheckInAtDesc(Long userId);
+
+    @Query("""
+      SELECT c FROM Checkin c WHERE c.user.id = :memberId AND c.branch.id = :branchId
+        AND c.checkOutAt IS NOT NULL AND c.checkInAt < :sessionEnd AND c.checkOutAt > :sessionStart
+    """)
+    List<Checkin> findCompletedDuringSession(@Param("memberId") Long memberId,
+                                             @Param("branchId") Long branchId,
+                                             @Param("sessionStart") LocalDateTime sessionStart,
+                                             @Param("sessionEnd") LocalDateTime sessionEnd);
 
     @EntityGraph(attributePaths = {"user", "branch"})
     @Query(

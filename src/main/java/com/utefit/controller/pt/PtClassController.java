@@ -8,6 +8,10 @@ import com.utefit.entity.User;
 import com.utefit.repository.UserRepository;
 import com.utefit.service.PersonalTrainingScheduleService;
 import com.utefit.service.PtClassService;
+import com.utefit.service.PtAttendanceService;
+import com.utefit.enums.RegistrationStatus;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,13 +37,15 @@ public class PtClassController {
     private final PtClassService ptClassService;
     private final PersonalTrainingScheduleService personalTrainingScheduleService;
     private final UserRepository userRepository;
+    private final PtAttendanceService attendance;
 
     public PtClassController(PtClassService ptClassService,
                              PersonalTrainingScheduleService personalTrainingScheduleService,
-                             UserRepository userRepository) {
+                             UserRepository userRepository, PtAttendanceService attendance) {
         this.ptClassService = ptClassService;
         this.personalTrainingScheduleService = personalTrainingScheduleService;
         this.userRepository = userRepository;
+        this.attendance = attendance;
     }
 
     private Long getCurrentUserId(Authentication authentication) {
@@ -156,6 +162,20 @@ public class PtClassController {
         model.addAttribute("schedule", schedule);
 
         return "pt/classes/detail";
+    }
+
+    @PostMapping("/{scheduleId}/attendance/{registrationId}")
+    public String markAttendance(@PathVariable Long scheduleId,
+                                 @PathVariable Long registrationId,
+                                 @RequestParam RegistrationStatus result,
+                                 Authentication authentication, RedirectAttributes redirect) {
+        try {
+            attendance.record(authentication.getName(), scheduleId, registrationId, result);
+            redirect.addFlashAttribute("successMessage", "Đã ghi nhận điểm danh.");
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            redirect.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/pt/classes/" + scheduleId;
     }
 
     // Helper: chuyển LocalDate -> "Thứ 2", "Thứ 3", ..., "Chủ nhật"

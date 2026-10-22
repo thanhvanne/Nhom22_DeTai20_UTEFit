@@ -10,6 +10,7 @@ import com.utefit.repository.MembershipPlanRepository;
 import com.utefit.repository.MembershipRepository;
 import com.utefit.repository.PaymentRepository;
 import com.utefit.repository.UserRepository;
+import com.utefit.enums.NotificationType;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,19 +28,22 @@ public class MembershipPaymentService {
     private final MembershipPlanRepository plans;
     private final MembershipRepository memberships;
     private final PaymentRepository payments;
+    private final NotificationService notifications;
 
     public MembershipPaymentService(
             UserRepository users,
             BranchRepository branches,
             MembershipPlanRepository plans,
             MembershipRepository memberships,
-            PaymentRepository payments
+            PaymentRepository payments,
+            NotificationService notifications
     ) {
         this.users = users;
         this.branches = branches;
         this.plans = plans;
         this.memberships = memberships;
         this.payments = payments;
+        this.notifications = notifications;
     }
 
     // Member chọn chi nhánh + gói.
@@ -49,7 +53,8 @@ public class MembershipPaymentService {
             String email,
             MembershipPurchaseRequest request
     ) {
-        User user = currentMember(email);
+        // Khóa theo Member để hai POST không tạo hai PENDING đồng thời.
+        User user = lockedMember(email);
 
         Branch branch = branches.findById(
                 request.getBranchId()
@@ -115,6 +120,8 @@ public class MembershipPaymentService {
                 .branch(branch)
                 .plan(plan)
                 .status(MembershipStatus.PENDING)
+                .quotedPrice(plan.getPrice())
+                .quotedDurationDays(plan.getDurationDays())
                 .build();
 
         return memberships.save(membership).getId();
@@ -174,7 +181,8 @@ public class MembershipPaymentService {
         Payment payment = Payment.builder()
                 .user(member)
                 .membership(membership)
-                .amount(plan.getPrice())
+                .amount(membership.getQuotedPrice() != null
+                        ? membership.getQuotedPrice() : plan.getPrice())
                 .method(PaymentMethod.CASH)
                 .status(PaymentStatus.PENDING)
                 .build();
@@ -187,12 +195,16 @@ public class MembershipPaymentService {
     @Transactional
     public void confirmCashPayment(Long paymentId) {
 
+        // Khóa Membership trước Payment, cùng thứ tự với luồng hủy đơn.
+        Payment snapshot = payments.findById(paymentId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy giao dịch"));
+        if (snapshot.getMembership() == null) {
+            throw new IllegalArgumentException("Giao dịch không có thông tin gói tập");
+        }
+        Membership membership = memberships.lockById(snapshot.getMembership().getId())
+                .orElseThrow(() -> new IllegalArgumentException("Gói tập không tồn tại"));
         Payment payment = payments.lockById(paymentId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Không tìm thấy giao dịch"
-                        )
-                );
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy giao dịch"));
 
         if (payment.getMethod() != PaymentMethod.CASH) {
             throw new IllegalArgumentException(
@@ -212,13 +224,9 @@ public class MembershipPaymentService {
             );
         }
 
-        Membership membership = memberships
-                .lockById(payment.getMembership().getId())
-                .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Gói tập không tồn tại"
-                        )
-                );
+        if (!membership.getId().equals(payment.getMembership().getId())) {
+            throw new IllegalStateException("Đơn hàng đã thay đổi trong khi thanh toán.");
+        }
 
         if (membership.getStatus()
                 != MembershipStatus.PENDING) {
@@ -244,8 +252,8 @@ public class MembershipPaymentService {
             );
         }
 
-        int duration = membership.getPlan()
-                .getDurationDays();
+        int duration = membership.getQuotedDurationDays() != null
+                ? membership.getQuotedDurationDays() : membership.getPlan().getDurationDays();
 
         if (duration <= 0) {
             throw new IllegalArgumentException(
@@ -265,7 +273,7 @@ public class MembershipPaymentService {
         LocalDate start = LocalDate.now();
 
         membership.setStartDate(start);
-        membership.setEndDate(start.plusDays(duration));
+        membership.setEndDate(start.plusDays(duration - 1L));
         membership.setStatus(MembershipStatus.ACTIVE);
 
         payment.setStatus(PaymentStatus.PAID);
@@ -276,6 +284,45 @@ public class MembershipPaymentService {
 
         memberships.save(membership);
         payments.save(payment);
+        notifications.createNotificationForUser(
+                membership.getUser().getId(),
+                NotificationType.MEMBERSHIP_ACTIVATED,
+                "Gói tập đã được kích hoạt",
+                "Thanh toán CASH đã được xác nhận. Gói tập của bạn có hiệu lực đến " + membership.getEndDate() + ".",
+                membership.getId());
+    }
+
+    /** Hủy đơn chưa thanh toán, đóng Payment PENDING nhưng giữ lịch sử. */
+    @Transactional
+    public void cancelPendingMembership(String email, Long membershipId) {
+        User member = lockedMember(email);
+        Membership membership = memberships.lockById(membershipId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy gói tập."));
+        if (!membership.getUser().getId().equals(member.getId())) {
+            throw new IllegalArgumentException("Bạn không sở hữu gói này.");
+        }
+        if (membership.getStatus() != MembershipStatus.PENDING) {
+            throw new IllegalStateException("Chỉ hủy được gói đang PENDING.");
+        }
+        // Khóa từng payment để tuần tự với thao tác Admin xác nhận CASH.
+        for (Payment payment : payments.findByMembership_IdAndStatus(
+                membershipId, PaymentStatus.PENDING)) {
+            Payment locked = payments.lockById(payment.getId()).orElseThrow();
+            if (locked.getStatus() == PaymentStatus.PENDING) {
+                locked.setStatus(PaymentStatus.FAILED);
+            }
+        }
+        membership.setStatus(MembershipStatus.CANCELLED);
+    }
+
+    private User lockedMember(String email) {
+        User user = users.lockByEmailForBooking(email)
+                .orElseThrow(() -> new IllegalArgumentException("Tài khoản không tồn tại."));
+        if (user.getRole() != UserRole.MEMBER || user.getStatus() != UserStatus.ACTIVE
+                || !Boolean.TRUE.equals(user.getEnabled())) {
+            throw new IllegalArgumentException("Tài khoản Member không hợp lệ.");
+        }
+        return user;
     }
 
     @Transactional(readOnly = true)
@@ -293,7 +340,7 @@ public class MembershipPaymentService {
                         m.getId(),
                         m.getBranch().getName(),
                         m.getPlan().getName(),
-                        m.getPlan().getPrice(),
+                        m.getQuotedPrice() != null ? m.getQuotedPrice() : m.getPlan().getPrice(),
                         m.getStatus().name(),
                         m.getStartDate(),
                         m.getEndDate()

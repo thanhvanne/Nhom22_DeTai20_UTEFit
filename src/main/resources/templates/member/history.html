@@ -169,6 +169,26 @@
 
     </section>
 
+    <section class="ut-panel mt-4">
+        <h2 class="h4">Lịch sử Check-in / Check-out</h2>
+        <div class="table-responsive"><table class="table table-dark table-striped">
+            <thead><tr><th>Chi nhánh</th><th>Vào</th><th>Ra</th></tr></thead>
+            <tbody><tr th:each="c : ${history.checkins}">
+                <td th:text="${c.branch}"></td>
+                <td th:text="${#temporals.format(c.inAt, 'dd/MM/yyyy HH:mm')}"></td>
+                <td th:text="${c.outAt == null ? 'Đang ở phòng tập' : #temporals.format(c.outAt, 'dd/MM/yyyy HH:mm')}"></td>
+            </tr></tbody></table></div>
+    </section>
+    <section class="ut-panel mt-4">
+        <h2 class="h4">Lịch sử buổi PT 1:1</h2>
+        <div class="table-responsive"><table class="table table-dark table-striped">
+            <thead><tr><th>PT</th><th>Ngày</th><th>Giờ</th><th>Chi nhánh</th><th>Trạng thái</th></tr></thead>
+            <tbody><tr th:each="p : ${history.personalSchedules}">
+                <td th:text="${p.trainerName}"></td><td th:text="${p.scheduleDate}"></td>
+                <td th:text="|${p.startTime} - ${p.endTime}|"></td>
+                <td th:text="${p.branchName}"></td><td th:text="${p.status}"></td>
+            </tr></tbody></table></div>
+    </section>
 </main>
 
 <footer th:replace="~{fragments/footer :: footer}"></footer>

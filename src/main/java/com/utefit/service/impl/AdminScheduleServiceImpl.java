@@ -41,6 +41,8 @@ public class AdminScheduleServiceImpl
 
     // GD5-C: Goi Service cua thanh vien B.
     private final NotificationService notificationService;
+    private final com.utefit.service.ScheduleConflictService conflicts;
+    private final com.utefit.repository.UserRepository userRepository;
 
     private static final DateTimeFormatter DATE_FMT =
             DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -138,6 +140,18 @@ public class AdminScheduleServiceImpl
                 ? getRegisteredMemberIds(id)
                 : List.of();
 
+        long occupied = classRegistrationRepository.countBySchedule_IdAndStatus(
+                id, RegistrationStatus.REGISTERED);
+        if (occupied > 0 && !cancelledByEdit && (
+                !schedule.getFitnessClass().getId().equals(dto.getFitnessClassId())
+                        || !schedule.getScheduleDate().equals(dto.getScheduleDate())
+                        || !schedule.getStartTime().equals(dto.getStartTime())
+                        || !schedule.getEndTime().equals(dto.getEndTime())
+                        || !java.util.Objects.equals(schedule.getRoom(),
+                        dto.getRoom() == null || dto.getRoom().isBlank() ? null : dto.getRoom().trim()))) {
+            throw new IllegalStateException("Lịch đã có người đăng ký; hủy lịch trước khi đổi thời gian/phòng/lớp.");
+        }
+
         // Giu nguyen business rules Giai doan 4.
         FitnessClass fitnessClass =
                 validateScheduleBusinessRules(dto, id);
@@ -164,6 +178,8 @@ public class AdminScheduleServiceImpl
 
         // GD5-C: Neu lich chuyen ACTIVE -> INACTIVE.
         if (cancelledByEdit) {
+            classRegistrationRepository.cancelRegistrationsForSchedule(
+                    id, RegistrationStatus.REGISTERED, RegistrationStatus.CANCELLED);
             notifyScheduleCancellation(
                     id,
                     membersToNotify,
@@ -214,6 +230,8 @@ public class AdminScheduleServiceImpl
 
         // GD5-C: Chi gui thong bao khi DONG ca.
         if (!nextActive) {
+            classRegistrationRepository.cancelRegistrationsForSchedule(
+                    id, RegistrationStatus.REGISTERED, RegistrationStatus.CANCELLED);
             notifyScheduleCancellation(
                     id,
                     membersToNotify,
@@ -344,6 +362,12 @@ public class AdminScheduleServiceImpl
         Trainer trainer = fitnessClass.getTrainer();
 
         if (isActiveSchedule && trainer != null) {
+            // Đồng bộ đặt lịch nhóm và lịch 1:1 theo cùng User PT.
+            userRepository.lockByIdForBooking(trainer.getUser().getId())
+                    .orElseThrow(() -> new IllegalStateException("PT không tồn tại."));
+            // Kiểm tra chéo lịch nhóm và lịch PT 1:1.
+            conflicts.assertTrainerFree(trainer.getId(), dto.getScheduleDate(),
+                    dto.getStartTime(), dto.getEndTime(), safeExcludeId);
             if (!Boolean.TRUE.equals(trainer.getActive())) {
                 throw new IllegalArgumentException(
                         "Huấn luyện viên phụ trách lớp này "

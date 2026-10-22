@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<!--
+    Các biến Thymeleaf:
+    - conversations
+    - activeConversationId
+    - memberSide
+    - acceptedTrainers (Member; có thể null)
+-->
+
+<aside th:fragment="sidebar"
+       class="uf-chat-sidebar"
+       aria-label="Danh sách trò chuyện">
+
+    <div class="uf-chat-sidebar-top">
+
+        <div class="uf-chat-sidebar-heading">
+
+            <div>
+                <p class="uf-chat-eyebrow">
+                    UTEFIT MESSENGER
+                </p>
+
+                <h1>Tin nhắn</h1>
+            </div>
+
+            <span class="uf-chat-side-icon"
+                  aria-hidden="true">
+                ✉
+            </span>
+
+        </div>
+
+        <!-- Tìm kiếm hội thoại -->
+        <label class="uf-chat-search">
+
+            <span class="visually-hidden">
+                Tìm hội thoại theo tên hoặc nội dung
+            </span>
+
+            <span aria-hidden="true">⌕</span>
+
+            <input id="ufChatSearch"
+                   type="search"
+                   autocomplete="off"
+                   placeholder="Tìm cuộc trò chuyện...">
+
+        </label>
+
+        <!-- Bộ lọc thực tế -->
+        <div class="uf-chat-filters"
+             role="group"
+             aria-label="Lọc hội thoại">
+
+            <button type="button"
+                    class="uf-chat-filter is-active"
+                    data-filter="all"
+                    aria-pressed="true">
+                Tất cả
+            </button>
+
+            <button type="button"
+                    class="uf-chat-filter"
+                    data-filter="unread"
+                    aria-pressed="false">
+                Chưa đọc
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- Danh sách có thể cuộn -->
+    <div class="uf-chat-sidebar-scroll">
+
+        <div class="uf-chat-list"
+             id="ufChatList">
+
+            <a th:each="c : ${conversations}"
+               class="uf-chat-item"
+
+               th:classappend="${activeConversationId != null and activeConversationId == c.conversationId} ? ' is-active' : ''"
+
+               th:href="${memberSide} ? @{/member/chats/{id}(id=${c.conversationId})} : @{/pt/chat/member/{id}(id=${c.partnerUserId})}"
+
+               th:attr="data-chat-item=chat,
+                        data-search=|${c.partnerName} ${c.lastMessagePreview ?: ''}|,
+                        data-unread=${c.unreadCount}"
+
+               th:aria-current="${activeConversationId != null and activeConversationId == c.conversationId} ? 'page' : null">
+
+                <!-- Avatar trong database -->
+                <img th:if="${c.partnerAvatarUrl != null and !#strings.isEmpty(c.partnerAvatarUrl)}"
+                     class="uf-chat-avatar"
+                     th:src="${c.partnerAvatarUrl}"
+                     th:alt="|Ảnh đại diện ${c.partnerName}|"
+                     loading="lazy">
+
+                <!-- Không có avatar -->
+                <span th:unless="${c.partnerAvatarUrl != null and !#strings.isEmpty(c.partnerAvatarUrl)}"
+                      class="uf-chat-avatar uf-chat-avatar-empty"
+                      aria-hidden="true">
+                    ●
+                </span>
+
+                <span class="uf-chat-item-body">
+
+                    <span class="uf-chat-item-title"
+                          th:text="${c.partnerName}">
+                        Tên người trò chuyện
+                    </span>
+
+                    <span class="uf-chat-item-preview"
+                          th:text="${c.lastMessagePreview != null and !#strings.isEmpty(c.lastMessagePreview)} ? ${c.lastMessagePreview} : 'Chưa có tin nhắn'">
+                        Chưa có tin nhắn
+                    </span>
+
+                </span>
+
+                <span class="uf-chat-item-meta">
+
+                    <time th:if="${c.lastMessageAt != null}"
+                          th:datetime="${c.lastMessageAt}"
+                          th:text="${#temporals.format(c.lastMessageAt, 'dd/MM HH:mm')}">
+                        22/10
+                    </time>
+
+                    <span th:if="${c.unreadCount > 0}"
+                          class="uf-chat-unread"
+                          th:text="${c.unreadCount}">
+                        1
+                    </span>
+
+                </span>
+
+            </a>
+
+        </div>
+
+        <!-- Không có kết quả tìm kiếm -->
+        <p id="ufChatNoMatches"
+           class="uf-chat-side-empty"
+           hidden>
+            Không có hội thoại phù hợp với bộ lọc.
+        </p>
+
+        <!-- Tài khoản chưa có hội thoại -->
+        <p class="uf-chat-side-empty"
+           th:if="${#lists.isEmpty(conversations)}">
+            Chưa có cuộc trò chuyện nào.
+        </p>
+
+        <!-- Chức năng đã có:
+             Member mở chat với PT có yêu cầu ACCEPTED. -->
+        <details class="uf-chat-new"
+                 th:if="${memberSide and acceptedTrainers != null and !#lists.isEmpty(acceptedTrainers)}">
+
+            <summary>
+                + Trò chuyện với PT đã nhận yêu cầu
+            </summary>
+
+            <div class="uf-chat-new-list">
+
+                <form th:each="pt : ${acceptedTrainers}"
+                      th:attr="action=@{/member/chats/start/{id}(id=${pt.id})}"
+                      method="post"
+                      class="uf-chat-new-row">
+
+                    <input type="hidden"
+                           th:name="${_csrf.parameterName}"
+                           th:value="${_csrf.token}">
+
+                    <span>
+
+                        <strong th:text="${pt.name}">
+                            Huấn luyện viên
+                        </strong>
+
+                        <small th:text="${pt.email}">
+                            Email PT
+                        </small>
+
+                    </span>
+
+                    <button type="submit"
+                            aria-label="Mở hội thoại">
+                        Mở →
+                    </button>
+
+                </form>
+
+            </div>
+
+        </details>
+
+        <div class="uf-chat-discover"
+             th:if="${memberSide and (acceptedTrainers == null or #lists.isEmpty(acceptedTrainers)) and #lists.isEmpty(conversations)}">
+
+            <a th:href="@{/member/trainer-requests}">
+                Xem yêu cầu PT →
+            </a>
+
+        </div>
+
+    </div>
+
+</aside>
+</html>

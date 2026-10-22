@@ -151,6 +151,21 @@ public class AdminClassServiceImpl implements AdminClassService {
                 ? dto.getStatus()
                 : previousStatus;
 
+        long maxRegistered = classScheduleRepository.findByFitnessClassIdAndActiveTrue(id).stream()
+                .mapToLong(s -> classRegistrationRepository.countBySchedule_IdAndStatus(
+                        s.getId(), RegistrationStatus.REGISTERED)).max().orElse(0);
+        if (dto.getCapacity() < maxRegistered) {
+            throw new IllegalStateException("Không thể giảm sức chứa thấp hơn số người đã đặt ở một buổi học.");
+        }
+        if (maxRegistered > 0 && targetStatus != ClassStatus.CANCELLED && (
+                !fitnessClass.getBranch().getId().equals(branch.getId())
+                        || !fitnessClass.getCategory().getId().equals(category.getId())
+                        || !java.util.Objects.equals(
+                        fitnessClass.getTrainer() == null ? null : fitnessClass.getTrainer().getId(),
+                        trainer == null ? null : trainer.getId()))) {
+            throw new IllegalStateException("Lớp đã có người đăng ký; không thể đổi chi nhánh/danh mục/PT.");
+        }
+
         fitnessClass.setName(dto.getName().trim());
         fitnessClass.setDescription(
                 dto.getDescription() != null
@@ -221,7 +236,10 @@ public class AdminClassServiceImpl implements AdminClassService {
                         + "Các lịch học thuộc lớp này sẽ không tiếp tục diễn ra. "
                         + "Vui lòng xem lại lịch tập của bạn.";
 
-        // Goi lai NotificationService cua B.
+        // Đồng bộ trạng thái đăng ký trong cùng transaction.
+        classRegistrationRepository.cancelRegistrationsForClass(fitnessClass.getId(),
+                RegistrationStatus.REGISTERED, RegistrationStatus.CANCELLED);
+        // Gửi sau commit thông qua NotificationService.
         for (Long memberId : memberIds) {
 
             notificationService.createNotificationForUser(
@@ -388,7 +406,7 @@ public class AdminClassServiceImpl implements AdminClassService {
 
         String spec = trainer.getSpecialization() != null
                 ? trainer.getSpecialization()
-                  .trim().toLowerCase()
+                .trim().toLowerCase()
                 : "";
 
         String catName = category.getName() != null

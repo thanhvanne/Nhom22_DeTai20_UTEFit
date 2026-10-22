@@ -6,6 +6,13 @@ import com.utefit.entity.Branch;
 import com.utefit.repository.BranchRepository;
 import com.utefit.service.AdminBranchService;
 import com.utefit.service.CloudinaryService;
+import com.utefit.repository.MembershipRepository;
+import com.utefit.repository.ClassScheduleRepository;
+import com.utefit.enums.MembershipStatus;
+import com.utefit.enums.ClassStatus;
+import java.time.LocalDate;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +27,8 @@ public class AdminBranchServiceImpl implements AdminBranchService {
 
     private final BranchRepository branchRepository;
     private final CloudinaryService cloudinaryService;
+    private final MembershipRepository memberships;
+    private final ClassScheduleRepository schedules;
 
     @Override
     @Transactional(readOnly = true)
@@ -98,16 +107,23 @@ public class AdminBranchServiceImpl implements AdminBranchService {
         branch.setDescription(dto.getDescription());
         branch.setOpeningTime(dto.getOpeningTime());
         branch.setClosingTime(dto.getClosingTime());
-        branch.setActive(dto.getActive() != null ? dto.getActive() : true);
+        boolean nextActive = dto.getActive() != null ? dto.getActive() : true;
+        if (!nextActive && Boolean.TRUE.equals(branch.getActive())) checkCanDeactivate(id);
+        branch.setActive(nextActive);
 
-        // Nếu người dùng tải lên file ảnh mới -> Xóa ảnh cũ trên Cloudinary (nếu có) rồi upload ảnh mới
         if (dto.getImageFile() != null && !dto.getImageFile().isEmpty()) {
-            if (branch.getImagePublicId() != null && !branch.getImagePublicId().isBlank()) {
-                cloudinaryService.delete(branch.getImagePublicId());
-            }
-            MediaUploadResult uploadResult = cloudinaryService.uploadImage(dto.getImageFile(), "utefit/branches");
-            branch.setImageUrl(uploadResult.url());
-            branch.setImagePublicId(uploadResult.publicId());
+            String oldPublicId = branch.getImagePublicId();
+            MediaUploadResult upload = cloudinaryService.uploadImage(dto.getImageFile(), "utefit/branches");
+            branch.setImageUrl(upload.url());
+            branch.setImagePublicId(upload.publicId());
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override public void afterCompletion(int status) {
+                    String toDelete = status == STATUS_COMMITTED ? oldPublicId : upload.publicId();
+                    if (toDelete != null && !toDelete.isBlank()) {
+                        try { cloudinaryService.delete(toDelete); } catch (RuntimeException ignored) {}
+                    }
+                }
+            });
         } else if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
             branch.setImageUrl(dto.getImageUrl().trim());
         }
@@ -119,8 +135,21 @@ public class AdminBranchServiceImpl implements AdminBranchService {
     @Transactional
     public void toggleActive(Long id) {
         Branch branch = getBranchById(id);
-        branch.setActive(!Boolean.TRUE.equals(branch.getActive()));
+        boolean nextActive = !Boolean.TRUE.equals(branch.getActive());
+        if (!nextActive) checkCanDeactivate(id);
+        branch.setActive(nextActive);
         branchRepository.save(branch);
+    }
+
+    private void checkCanDeactivate(Long branchId) {
+        LocalDate today = LocalDate.now();
+        if (memberships.hasActiveMembersForBranch(branchId, MembershipStatus.ACTIVE, today)) {
+            throw new IllegalStateException("Chi nhánh còn Member đã thanh toán có gói hiệu lực.");
+        }
+        if (schedules.hasFutureActiveSessionsAtBranch(branchId, today,
+                ClassStatus.CANCELLED, ClassStatus.COMPLETED)) {
+            throw new IllegalStateException("Chi nhánh còn lịch lớp tương lai; hãy hủy/chuyển lịch trước.");
+        }
     }
 
     // Business Rule trọng tâm để chụp Source Evidence cho báo cáo

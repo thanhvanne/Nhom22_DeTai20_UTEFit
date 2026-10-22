@@ -108,6 +108,38 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
             @Param("excludeScheduleId") Long excludeScheduleId
     );
 
+    @EntityGraph(attributePaths = {"fitnessClass", "fitnessClass.trainer"})
+    @Query("""
+        SELECT s FROM ClassSchedule s JOIN s.fitnessClass fc
+        WHERE fc.trainer.id = :trainerId AND s.scheduleDate = :day
+          AND s.active = true AND fc.status NOT IN :excludedStatuses
+        """)
+    List<ClassSchedule> findActiveTrainerSessions(
+            @Param("trainerId") Long trainerId,
+            @Param("day") LocalDate day,
+            @Param("excludedStatuses") List<ClassStatus> excludedStatuses);
+
+    @Query("""
+        SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END
+        FROM ClassSchedule s JOIN s.fitnessClass fc
+        WHERE fc.trainer.id = :trainerId AND s.scheduleDate > :today
+          AND s.active = true AND fc.status NOT IN (:cancelled, :completed)
+    """)
+    boolean existsUpcomingTrainerSessions(@Param("trainerId") Long trainerId,
+                                          @Param("today") LocalDate today,
+                                          @Param("cancelled") ClassStatus cancelled,
+                                          @Param("completed") ClassStatus completed);
+
+    @Query("""
+       SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END FROM ClassSchedule s
+       WHERE s.fitnessClass.branch.id = :branchId AND s.scheduleDate >= :today
+         AND s.active = true AND s.fitnessClass.status NOT IN (:cancelled, :completed)
+    """)
+    boolean hasFutureActiveSessionsAtBranch(@Param("branchId") Long branchId,
+                                            @Param("today") LocalDate today,
+                                            @Param("cancelled") ClassStatus cancelled,
+                                            @Param("completed") ClassStatus completed);
+
     List<ClassSchedule> findByFitnessClassIdAndActiveTrue(Long fitnessClassId);
 
     // === Thêm mới cho PT xem lịch lớp của mình ===

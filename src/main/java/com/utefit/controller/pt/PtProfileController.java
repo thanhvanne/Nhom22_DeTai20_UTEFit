@@ -1,12 +1,7 @@
 package com.utefit.controller.pt;
 
-import com.utefit.entity.Trainer;
-import com.utefit.entity.User;
-import com.utefit.repository.TrainerRepository;
-import com.utefit.repository.UserRepository;
-import com.utefit.repository.BranchRepository;
-import com.utefit.service.CloudinaryService;
-import com.utefit.dto.cloudinary.MediaUploadResult;
+import com.utefit.service.PtProfileService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,98 +11,36 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/pt/profile")
+@RequiredArgsConstructor
 public class PtProfileController {
+    private final PtProfileService profiles;
 
-    private final TrainerRepository trainerRepository;
-    private final UserRepository userRepository;
-    private final BranchRepository branchRepository;
-    private final CloudinaryService cloudinaryService;
-
-    public PtProfileController(TrainerRepository trainerRepository,
-                               UserRepository userRepository,
-                               BranchRepository branchRepository,
-                               CloudinaryService cloudinaryService) {
-        this.trainerRepository = trainerRepository;
-        this.userRepository = userRepository;
-        this.branchRepository = branchRepository;
-        this.cloudinaryService = cloudinaryService;
-    }
-
-    private Trainer getCurrentTrainer(Authentication authentication) {
-        String email = authentication.getName();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản đăng nhập!"));
-
-        return trainerRepository.findByUserId(user.getId())
-                .orElseGet(() -> {
-                    Trainer newTrainer = Trainer.builder()
-                            .user(user)
-                            .specialization("General Fitness")
-                            .yearsExperience(1)
-                            .bio("Chưa cập nhật tiểu sử.")
-                            .active(true)
-                            .build();
-                    return trainerRepository.save(newTrainer);
-                });
-    }
-
-    // /pt/profile
     @GetMapping
-    public String viewProfile(Authentication authentication, Model model) {
-        Trainer trainer = getCurrentTrainer(authentication);
-        model.addAttribute("trainer", trainer);
+    public String view(Authentication authentication, Model model) {
+        model.addAttribute("trainer", profiles.myProfile(authentication.getName()));
         return "pt/profile/detail";
     }
 
-    // /pt/profile/edit
     @GetMapping("/edit")
-    public String editForm(Authentication authentication, Model model) {
-        Trainer trainer = getCurrentTrainer(authentication);
-        model.addAttribute("trainer", trainer);
-        model.addAttribute("branches", branchRepository.findAll());
-        return "pt/profile/edit";  // đúng với path bạn nói
+    public String edit(Authentication authentication, Model model) {
+        model.addAttribute("trainer", profiles.myProfile(authentication.getName()));
+        return "pt/profile/edit";
     }
 
     @PostMapping("/edit")
-    public String updateProfile(
-            Authentication authentication,
-            @RequestParam("specialization") String specialization,
-            @RequestParam("yearsExperience") Integer yearsExperience,
-            @RequestParam("bio") String bio,
-            @RequestParam(value = "branchId", required = false) Long branchId,
-            @RequestParam(value = "avatarFile", required = false) MultipartFile avatarFile,
-            RedirectAttributes redirectAttributes
-    ) {
+    public String update(Authentication authentication,
+                         @RequestParam String specialization,
+                         @RequestParam Integer yearsExperience,
+                         @RequestParam(required = false) String bio,
+                         @RequestParam(required = false) MultipartFile avatarFile,
+                         RedirectAttributes redirect) {
         try {
-            Trainer trainer = getCurrentTrainer(authentication);
-
-            trainer.setSpecialization(specialization);
-            trainer.setYearsExperience(yearsExperience);
-            trainer.setBio(bio);
-
-            if (branchId != null) {
-                branchRepository.findById(branchId).ifPresent(trainer::setBranch);
-            }
-
-            if (avatarFile != null && !avatarFile.isEmpty()) {
-                MediaUploadResult uploadResult = cloudinaryService.uploadImage(avatarFile, "avatars");
-
-                if (uploadResult != null) {
-                    String url = uploadResult.url();
-                    String publicId = uploadResult.publicId();
-
-                    trainer.getUser().setAvatarUrl(url);
-                    trainer.getUser().setAvatarPublicId(publicId);
-                    userRepository.save(trainer.getUser());
-                }
-            }
-
-            trainerRepository.save(trainer);
-            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật hồ sơ thành công!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Có lỗi xảy ra: " + e.getMessage());
+            profiles.updateMyProfile(authentication.getName(),
+                    specialization, yearsExperience, bio, avatarFile);
+            redirect.addFlashAttribute("successMessage", "Cập nhật hồ sơ PT thành công.");
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            redirect.addFlashAttribute("errorMessage", ex.getMessage());
         }
-
         return "redirect:/pt/profile";
     }
 }

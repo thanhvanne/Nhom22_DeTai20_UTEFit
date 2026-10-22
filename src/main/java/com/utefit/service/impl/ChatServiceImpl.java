@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -102,6 +104,9 @@ public class ChatServiceImpl implements ChatService {
         if (content == null || content.trim().isEmpty()) {
             throw new IllegalArgumentException("Nội dung tin nhắn không được để trống.");
         }
+        if (content.trim().length() > 2000) {
+            throw new IllegalArgumentException("Nội dung tin nhắn tối đa 2000 ký tự.");
+        }
 
         Conversation conversation = conversationRepository.findById(conversationId)
                 .orElseThrow(() ->
@@ -109,6 +114,15 @@ public class ChatServiceImpl implements ChatService {
 
         if (!isParticipant(conversation, senderUserId)) {
             throw new IllegalStateException("Bạn không có quyền gửi tin nhắn trong cuộc trò chuyện này.");
+        }
+
+        Trainer assigned = conversation.getTrainer();
+        if (!Boolean.TRUE.equals(assigned.getActive())
+                || !Boolean.TRUE.equals(assigned.getUser().getEnabled())
+                || assigned.getUser().getStatus() != com.utefit.enums.UserStatus.ACTIVE
+                || !trainerRequestRepository.existsByMember_IdAndTrainer_IdAndStatus(
+                conversation.getMember().getId(), assigned.getId(), TrainerRequestStatus.ACCEPTED)) {
+            throw new IllegalStateException("Quan hệ Member–PT không còn hiệu lực để nhắn tin.");
         }
 
         User sender = userRepository.findById(senderUserId)
@@ -145,27 +159,29 @@ public class ChatServiceImpl implements ChatService {
         }
 
         ChatMessageResponse response = toMessageResponse(saved, senderUserId);
+        // Người nhận phải có mine=false, không dùng response của người gửi.
+        ChatMessageResponse receiverResponse = receiver == null
+                ? null : toMessageResponse(saved, receiver.getId());
 
-        // Gửi realtime qua STOMP tới cả hai phía
-        try {
-            // principal name = email
-            String senderEmail = sender.getEmail();
-            messagingTemplate.convertAndSendToUser(
-                    senderEmail,
-                    "/queue/chat",
-                    response
-            );
-
-            if (receiver != null) {
-                String receiverEmail = receiver.getEmail();
-                messagingTemplate.convertAndSendToUser(
-                        receiverEmail,
-                        "/queue/chat",
-                        response
-                );
+        // Không phát sự kiện WebSocket trước khi transaction lưu Message commit.
+        String senderEmail = sender.getEmail();
+        String receiverEmail = receiver == null ? null : receiver.getEmail();
+        Runnable push = () -> {
+            try {
+                messagingTemplate.convertAndSendToUser(senderEmail, "/queue/chat", response);
+                if (receiverEmail != null) {
+                    messagingTemplate.convertAndSendToUser(receiverEmail, "/queue/chat", receiverResponse);
+                }
+            } catch (RuntimeException ignored) {
+                // Tin nhắn vẫn ở DB, client tải lại lịch sử.
             }
-        } catch (Exception ignored) {
-        }
+        };
+        if (TransactionSynchronizationManager.isActualTransactionActive()
+                && TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override public void afterCommit() { push.run(); }
+            });
+        } else push.run();
 
         return response;
     }
@@ -180,6 +196,11 @@ public class ChatServiceImpl implements ChatService {
                 .orElseThrow(() ->
                         new EntityNotFoundException("Không tìm thấy huấn luyện viên."));
 
+        if (!Boolean.TRUE.equals(trainer.getActive())
+                || !Boolean.TRUE.equals(trainer.getUser().getEnabled())
+                || trainer.getUser().getStatus() != com.utefit.enums.UserStatus.ACTIVE) {
+            throw new IllegalStateException("PT đã ngừng hoạt động; không thể bắt đầu Chat mới.");
+        }
         boolean hasAccepted = trainerRequestRepository
                 .existsByMember_IdAndTrainer_IdAndStatus(
                         member.getId(),
@@ -206,6 +227,7 @@ public class ChatServiceImpl implements ChatService {
                     return saved.getId();
                 });
     }
+
     @Override
     @Transactional(readOnly = true)
     public long countUnreadMessagesForUser(Long userId) {

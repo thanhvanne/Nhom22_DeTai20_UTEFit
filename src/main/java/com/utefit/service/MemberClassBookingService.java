@@ -44,17 +44,20 @@ public class MemberClassBookingService {
     private final MembershipRepository memberships;
     private final MemberClassScheduleRepository schedules;
     private final ClassRegistrationRepository registrations;
+    private final ScheduleConflictService conflicts;
 
     public MemberClassBookingService(
             UserRepository users,
             MembershipRepository memberships,
             MemberClassScheduleRepository schedules,
-            ClassRegistrationRepository registrations
+            ClassRegistrationRepository registrations,
+            ScheduleConflictService conflicts
     ) {
         this.users = users;
         this.memberships = memberships;
         this.schedules = schedules;
         this.registrations = registrations;
+        this.conflicts = conflicts;
     }
 
     // ==============================
@@ -298,6 +301,8 @@ public class MemberClassBookingService {
             old.setRegisteredAt(now);
         }
 
+        conflicts.assertMemberFree(member.getId(), schedule.getScheduleDate(),
+                schedule.getStartTime(), schedule.getEndTime(), scheduleId);
         registrations.saveAndFlush(old);
     }
 

@@ -34,4 +34,7 @@ public interface TrainerRequestService {
      * PT từ chối request
      */
     void rejectRequest(Long trainerUserId, Long requestId);
+
+    /** Member chỉ hủy yêu cầu PENDING của chính mình. */
+    void cancelPendingRequest(Long memberUserId, Long requestId);
 }

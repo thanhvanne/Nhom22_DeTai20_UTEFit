@@ -120,6 +120,7 @@ public class PtClassServiceImpl implements PtClassService {
         User user = registration.getUser();
 
         return PtClassMemberRegistrationResponse.builder()
+                .registrationId(registration.getId())
                 .memberId(user.getId())
                 .memberName(user.getFullName())
                 .memberEmail(user.getEmail())

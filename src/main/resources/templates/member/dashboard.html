@@ -2,337 +2,596 @@
 <html lang="vi"
       xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments/head :: head('Member Dashboard - UTEFit')}">
+<head th:replace="~{fragments/head :: head('Tổng quan hội viên - UTEFit')}">
 </head>
 
-<body>
+<body class="ut-member-layout">
 
-<header th:replace="~{fragments/header :: header}">
-</header>
+<header th:replace="~{fragments/header :: header}"></header>
 
-<main class="container ut-page">
+<main class="ut-dashboard container-fluid">
 
-    <span class="eyebrow">
-        UTEFIT MEMBER PORTAL
-    </span>
+    <!-- ======================================
+         HERO - CHÀO MỪNG HỘI VIÊN
+         ====================================== -->
 
-    <h1 class="ut-page-title mt-3">
-        Trung tâm <span>hội viên</span>
-    </h1>
+    <section class="ut-welcome"
+             aria-label="Chào mừng hội viên">
 
-    <p class="ut-subtitle">
-        Quản lý tài khoản, gói tập, lịch lớp
-        và lịch sử thanh toán của bạn.
-    </p>
+        <div class="ut-welcome-content">
 
-    <div class="row g-4 mt-2">
+            <p class="ut-kicker">
+                TRUNG TÂM HỘI VIÊN · UTEFIT
+            </p>
 
-        <!-- Profile -->
-        <div class="col-md-6 col-lg-4">
+            <p class="ut-greeting">
+                Chào mừng trở lại,
+            </p>
 
-            <div class="ut-card">
-                <div class="ut-card-body">
+            <h1 th:text="${dashboard.memberName}">
+                Hội viên UTEFit
+            </h1>
 
-                    <div class="program-icon">01</div>
+            <p>
+                Theo dõi gói tập, lịch luyện tập và
+                kết nối cùng huấn luyện viên tại một nơi.
+            </p>
 
-                    <h3>Hồ sơ cá nhân</h3>
+            <div class="ut-hero-links">
 
-                    <p>
-                        Chỉnh sửa họ tên, số điện thoại,
-                        ảnh đại diện và đổi mật khẩu.
-                    </p>
+                <a th:href="@{/member/classes}"
+                   class="btn btn-brand">
+                    Khám phá lớp tập →
+                </a>
 
-                    <a class="btn btn-brand mt-3"
-                       th:href="@{/member/profile}">
-                        Quản lý hồ sơ
-                    </a>
+                <a th:href="@{/member/schedule}"
+                   class="btn btn-outline-light">
+                    Lịch của tôi
+                </a>
 
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Membership -->
-        <div class="col-md-6 col-lg-4">
-
-            <div class="ut-card">
-                <div class="ut-card-body">
-
-                    <div class="program-icon">02</div>
-
-                    <h3>Membership</h3>
-
-                    <p>
-                        Chọn chi nhánh, đăng ký gói
-                        và theo dõi thời hạn sử dụng.
-                    </p>
-
-                    <a class="btn btn-brand mt-3"
-                       th:href="@{/member/memberships}">
-                        Gói tập của tôi
-                    </a>
-
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Payments -->
-        <div class="col-md-6 col-lg-4">
-
-            <div class="ut-card">
-                <div class="ut-card-body">
-
-                    <div class="program-icon">03</div>
-
-                    <h3>Thanh toán</h3>
-
-                    <p>
-                        Xem trạng thái thanh toán CASH,
-                        số tiền và lịch sử giao dịch.
-                    </p>
-
-                    <a class="btn btn-brand mt-3"
-                       th:href="@{/member/payments}">
-                        Xem thanh toán
-                    </a>
-
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Branches -->
-        <div class="col-md-6 col-lg-4">
-
-            <div class="ut-card">
-                <div class="ut-card-body">
-
-                    <div class="program-icon">04</div>
-
-                    <h3>Chi nhánh UTEFit</h3>
-
-                    <p>
-                        Tra cứu các phòng tập đang
-                        hoạt động trong hệ thống.
-                    </p>
-
-                    <a class="btn btn-outline-light mt-3"
-                       th:href="@{/branches}">
-                        Khám phá chi nhánh
-                    </a>
-
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Class Booking -->
-        <div class="col-md-6 col-lg-4">
-
-            <div class="ut-card">
-                <div class="ut-card-body">
-
-                    <div class="program-icon">05</div>
-
-                    <h3>Đăng ký lớp tập</h3>
-
-                    <p>
-                        Tìm lịch lớp còn chỗ, đăng ký,
-                        hủy lịch và xem lịch cá nhân.
-                    </p>
-
-                    <a class="btn btn-brand mt-3"
-                       th:href="@{/member/classes}">
-                        Đăng ký lịch lớp
-                    </a>
-
-                    <a class="btn btn-outline-light mt-3 ms-2"
-                       th:href="@{/member/schedule}">
-                        Lịch của tôi
-                    </a>
-
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Trainers -->
-        <div class="col-md-6 col-lg-4">
-
-            <div class="ut-card">
-                <div class="ut-card-body">
-
-                    <div class="program-icon">06</div>
-
-                    <h3>Huấn luyện viên</h3>
-
-                    <p>
-                        Khám phá hồ sơ các PT
-                        và tìm người hướng dẫn phù hợp.
-                    </p>
-
-                    <a class="btn btn-outline-light mt-3"
-                       th:href="@{/trainers}">
-                        Tìm PT
-                    </a>
-
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Giai đoạn 5: Member - PT -->
-        <div class="col-md-6 col-lg-4">
-            <div class="ut-card">
-                <div class="ut-card-body">
-
-                    <div class="program-icon">07</div>
-
-                    <h3>Yêu cầu PT</h3>
-
-                    <p>
-                        Gửi yêu cầu, xem PT chấp nhận
-                        hoặc từ chối.
-                    </p>
-
-                    <a class="btn btn-brand mt-3"
-                       th:href="@{/member/trainer-requests}">
-                        Yêu cầu của tôi
-                    </a>
-
-                </div>
             </div>
         </div>
 
-        <div class="col-md-6 col-lg-4">
-            <div class="ut-card">
-                <div class="ut-card-body">
-
-                    <div class="program-icon">08</div>
-
-                    <h3>Lịch PT 1:1</h3>
-
-                    <p>
-                        Xem lịch tập cá nhân do
-                        huấn luyện viên tạo.
-                    </p>
-
-                    <a class="btn btn-brand mt-3"
-                       th:href="@{/member/pt-schedules}">
-                        Xem lịch PT
-                    </a>
-
-                </div>
-            </div>
+        <div class="ut-hero-decoration"
+             aria-hidden="true">
+            UTE<span>FIT</span>
+            <small>STRONGER EVERY DAY</small>
         </div>
 
-        <div class="col-md-6 col-lg-4">
-            <div class="ut-card">
-                <div class="ut-card-body">
+    </section>
 
-                    <div class="program-icon">09</div>
+    <div class="ut-dashboard-grid">
 
-                    <h3>Chat & thông báo</h3>
+        <!-- ======================================
+             GÓI TẬP HIỆN TẠI
+             ====================================== -->
 
-                    <p>
-                        Trò chuyện với PT
-                        và nhận thông tin lịch tập.
-                    </p>
+        <section class="ut-dash-panel ut-membership-panel"
+                 aria-labelledby="ut-membership-title">
 
-                    <a class="btn btn-brand mt-3"
-                       th:href="@{/member/chats}">
-                        Tin nhắn
-                    </a>
+            <div class="ut-panel-top">
 
-                    <a class="btn btn-outline-light mt-3 ms-2"
-                       th:href="@{/member/notifications}">
-                        Thông báo
-                    </a>
+                <h2 id="ut-membership-title">
+                    <span class="ut-icon-square">◆</span>
+                    Gói tập hiện tại
+                </h2>
 
-                </div>
+                <a th:href="@{/member/memberships}"
+                   class="ut-panel-link">
+                    Xem chi tiết →
+                </a>
             </div>
-        </div>
 
-        <!-- Giai đoạn 6: Review -->
-        <div class="col-md-6 col-lg-4">
-            <div class="ut-card">
-                <div class="ut-card-body">
+            <!-- Có Membership ACTIVE và còn hạn -->
+            <th:block th:if="${dashboard.activeMembership != null}">
 
-                    <div class="program-icon">10</div>
+                <div class="ut-plan-display">
 
-                    <h3>Đánh giá dịch vụ</h3>
+                    <div class="ut-plan-symbol"
+                         aria-hidden="true">
+                        ✦
+                    </div>
 
-                    <p>
-                        Viết đánh giá 1–5 sao,
-                        đăng ảnh trải nghiệm,
-                        theo dõi trạng thái.
-                    </p>
+                    <div class="ut-plan-details">
 
-                    <a class="btn btn-brand mt-3"
-                       th:href="@{/member/reviews}">
-                        Đánh giá của tôi
-                    </a>
+                        <span class="ut-pill ut-pill-success">
+                            Đang hoạt động
+                        </span>
 
-                    <a class="btn btn-outline-light mt-3 ms-2"
-                       th:href="@{/reviews}">
-                        Đánh giá công khai
-                    </a>
+                        <h3 th:text="${dashboard.activeMembership.planName}">
+                            Gói tập
+                        </h3>
 
+                        <p>
+                            ⌖
+                            <span th:text="${dashboard.activeMembership.branchName}">
+                                Chi nhánh
+                            </span>
+                        </p>
+
+                        <p>
+                            ◷
+                            <span th:text="${dashboard.activeMembership.startDate}">
+                            </span>
+                            —
+                            <span th:text="${dashboard.activeMembership.endDate}">
+                            </span>
+                        </p>
+
+                        <div class="ut-progress-track"
+                             role="progressbar"
+                             aria-label="Thời gian gói đã sử dụng"
+                             th:attr="aria-valuenow=${dashboard.progressPercent}"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+
+                            <span th:style="|width:${dashboard.progressPercent}%|">
+                            </span>
+                        </div>
+
+                        <p class="ut-pink"
+                           th:text="|Còn ${dashboard.daysLeft} ngày sử dụng|">
+                            Còn hạn
+                        </p>
+
+                    </div>
                 </div>
+
+                <a class="ut-wide-action"
+                   th:href="@{/member/memberships}">
+                    Quản lý gói tập →
+                </a>
+
+            </th:block>
+
+            <!-- Chưa có gói ACTIVE -->
+            <div th:if="${dashboard.activeMembership == null}"
+                 class="ut-empty-state">
+
+                <div class="ut-empty-icon">
+                    ✦
+                </div>
+
+                <h3 th:text="${dashboard.pendingMembership}
+                    ? 'Có gói tập chờ thanh toán'
+                    : 'Chưa có gói tập đang sử dụng'">
+                    Chưa có gói tập
+                </h3>
+
+                <p th:text="${dashboard.pendingMembership}
+                    ? 'Hoàn tất thanh toán CASH và chờ Admin xác nhận để sử dụng dịch vụ.'
+                    : 'Chọn chi nhánh và gói tập phù hợp để bắt đầu.'">
+                </p>
+
+                <a class="btn btn-brand"
+                   th:href="${dashboard.pendingMembership}
+                       ? @{/member/payments}
+                       : @{/member/memberships}"
+                   th:text="${dashboard.pendingMembership}
+                       ? 'Theo dõi thanh toán'
+                       : 'Đăng ký gói tập'">
+                    Đăng ký gói
+                </a>
+
             </div>
-        </div>
 
-        <!-- Giai đoạn 6: Lịch sử -->
-        <div class="col-md-6 col-lg-4">
-            <div class="ut-card">
-                <div class="ut-card-body">
+        </section>
 
-                    <div class="program-icon">11</div>
+        <!-- ======================================
+             BUỔI TẬP SẮP TỚI
+             ====================================== -->
 
-                    <h3>Lịch sử sử dụng</h3>
+        <section class="ut-dash-panel ut-upcoming-panel"
+                 aria-labelledby="ut-upcoming-title">
 
-                    <p>
-                        Gói tập, thanh toán, lịch lớp
-                        và đánh giá trong một trang.
-                    </p>
+            <div class="ut-panel-top">
 
-                    <a class="btn btn-brand mt-3"
-                       th:href="@{/member/history}">
-                        Xem lịch sử
+                <h2 id="ut-upcoming-title">
+                    <span class="ut-icon-square">▣</span>
+                    Buổi tập sắp tới
+                </h2>
+
+                <a th:href="@{/member/schedule}"
+                   class="ut-panel-link">
+                    Lịch lớp →
+                </a>
+
+            </div>
+
+            <!-- Lịch thật: Class + PT -->
+            <div class="ut-upcoming-list"
+                 th:if="${!#lists.isEmpty(dashboard.upcoming)}">
+
+                <article class="ut-session"
+                         th:each="s : ${dashboard.upcoming}">
+
+                    <div class="ut-date-box">
+
+                        <strong th:text="${#temporals.format(s.date,'dd')}">
+                            22
+                        </strong>
+
+                        <span th:text="${#temporals.format(s.date,'MM/yyyy')}">
+                            10/2026
+                        </span>
+
+                    </div>
+
+                    <div class="ut-session-details">
+
+                        <span class="ut-session-tag"
+                              th:text="${s.kind == 'PT'}
+                                  ? 'PT 1:1'
+                                  : 'Lớp nhóm'">
+                            Lớp nhóm
+                        </span>
+
+                        <h3 th:text="${s.title}">
+                            Buổi tập
+                        </h3>
+
+                        <p>
+                            <span th:text="${s.startTime}">
+                                18:00
+                            </span>
+                            –
+                            <span th:text="${s.endTime}">
+                                19:00
+                            </span>
+
+                            <span th:if="${s.branchName != null}">
+                                ·
+                                <span th:text="${s.branchName}">
+                                </span>
+                            </span>
+                        </p>
+
+                    </div>
+
+                    <a class="ut-session-arrow"
+                       th:href="${s.kind == 'PT'}
+                           ? @{/member/pt-schedules}
+                           : @{/member/schedule}"
+                       aria-label="Xem lịch">
+                        →
                     </a>
 
-                </div>
+                </article>
+
             </div>
-        </div>
 
-    </div>
+            <div th:if="${#lists.isEmpty(dashboard.upcoming)}"
+                 class="ut-empty-state ut-empty-small">
 
-    <div class="ut-panel mt-5">
+                <div class="ut-empty-icon">
+                    ▣
+                </div>
 
-        <h3 class="mb-3">
-            Tài khoản của bạn
-        </h3>
+                <h3>
+                    Chưa có buổi tập sắp tới
+                </h3>
 
-        <p class="ut-subtitle">
-            Khu vực này dành riêng cho MEMBER.
-            Các trang PT và Admin được Spring Security
-            bảo vệ theo vai trò.
-        </p>
+                <p>
+                    Khám phá lịch lớp còn chỗ
+                    hoặc xem lịch PT của bạn.
+                </p>
 
-        <form th:action="@{/auth/logout}"
-              method="post">
+                <a class="btn btn-outline-light"
+                   th:href="@{/member/classes}">
+                    Tìm lớp tập
+                </a>
 
-            <input type="hidden"
-                   th:name="${_csrf.parameterName}"
-                   th:value="${_csrf.token}">
+            </div>
 
-            <button type="submit"
-                    class="btn btn-outline-danger">
-                Đăng xuất
-            </button>
+            <a th:href="@{/member/pt-schedules}"
+               class="ut-secondary-link">
+                Xem lịch PT cá nhân →
+            </a>
 
-        </form>
+        </section>
+
+        <!-- ======================================
+             THAO TÁC NHANH
+             ====================================== -->
+
+        <section class="ut-dash-panel ut-action-panel"
+                 aria-labelledby="ut-actions-title">
+
+            <div class="ut-panel-top">
+
+                <h2 id="ut-actions-title">
+                    <span class="ut-icon-square">⚡</span>
+                    Thao tác nhanh
+                </h2>
+
+            </div>
+
+            <div class="ut-quick-grid">
+
+                <a th:href="@{/member/classes}">
+                    <span>▣</span>
+                    Đăng ký lớp
+                </a>
+
+                <a th:href="@{/member/schedule}">
+                    <span>▤</span>
+                    Lịch của tôi
+                </a>
+
+                <a th:href="@{/trainers}">
+                    <span>♙</span>
+                    Tìm PT
+                </a>
+
+                <a th:href="@{/member/payments}">
+                    <span>▰</span>
+                    Thanh toán
+                </a>
+
+                <a th:href="@{/member/reviews}">
+                    <span>☆</span>
+                    Đánh giá
+                </a>
+
+                <a th:href="@{/member/history}">
+                    <span>◷</span>
+                    Lịch sử
+                </a>
+
+            </div>
+
+            <!-- Giao dịch mới nhất -->
+            <div class="ut-payment-line"
+                 th:if="${dashboard.latestPayment != null}">
+
+                <div>
+                    <small>
+                        Giao dịch gần nhất
+                    </small>
+
+                    <strong th:text="${dashboard.latestPayment.planName}">
+                        Gói tập
+                    </strong>
+                </div>
+
+                <span class="ut-pill"
+                      th:text="${dashboard.latestPayment.status}">
+                    PENDING
+                </span>
+
+            </div>
+
+        </section>
+
+        <!-- ======================================
+             LỚP TẬP NỔI BẬT
+             ====================================== -->
+
+        <section class="ut-dash-panel ut-classes-panel"
+                 aria-labelledby="ut-classes-title">
+
+            <div class="ut-panel-top">
+
+                <h2 id="ut-classes-title">
+                    <span class="ut-icon-square">✦</span>
+                    Lớp tập nổi bật
+                </h2>
+
+                <a th:href="@{/member/classes}"
+                   class="ut-panel-link">
+                    Tìm lịch lớp →
+                </a>
+
+            </div>
+
+            <!-- Dữ liệu FitnessClass thật -->
+            <div class="ut-catalog-grid"
+                 th:if="${!#lists.isEmpty(dashboard.featuredClasses)}">
+
+                <article class="ut-catalog-card"
+                         th:each="c : ${dashboard.featuredClasses}">
+
+                    <div class="ut-catalog-art"
+                         aria-hidden="true">
+
+                        <span th:text="${c.categoryName}">
+                            FITNESS
+                        </span>
+
+                        <strong>
+                            UTEFIT
+                        </strong>
+
+                    </div>
+
+                    <div class="ut-catalog-body">
+
+                        <h3 th:text="${c.name}">
+                            Lớp tập
+                        </h3>
+
+                        <p th:text="${c.branchName}">
+                            Chi nhánh
+                        </p>
+
+                        <p class="ut-small"
+                           th:text="|PT: ${c.trainerName}|">
+                            Huấn luyện viên
+                        </p>
+
+                        <a class="ut-inline-cta"
+                           th:href="@{/member/classes}">
+                            Xem lịch và đăng ký →
+                        </a>
+
+                    </div>
+
+                </article>
+
+            </div>
+
+            <div th:if="${#lists.isEmpty(dashboard.featuredClasses)}"
+                 class="ut-empty-state ut-empty-small">
+
+                <p>
+                    Hiện chưa có lớp nổi bật.
+                </p>
+
+                <a th:href="@{/classes}"
+                   class="ut-panel-link">
+                    Xem tất cả lớp →
+                </a>
+
+            </div>
+
+        </section>
+
+        <!-- ======================================
+             HUẤN LUYỆN VIÊN
+             ====================================== -->
+
+        <section class="ut-dash-panel ut-trainers-panel"
+                 aria-labelledby="ut-trainers-title">
+
+            <div class="ut-panel-top">
+
+                <h2 id="ut-trainers-title">
+                    <span class="ut-icon-square">♙</span>
+                    Huấn luyện viên
+                </h2>
+
+                <a th:href="@{/trainers}"
+                   class="ut-panel-link">
+                    Xem tất cả →
+                </a>
+
+            </div>
+
+            <div class="ut-trainer-list"
+                 th:if="${!#lists.isEmpty(dashboard.featuredTrainers)}">
+
+                <article class="ut-trainer-row"
+                         th:each="t : ${dashboard.featuredTrainers}">
+
+                    <!-- Avatar từ database / Cloudinary -->
+                    <img th:if="${t.avatarUrl != null and !t.avatarUrl.isBlank()}"
+                         th:src="${t.avatarUrl}"
+                         alt="Ảnh huấn luyện viên"
+                         loading="lazy">
+
+                    <!-- PT chưa có avatar -->
+                    <div class="ut-trainer-avatar"
+                         th:unless="${t.avatarUrl != null and !t.avatarUrl.isBlank()}"
+                         aria-hidden="true">
+                        PT
+                    </div>
+
+                    <div>
+
+                        <h3 th:text="${t.fullName}">
+                            Huấn luyện viên
+                        </h3>
+
+                        <p th:text="${t.specialization ?: 'Huấn luyện cá nhân'}">
+                            Chuyên môn
+                        </p>
+
+                    </div>
+
+                    <a th:href="@{/trainers/{id}(id=${t.id})}"
+                       class="ut-inline-cta">
+                        Hồ sơ →
+                    </a>
+
+                </article>
+
+            </div>
+
+            <div class="ut-empty-state ut-empty-small"
+                 th:if="${#lists.isEmpty(dashboard.featuredTrainers)}">
+
+                <p>
+                    Chưa có PT công khai.
+                </p>
+
+                <a th:href="@{/trainers}"
+                   class="ut-panel-link">
+                    Tìm PT →
+                </a>
+
+            </div>
+
+        </section>
+
+        <!-- ======================================
+             THÔNG BÁO GẦN ĐÂY
+             ====================================== -->
+
+        <section class="ut-dash-panel ut-notify-panel"
+                 aria-labelledby="ut-notify-title">
+
+            <div class="ut-panel-top">
+
+                <h2 id="ut-notify-title">
+
+                    <span class="ut-icon-square">◉</span>
+                    Thông báo
+
+                    <span class="ut-unread"
+                          th:if="${dashboard.unreadCount > 0}"
+                          th:text="${dashboard.unreadCount}">
+                        2
+                    </span>
+
+                </h2>
+
+                <a th:href="@{/member/notifications}"
+                   class="ut-panel-link">
+                    Xem tất cả →
+                </a>
+
+            </div>
+
+            <div class="ut-notification-list"
+                 th:if="${!#lists.isEmpty(dashboard.notifications)}">
+
+                <article class="ut-notification"
+                         th:each="n : ${dashboard.notifications}">
+
+                    <span class="ut-notify-dot"
+                          th:classappend="${n.read} ? ' is-read'">
+                    </span>
+
+                    <div>
+
+                        <h3 th:text="${n.title}">
+                            Thông báo
+                        </h3>
+
+                        <p th:text="${n.content}">
+                            Nội dung
+                        </p>
+
+                        <small th:if="${n.createdAt != null}"
+                               th:text="${#temporals.format(n.createdAt,'dd/MM/yyyy HH:mm')}">
+                        </small>
+
+                    </div>
+
+                </article>
+
+            </div>
+
+            <div class="ut-empty-state ut-empty-small"
+                 th:if="${#lists.isEmpty(dashboard.notifications)}">
+
+                <p>
+                    Bạn chưa có thông báo nào.
+                </p>
+
+            </div>
+
+        </section>
 
     </div>
 

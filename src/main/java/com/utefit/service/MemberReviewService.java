@@ -4,6 +4,7 @@ import com.utefit.dto.cloudinary.MediaUploadResult;
 import com.utefit.dto.member.ReviewForm;
 import com.utefit.entity.*;
 import com.utefit.enums.RegistrationStatus;
+import com.utefit.enums.PersonalTrainingStatus;
 import com.utefit.repository.BranchRepository;
 import com.utefit.repository.ReviewRepository;
 import com.utefit.repository.TrainerRepository;
@@ -334,8 +335,11 @@ public class MemberReviewService {
         for (PersonalTrainingSchedule session :
                 reviews.personalSessions(memberId)) {
 
+            if (session.getStatus() != PersonalTrainingStatus.COMPLETED) {
+                continue;
+            }
             Trainer t = session.getTrainer();
-            Branch branch = t.getBranch();
+            Branch branch = session.getBranch() != null ? session.getBranch() : t.getBranch();
 
             if (branch == null
                     || session.getEndTime() == null

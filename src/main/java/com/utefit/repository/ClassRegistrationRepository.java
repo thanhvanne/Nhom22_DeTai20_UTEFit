@@ -7,6 +7,9 @@ import com.utefit.enums.RegistrationStatus;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Lock;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
@@ -52,6 +55,22 @@ public interface ClassRegistrationRepository
     // =====================================================
     // CAC PHUONG THUC CU - GIU NGUYEN
     // =====================================================
+
+    @Modifying
+    @Query("UPDATE ClassRegistration r SET r.status = :target WHERE r.schedule.id = :scheduleId AND r.status = :current")
+    int cancelRegistrationsForSchedule(@Param("scheduleId") Long scheduleId,
+                                       @Param("current") RegistrationStatus current,
+                                       @Param("target") RegistrationStatus target);
+
+    @Modifying
+    @Query("UPDATE ClassRegistration r SET r.status = :target WHERE r.id IN (SELECT x.id FROM ClassRegistration x WHERE x.schedule.fitnessClass.id = :classId AND x.status = :current)")
+    int cancelRegistrationsForClass(@Param("classId") Long classId,
+                                    @Param("current") RegistrationStatus current,
+                                    @Param("target") RegistrationStatus target);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT r FROM ClassRegistration r JOIN FETCH r.schedule s JOIN FETCH s.fitnessClass fc WHERE r.id = :id")
+    Optional<ClassRegistration> lockForAttendance(@Param("id") Long id);
 
     // PT dem so Member dang dang ky.
     long countBySchedule_IdAndStatus(
