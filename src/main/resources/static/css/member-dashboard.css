@@ -914,3 +914,15 @@
         flex-wrap: wrap;
     }
 }
+/* 2026-10: chỉ giữ phần cốt lõi của Dashboard; thông báo luôn ở hàng đầu. */
+.ut-dashboard-grid > .ut-notify-panel {grid-column:1/-1}
+.ut-dashboard-grid > .ut-membership-panel,
+.ut-dashboard-grid > .ut-upcoming-panel,
+.ut-dashboard-grid > .ut-action-panel {grid-column:auto}
+.ut-welcome {min-height:168px;padding:24px 34px}
+.ut-welcome h1 {font-size:clamp(1.7rem,2.7vw,2.4rem)}
+.ut-hero-decoration {opacity:.13}
+.ut-notify-panel .ut-notification-list {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.ut-notify-panel .ut-notification {border:1px solid #2b3854;border-radius:10px;padding:12px}
+@media(max-width:1199.98px){.ut-dashboard-grid>.ut-notify-panel{grid-column:1/-1}.ut-notify-panel .ut-notification-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:767.98px){.ut-notify-panel .ut-notification-list{grid-template-columns:1fr}.ut-welcome{padding:20px}}

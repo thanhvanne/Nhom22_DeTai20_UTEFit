@@ -1,4 +1,3 @@
-
 package com.utefit.controller.member;
 
 import com.utefit.service.MemberClassBookingService;
@@ -10,6 +9,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
+import java.time.LocalDate;
+import org.springframework.format.annotation.DateTimeFormat;
+import com.utefit.service.WeeklyTimetableService;
 
 @Controller
 @RequestMapping("/member")
@@ -17,13 +19,16 @@ public class MemberClassBookingController {
 
     private final MemberClassBookingService booking;
     private final PublicCatalogService catalog;
+    private final WeeklyTimetableService timetable;
 
     public MemberClassBookingController(
             MemberClassBookingService booking,
-            PublicCatalogService catalog
+            PublicCatalogService catalog,
+            WeeklyTimetableService timetable
     ) {
         this.booking = booking;
         this.catalog = catalog;
+        this.timetable = timetable;
     }
 
     // Danh sách lịch lớp, tìm kiếm và lọc.
@@ -91,6 +96,7 @@ public class MemberClassBookingController {
     @PostMapping("/classes/{id}/cancel")
     public String cancel(
             @PathVariable Long id,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate weekStart,
             Principal principal,
             RedirectAttributes redirect
     ) {
@@ -113,22 +119,16 @@ public class MemberClassBookingController {
             );
         }
 
-        return "redirect:/member/schedule";
+        return "redirect:/member/schedule" + (weekStart == null ? "" : "?weekStart=" + weekStart);
     }
 
     // Lịch sử và lịch cá nhân.
     @GetMapping("/schedule")
     public String schedule(
-            Principal principal,
-            Model model
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate weekStart,
+            Principal principal, Model model
     ) {
-        model.addAttribute(
-                "bookings",
-                booking.mySchedule(
-                        principal.getName()
-                )
-        );
-
+        model.addAttribute("week", timetable.memberWeek(principal.getName(), weekStart));
         return "member/schedule";
     }
 }

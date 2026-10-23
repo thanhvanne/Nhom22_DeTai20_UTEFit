@@ -1,153 +1,58 @@
-
 <!DOCTYPE html>
-<html lang="vi"
-      xmlns:th="http://www.thymeleaf.org">
-
-<head th:replace="~{fragments/head :: head('Lịch lớp của tôi - UTEFit')}">
-</head>
-
-<body>
-
-<header th:replace="~{fragments/header :: header}">
-</header>
-
-<main class="container ut-page">
-
-    <div class="d-flex justify-content-between
-                align-items-center flex-wrap gap-3 mb-4">
-
-        <div>
-
-            <h1 class="ut-page-title">
-                Lịch lớp <span>của tôi</span>
-            </h1>
-
-            <p class="ut-subtitle mb-0">
-                Danh sách các lịch bạn đã đăng ký và hủy.
-            </p>
-
-        </div>
-
-        <a class="btn btn-brand"
-           th:href="@{/member/classes}">
-            Tìm lịch lớp mới
-        </a>
-
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Thời khóa biểu hội viên - UTEFit')}"></head>
+<body class="ut-week-page">
+<header th:replace="~{fragments/header :: header}"></header>
+<main class="container-fluid ut-week-wrap">
+    <div class="ut-week-heading">
+        <div><p class="ut-week-kicker">UTEFIT · MEMBER</p>
+            <h1>Thời khóa biểu <span>của tôi</span></h1>
+            <p>Lịch lớp nhóm và PT 1:1 theo từng ngày trong tuần.</p></div>
+        <a class="btn btn-brand" th:href="@{/member/classes}">Tìm lớp mới</a>
     </div>
-
-    <div th:if="${success}"
-         class="alert alert-success"
-         th:text="${success}">
+    <div class="alert alert-success" th:if="${success != null or successMessage != null}"
+         th:text="${success != null ? success : successMessage}"></div>
+    <div class="alert alert-danger" th:if="${error != null or errorMessage != null}"
+         th:text="${error != null ? error : errorMessage}"></div>
+    <nav class="ut-week-controls" aria-label="Chuyển tuần">
+        <a th:href="@{/member/schedule(weekStart=${week.previous()})}">← Tuần trước</a>
+        <strong th:text="|${#temporals.format(week.start,'dd/MM')} – ${#temporals.format(week.end,'dd/MM/yyyy')}|">Tuần</strong>
+        <a th:href="@{/member/schedule}">Tuần này</a>
+        <a th:href="@{/member/schedule(weekStart=${week.next()})}">Tuần sau →</a>
+    </nav>
+    <div class="ut-week-grid" role="group" aria-label="Thời khóa biểu 7 ngày">
+        <section class="ut-week-day" th:each="day : ${week.days}"
+                 th:classappend="${day.date.equals(week.today)} ? ' is-today' : ''">
+            <div class="ut-week-day-head"><span th:text="${day.label}">Thứ 2</span>
+                <strong th:text="${#temporals.format(day.date,'dd/MM')}">01/01</strong></div>
+            <div class="ut-week-events">
+                <article class="ut-week-event" th:each="slot : ${day.slots}"
+                         th:classappend="${slot.kind == 'PT'} ? ' is-pt' : ' is-class'">
+                    <span class="ut-week-type" th:text="${slot.kind == 'PT' ? 'PT 1:1' : 'Lớp nhóm'}">Lớp</span>
+                    <time th:text="|${#temporals.format(slot.start,'HH:mm')}–${#temporals.format(slot.end,'HH:mm')}|">18:00–19:00</time>
+                    <h3 th:text="${slot.title}">Tên lớp</h3>
+                    <p th:text="${slot.detail}">Chi tiết</p>
+                    <small th:text="${slot.status}">Trạng thái</small>
+                    <div class="ut-week-actions">
+                        <a th:if="${slot.detailUrl != null}" th:href="${slot.detailUrl}">Chi tiết</a>
+                        <form th:if="${slot.cancelUrl != null}" method="post" th:action="${slot.cancelUrl}"
+                              onsubmit="return confirm('Bạn chắc chắn muốn hủy lịch này?')">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <input type="hidden" name="weekStart" th:value="${week.start}">
+                            <button type="submit">Hủy</button></form>
+                        <form th:if="${slot.completeUrl != null}" method="post" th:action="${slot.completeUrl}"
+                              onsubmit="return confirm('Xác nhận hoàn thành buổi PT theo điều kiện check-in?')">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <input type="hidden" name="weekStart" th:value="${week.start}">
+                            <button class="ut-complete" type="submit">Hoàn thành</button></form>
+                    </div>
+                </article>
+                <p class="ut-week-no-events" th:if="${#lists.isEmpty(day.slots)}">Không có lịch</p>
+            </div>
+        </section>
     </div>
-
-    <div th:if="${error}"
-         class="alert alert-danger"
-         th:text="${error}">
-    </div>
-
-    <div class="ut-panel">
-
-        <div class="table-responsive">
-
-            <table class="table ut-table align-middle">
-
-                <thead>
-                <tr>
-                    <th>Lớp tập</th>
-                    <th>Chi nhánh</th>
-                    <th>Ngày</th>
-                    <th>Giờ</th>
-                    <th>Phòng</th>
-                    <th>Trạng thái</th>
-                    <th>Thao tác</th>
-                </tr>
-                </thead>
-
-                <tbody>
-
-                <tr th:each="b : ${bookings}">
-
-                    <td th:text="${b.className}">
-                        Yoga
-                    </td>
-
-                    <td th:text="${b.branchName}">
-                        UTEFit
-                    </td>
-
-                    <td th:text="${#temporals.format(b.date, 'dd/MM/yyyy')}">
-                        01/11/2026
-                    </td>
-
-                    <td th:text="${b.startTime + ' - ' + b.endTime}">
-                        08:00 - 09:00
-                    </td>
-
-                    <td th:text="${b.room ?: '-'}">
-                        A1
-                    </td>
-
-                    <td>
-
-                        <span class="ut-status"
-                              th:classappend="${b.status == 'REGISTERED' ? 'ACTIVE' : 'CANCELLED'}"
-                              th:text="${b.status == 'REGISTERED' ? 'Đã đăng ký' : (b.status == 'CANCELLED' ? 'Đã hủy' : b.status)}">
-                            REGISTERED
-                        </span>
-
-                    </td>
-
-                    <td>
-
-                        <form th:if="${b.canCancel}"
-                              method="post"
-                              th:action="@{/member/classes/{id}/cancel(id=${b.scheduleId})}">
-
-                            <input type="hidden"
-                                   th:name="${_csrf.parameterName}"
-                                   th:value="${_csrf.token}">
-
-                            <button type="submit"
-                                    class="btn btn-outline-danger btn-sm"
-                                    onclick="return confirm('Bạn chắc chắn muốn hủy lịch lớp này?')">
-
-                                Hủy lịch
-
-                            </button>
-
-                        </form>
-
-                        <span th:unless="${b.canCancel}"
-                              class="text-secondary">
-                            —
-                        </span>
-
-                    </td>
-
-                </tr>
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-        <p th:if="${#lists.isEmpty(bookings)}"
-           class="ut-subtitle text-center my-4">
-
-            Bạn chưa đăng ký lịch lớp nào.
-
-        </p>
-
-    </div>
-
+    <p class="ut-week-note">Member chỉ hủy được lớp chưa bắt đầu; không được xóa lịch đã học.</p>
 </main>
-
-<footer th:replace="~{fragments/footer :: footer}">
-</footer>
-
-<div th:replace="~{fragments/scripts :: scripts}">
-</div>
-
-</body>
-</html>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<div th:replace="~{fragments/scripts :: scripts}"></div>
+</body></html>

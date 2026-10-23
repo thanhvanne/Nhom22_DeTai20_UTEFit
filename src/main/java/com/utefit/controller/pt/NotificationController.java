@@ -1,67 +1,43 @@
 package com.utefit.controller.pt;
 
-import com.utefit.dto.notification.NotificationDto;
-import com.utefit.entity.User;
-import com.utefit.repository.UserRepository;
+import com.utefit.service.CurrentAccountService;
 import com.utefit.service.NotificationService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
 import java.security.Principal;
-import java.util.List;
 
 @Controller
 @RequestMapping("/notifications")
 @RequiredArgsConstructor
 public class NotificationController {
-
-    private final NotificationService notificationService;
-    private final UserRepository userRepository;
+    private final NotificationService notifications;
+    private final CurrentAccountService accounts;
 
     @GetMapping
-    public String listNotifications(Model model, Principal principal) {
-        Long userId = getCurrentUserId(principal);
-        List<NotificationDto> notifications =
-                notificationService.getNotificationsForUser(userId);
-        model.addAttribute("notifications", notifications);
+    public String listNotifications(Model model,Principal principal) {
+        model.addAttribute("notifications",notifications.getNotificationsForUser(
+                accounts.requireUserId(principal.getName())));
         return "notification/list";
     }
-
     @PostMapping("/{id}/read")
-    public String markAsRead(@PathVariable("id") Long id,
-                             @RequestParam(value = "redirect", required = false) String redirect,
-                             Principal principal) {
-        Long userId = getCurrentUserId(principal);
-        notificationService.markAsRead(id, userId);
-        return "redirect:" + (redirect != null ? redirect : "/notifications");
+    public String markAsRead(@PathVariable Long id,
+                             @RequestParam(required=false) String redirect,Principal principal) {
+        notifications.markAsRead(id,accounts.requireUserId(principal.getName()));
+        return safeRedirect(redirect);
     }
-
     @PostMapping("/read-all")
-    public String markAllAsRead(@RequestParam(value = "redirect", required = false) String redirect,
-                                Principal principal) {
-        Long userId = getCurrentUserId(principal);
-        notificationService.markAllAsRead(userId);
-        return "redirect:" + (redirect != null ? redirect : "/notifications");
+    public String markAllAsRead(@RequestParam(required=false) String redirect,Principal principal) {
+        notifications.markAllAsRead(accounts.requireUserId(principal.getName()));
+        return safeRedirect(redirect);
     }
-
-    @GetMapping("/unread-count")
-    @ResponseBody
+    @GetMapping("/unread-count") @ResponseBody
     public long unreadCount(Principal principal) {
-        Long userId = getCurrentUserId(principal);
-        return notificationService.countUnreadForUser(userId);
+        return notifications.countUnreadForUser(accounts.requireUserId(principal.getName()));
     }
-
-    private Long getCurrentUserId(Principal principal) {
-        if (principal == null) {
-            throw new EntityNotFoundException("Không tìm thấy người dùng đăng nhập.");
-        }
-        String email = principal.getName(); // username = email
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() ->
-                        new EntityNotFoundException("Không tìm thấy người dùng với email: " + email));
-        return user.getId();
+    private String safeRedirect(String target) {
+        return "redirect:"+(target!=null && (target.equals("/notifications")
+                || target.equals("/pt/dashboard"))?target:"/notifications");
     }
 }

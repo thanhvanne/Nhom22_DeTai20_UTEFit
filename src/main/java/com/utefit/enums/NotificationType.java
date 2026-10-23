@@ -8,5 +8,6 @@ public enum NotificationType {
     CLASS_SCHEDULE_CANCELLED,      // Admin huỷ lớp/lịch (C sẽ dùng)
     MESSAGE_RECEIVED,              // Tin nhắn mới trong chat
     MEMBERSHIP_ACTIVATED,          // Admin xác nhận CASH
-    PERSONAL_SCHEDULE_CANCELLED    // PT hủy buổi cá nhân
+    PERSONAL_SCHEDULE_CANCELLED,   // PT hủy buổi cá nhân
+    SCHEDULE_REMINDER             // Nhắc buổi học trước 24 giờ
 }

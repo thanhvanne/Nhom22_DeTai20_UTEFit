@@ -1,4 +1,3 @@
-
 package com.utefit.repository;
 
 import com.utefit.entity.PersonalTrainingSchedule;
@@ -12,6 +11,16 @@ import java.util.List;
 
 public interface PersonalTrainingScheduleRepository
         extends JpaRepository<PersonalTrainingSchedule, Long> {
+
+    @Query("""
+            SELECT p FROM PersonalTrainingSchedule p
+            JOIN FETCH p.member JOIN FETCH p.trainer t JOIN FETCH t.user
+            WHERE p.active = true AND p.status = :status
+              AND p.scheduleDate BETWEEN :first AND :last
+            """)
+    List<PersonalTrainingSchedule> findUpcomingForReminders(
+            @Param("status") com.utefit.enums.PersonalTrainingStatus status,
+            @Param("first") LocalDate first, @Param("last") LocalDate last);
 
     @Query(value = """
             SELECT *

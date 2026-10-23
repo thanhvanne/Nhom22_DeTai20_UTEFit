@@ -1,193 +1,67 @@
 package com.utefit.controller.pt;
 
-import com.utefit.dto.trainer.PersonalTrainingScheduleResponse;
 import com.utefit.dto.trainer.PtClassScheduleDetailResponse;
-import com.utefit.dto.trainer.PtClassScheduleSummaryResponse;
-import com.utefit.dto.trainer.PtWeeklyDayScheduleResponse;
-import com.utefit.entity.User;
-import com.utefit.repository.UserRepository;
-import com.utefit.service.PersonalTrainingScheduleService;
-import com.utefit.service.PtClassService;
-import com.utefit.service.PtAttendanceService;
 import com.utefit.enums.RegistrationStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import com.utefit.service.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.temporal.TemporalAdjusters;
-import java.util.*;
 
 @Controller
 @RequestMapping("/pt/classes")
+@RequiredArgsConstructor
 public class PtClassController {
-
-    private final PtClassService ptClassService;
-    private final PersonalTrainingScheduleService personalTrainingScheduleService;
-    private final UserRepository userRepository;
+    private final PtClassService classes;
     private final PtAttendanceService attendance;
+    private final PtPersonalScheduleViewService ptUsers;
+    private final PersonalTrainingScheduleService personal;
+    private final WeeklyTimetableService timetable;
 
-    public PtClassController(PtClassService ptClassService,
-                             PersonalTrainingScheduleService personalTrainingScheduleService,
-                             UserRepository userRepository, PtAttendanceService attendance) {
-        this.ptClassService = ptClassService;
-        this.personalTrainingScheduleService = personalTrainingScheduleService;
-        this.userRepository = userRepository;
-        this.attendance = attendance;
-    }
-
-    private Long getCurrentUserId(Authentication authentication) {
-        String email = authentication.getName();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalStateException("Không tìm thấy tài khoản đăng nhập."));
-        return user.getId();
-    }
-
-    // Lịch dạng tuần cho PT: LỚP + PT 1:1
     @GetMapping
-    public String listWeeklyClasses(Authentication authentication,
-                                    @RequestParam(value = "weekStart", required = false)
-                                    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate weekStartParam,
-                                    Model model) {
-
-        Long userId = getCurrentUserId(authentication);
-        LocalDate today = LocalDate.now();
-
-        // Nếu không truyền weekStart -> lấy tuần hiện tại
-        LocalDate baseDate = (weekStartParam != null ? weekStartParam : today);
-
-        // Quy về thứ 2 của tuần chứa baseDate
-        LocalDate weekStart = baseDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-        LocalDate weekEnd = weekStart.plusDays(6);
-
-        // --------- LẤY LỊCH LỚP (CLASS) ---------
-        Pageable pageable = PageRequest.of(0, 200);
-        Page<PtClassScheduleSummaryResponse> page =
-                ptClassService.getSchedulesForTrainer(userId, weekStart, pageable);
-
-        final LocalDate filterStart = weekStart;
-        final LocalDate filterEnd = weekEnd;
-
-        List<PtClassScheduleSummaryResponse> weekClassSchedules = page.getContent().stream()
-                .filter(s -> {
-                    LocalDate d = s.getScheduleDate();
-                    return !d.isBefore(filterStart) && !d.isAfter(filterEnd);
-                })
-                .toList();
-
-        // --------- LẤY LỊCH PT 1:1 ---------
-        List<PersonalTrainingScheduleResponse> weekPersonalSchedules =
-                personalTrainingScheduleService.getSchedulesForTrainer(userId, weekStart, weekEnd);
-
-        // --------- CHUẨN BỊ CẤU TRÚC 7 NGÀY ---------
-        List<PtWeeklyDayScheduleResponse> weekDays = new ArrayList<>();
-        Map<LocalDate, PtWeeklyDayScheduleResponse> dayMap = new HashMap<>();
-
-        for (int i = 0; i < 7; i++) {
-            LocalDate date = weekStart.plusDays(i);
-            PtWeeklyDayScheduleResponse dayView = new PtWeeklyDayScheduleResponse();
-            dayView.setDate(date);
-            dayView.setDayLabel(toVietnameseDayOfWeek(date));
-
-            weekDays.add(dayView);
-            dayMap.put(date, dayView);
-        }
-
-        // --------- PHÂN LỚP VÀO SÁNG/CHIỀU/TỐI ---------
-        for (PtClassScheduleSummaryResponse schedule : weekClassSchedules) {
-            LocalDate date = schedule.getScheduleDate();
-            PtWeeklyDayScheduleResponse dayView = dayMap.get(date);
-            if (dayView == null) continue;
-
-            LocalTime start = schedule.getStartTime();
-            if (start.isBefore(LocalTime.NOON)) {
-                dayView.getMorningClasses().add(schedule);
-            } else if (start.isBefore(LocalTime.of(18, 0))) {
-                dayView.getAfternoonClasses().add(schedule);
-            } else {
-                dayView.getEveningClasses().add(schedule);
-            }
-        }
-
-        // --------- PHÂN LỊCH PT 1:1 VÀO SÁNG/CHIỀU/TỐI ---------
-        for (PersonalTrainingScheduleResponse ps : weekPersonalSchedules) {
-            LocalDate date = ps.getScheduleDate();
-            PtWeeklyDayScheduleResponse dayView = dayMap.get(date);
-            if (dayView == null) continue;
-
-            LocalTime start = ps.getStartTime();
-            if (start.isBefore(LocalTime.NOON)) {
-                dayView.getMorningPersonalSessions().add(ps);
-            } else if (start.isBefore(LocalTime.of(18, 0))) {
-                dayView.getAfternoonPersonalSessions().add(ps);
-            } else {
-                dayView.getEveningPersonalSessions().add(ps);
-            }
-        }
-
-        boolean hasSchedules = !weekClassSchedules.isEmpty() || !weekPersonalSchedules.isEmpty();
-
-        model.addAttribute("today", today);
-        model.addAttribute("weekStart", weekStart);
-        model.addAttribute("weekEnd", weekEnd);
-        model.addAttribute("weekDays", weekDays);
-        model.addAttribute("hasSchedules", hasSchedules);
-
+    public String week(Authentication auth,
+                       @RequestParam(required=false) @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate weekStart,
+                       Model model) {
+        model.addAttribute("week",timetable.trainerWeek(auth.getName(),weekStart));
         return "pt/classes/list";
     }
-
-    // Chi tiết một lịch lớp + danh sách học viên
     @GetMapping("/{scheduleId}")
-    public String viewSchedule(Authentication authentication,
-                               @PathVariable("scheduleId") Long scheduleId,
-                               Model model) {
-
-        Long userId = getCurrentUserId(authentication);
-
-        PtClassScheduleDetailResponse schedule =
-                ptClassService.getScheduleDetailForTrainer(userId, scheduleId);
-
-        model.addAttribute("schedule", schedule);
-
+    public String detail(Authentication auth,@PathVariable Long scheduleId,Model model) {
+        PtClassScheduleDetailResponse result=classes.getScheduleDetailForTrainer(
+                ptUsers.trainerUserId(auth.getName()),scheduleId);
+        model.addAttribute("schedule",result);
         return "pt/classes/detail";
     }
-
     @PostMapping("/{scheduleId}/attendance/{registrationId}")
-    public String markAttendance(@PathVariable Long scheduleId,
-                                 @PathVariable Long registrationId,
-                                 @RequestParam RegistrationStatus result,
-                                 Authentication authentication, RedirectAttributes redirect) {
-        try {
-            attendance.record(authentication.getName(), scheduleId, registrationId, result);
-            redirect.addFlashAttribute("successMessage", "Đã ghi nhận điểm danh.");
-        } catch (IllegalArgumentException | IllegalStateException ex) {
-            redirect.addFlashAttribute("errorMessage", ex.getMessage());
+    public String attendance(@PathVariable Long scheduleId,@PathVariable Long registrationId,
+                             @RequestParam RegistrationStatus result,Authentication auth,RedirectAttributes redirect) {
+        try { attendance.record(auth.getName(),scheduleId,registrationId,result);
+            redirect.addFlashAttribute("successMessage","Đã điểm danh.");
+        } catch (IllegalArgumentException|IllegalStateException ex) {
+            redirect.addFlashAttribute("errorMessage",ex.getMessage());
         }
-        return "redirect:/pt/classes/" + scheduleId;
+        return "redirect:/pt/classes/"+scheduleId;
     }
-
-    // Helper: chuyển LocalDate -> "Thứ 2", "Thứ 3", ..., "Chủ nhật"
-    private String toVietnameseDayOfWeek(LocalDate date) {
-        return switch (date.getDayOfWeek()) {
-            case MONDAY -> "Thứ 2";
-            case TUESDAY -> "Thứ 3";
-            case WEDNESDAY -> "Thứ 4";
-            case THURSDAY -> "Thứ 5";
-            case FRIDAY -> "Thứ 6";
-            case SATURDAY -> "Thứ 7";
-            case SUNDAY -> "Chủ nhật";
-        };
+    @PostMapping("/personal/{id}/{action}")
+    public String personalAction(@PathVariable Long id,@PathVariable String action,
+                                 @RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate weekStart,
+                                 Authentication auth,RedirectAttributes redirect) {
+        Long ptUserId=ptUsers.trainerUserId(auth.getName());
+        try {
+            switch (action) {
+                case "cancel" -> personal.cancelSchedule(ptUserId,id);
+                case "complete" -> personal.completeSchedule(ptUserId,id);
+                default -> throw new IllegalArgumentException("Thao tác không hợp lệ.");
+            }
+            redirect.addFlashAttribute("successMessage","Đã cập nhật buổi PT.");
+        } catch (IllegalArgumentException|IllegalStateException ex) {
+            redirect.addFlashAttribute("errorMessage",ex.getMessage());
+        }
+        return "redirect:/pt/classes?weekStart="+weekStart;
     }
 }

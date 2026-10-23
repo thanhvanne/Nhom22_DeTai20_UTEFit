@@ -3,6 +3,7 @@ package com.utefit.controller.pt;
 import com.utefit.dto.trainer.PersonalTrainingScheduleResponse;
 import com.utefit.entity.User;
 import com.utefit.service.PtPersonalScheduleViewService;
+import com.utefit.service.WeeklyTimetableService;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.utefit.service.PersonalTrainingScheduleService;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -23,11 +24,14 @@ public class PtPersonalScheduleController {
 
     private final PersonalTrainingScheduleService personalTrainingScheduleService;
     private final PtPersonalScheduleViewService viewService;
+    private final WeeklyTimetableService timetable;
 
     public PtPersonalScheduleController(PersonalTrainingScheduleService personalTrainingScheduleService,
-                                        PtPersonalScheduleViewService viewService) {
+                                        PtPersonalScheduleViewService viewService,
+                                        WeeklyTimetableService timetable) {
         this.personalTrainingScheduleService = personalTrainingScheduleService;
         this.viewService = viewService;
+        this.timetable = timetable;
     }
 
     /**
@@ -35,30 +39,11 @@ public class PtPersonalScheduleController {
      * URL: /pt/personal-schedules?fromDate=yyyy-MM-dd&toDate=yyyy-MM-dd (optional)
      */
     @GetMapping
-    public String listSchedules(@RequestParam(value = "fromDate", required = false)
-                                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
-                                @RequestParam(value = "toDate", required = false)
-                                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
-                                Principal principal,
-                                Model model) {
-
-        Long trainerUserId = viewService.trainerUserId(principal.getName());
-
-        LocalDate today = LocalDate.now();
-        if (fromDate == null) {
-            fromDate = today;
-        }
-        if (toDate == null) {
-            toDate = today.plusDays(14); // mặc định xem 2 tuần tới
-        }
-
-        List<PersonalTrainingScheduleResponse> schedules =
-                personalTrainingScheduleService.getSchedulesForTrainer(trainerUserId, fromDate, toDate);
-
-        model.addAttribute("schedules", schedules);
-        model.addAttribute("fromDate", fromDate);
-        model.addAttribute("toDate", toDate);
-
+    public String listSchedules(
+            @RequestParam(value="weekStart",required=false)
+            @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate weekStart,
+            Principal principal,Model model) {
+        model.addAttribute("week",timetable.trainerPersonalWeek(principal.getName(),weekStart));
         return "pt/personal-schedules/list";
     }
 

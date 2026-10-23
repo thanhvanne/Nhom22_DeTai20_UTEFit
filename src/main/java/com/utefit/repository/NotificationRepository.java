@@ -1,12 +1,16 @@
 package com.utefit.repository;
 
 import com.utefit.entity.Notification;
+import com.utefit.enums.NotificationType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
+
+    boolean existsByUser_IdAndTypeAndRelatedIdAndTitle(Long userId, NotificationType type,
+                                                       Long relatedId, String title);
 
     // Đếm số thông báo chưa đọc cho user
     long countByUser_IdAndReadIsFalse(Long userId);

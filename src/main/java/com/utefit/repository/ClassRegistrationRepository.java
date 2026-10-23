@@ -1,4 +1,3 @@
-
 package com.utefit.repository;
 
 import com.utefit.entity.ClassRegistration;
@@ -18,6 +17,17 @@ import java.util.Optional;
 
 public interface ClassRegistrationRepository
         extends JpaRepository<ClassRegistration, Long> {
+
+    @Query("""
+            SELECT r FROM ClassRegistration r
+            JOIN FETCH r.user u JOIN FETCH r.schedule s JOIN FETCH s.fitnessClass fc
+            WHERE r.status = :registered AND s.scheduleDate BETWEEN :first AND :last
+              AND s.active = true AND fc.status <> :cancelled
+            """)
+    List<ClassRegistration> findUpcomingForReminders(
+            @Param("registered") RegistrationStatus registered,
+            @Param("cancelled") com.utefit.enums.ClassStatus cancelled,
+            @Param("first") LocalDate first, @Param("last") LocalDate last);
 
     // =====================================================
     // GIAI DOAN 5 - ADMIN NOTIFICATION

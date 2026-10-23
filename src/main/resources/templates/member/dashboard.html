@@ -21,7 +21,7 @@
         <div class="ut-welcome-content">
 
             <p class="ut-kicker">
-                TRUNG TÂM HỘI VIÊN · UTEFIT
+                UTEFIT · HỘI VIÊN
             </p>
 
             <p class="ut-greeting">
@@ -61,6 +61,78 @@
     </section>
 
     <div class="ut-dashboard-grid">
+
+
+        <!-- ======================================
+             THÔNG BÁO GẦN ĐÂY
+             ====================================== -->
+
+        <section class="ut-dash-panel ut-notify-panel"
+                 aria-labelledby="ut-notify-title">
+
+            <div class="ut-panel-top">
+
+                <h2 id="ut-notify-title">
+
+                    <span class="ut-icon-square">◉</span>
+                    Thông báo
+
+                    <span class="ut-unread"
+                          th:if="${dashboard.unreadCount > 0}"
+                          th:text="${dashboard.unreadCount}">
+                        2
+                    </span>
+
+                </h2>
+
+                <a th:href="@{/member/notifications}"
+                   class="ut-panel-link">
+                    Xem tất cả →
+                </a>
+
+            </div>
+
+            <div class="ut-notification-list"
+                 th:if="${!#lists.isEmpty(dashboard.notifications)}">
+
+                <article class="ut-notification"
+                         th:each="n : ${dashboard.notifications}">
+
+                    <span class="ut-notify-dot"
+                          th:classappend="${n.read} ? ' is-read'">
+                    </span>
+
+                    <div>
+
+                        <h3 th:text="${n.title}">
+                            Thông báo
+                        </h3>
+
+                        <p th:text="${n.content}">
+                            Nội dung
+                        </p>
+
+                        <small th:if="${n.createdAt != null}"
+                               th:text="${#temporals.format(n.createdAt,'dd/MM/yyyy HH:mm')}">
+                        </small>
+
+                    </div>
+
+                </article>
+
+            </div>
+
+            <div class="ut-empty-state ut-empty-small"
+                 th:if="${#lists.isEmpty(dashboard.notifications)}">
+
+                <p>
+                    Bạn chưa có thông báo nào.
+                </p>
+
+            </div>
+
+        </section>
+
 
         <!-- ======================================
              GÓI TẬP HIỆN TẠI
@@ -358,236 +430,6 @@
                       th:text="${dashboard.latestPayment.status}">
                     PENDING
                 </span>
-
-            </div>
-
-        </section>
-
-        <!-- ======================================
-             LỚP TẬP NỔI BẬT
-             ====================================== -->
-
-        <section class="ut-dash-panel ut-classes-panel"
-                 aria-labelledby="ut-classes-title">
-
-            <div class="ut-panel-top">
-
-                <h2 id="ut-classes-title">
-                    <span class="ut-icon-square">✦</span>
-                    Lớp tập nổi bật
-                </h2>
-
-                <a th:href="@{/member/classes}"
-                   class="ut-panel-link">
-                    Tìm lịch lớp →
-                </a>
-
-            </div>
-
-            <!-- Dữ liệu FitnessClass thật -->
-            <div class="ut-catalog-grid"
-                 th:if="${!#lists.isEmpty(dashboard.featuredClasses)}">
-
-                <article class="ut-catalog-card"
-                         th:each="c : ${dashboard.featuredClasses}">
-
-                    <div class="ut-catalog-art"
-                         aria-hidden="true">
-
-                        <span th:text="${c.categoryName}">
-                            FITNESS
-                        </span>
-
-                        <strong>
-                            UTEFIT
-                        </strong>
-
-                    </div>
-
-                    <div class="ut-catalog-body">
-
-                        <h3 th:text="${c.name}">
-                            Lớp tập
-                        </h3>
-
-                        <p th:text="${c.branchName}">
-                            Chi nhánh
-                        </p>
-
-                        <p class="ut-small"
-                           th:text="|PT: ${c.trainerName}|">
-                            Huấn luyện viên
-                        </p>
-
-                        <a class="ut-inline-cta"
-                           th:href="@{/member/classes}">
-                            Xem lịch và đăng ký →
-                        </a>
-
-                    </div>
-
-                </article>
-
-            </div>
-
-            <div th:if="${#lists.isEmpty(dashboard.featuredClasses)}"
-                 class="ut-empty-state ut-empty-small">
-
-                <p>
-                    Hiện chưa có lớp nổi bật.
-                </p>
-
-                <a th:href="@{/classes}"
-                   class="ut-panel-link">
-                    Xem tất cả lớp →
-                </a>
-
-            </div>
-
-        </section>
-
-        <!-- ======================================
-             HUẤN LUYỆN VIÊN
-             ====================================== -->
-
-        <section class="ut-dash-panel ut-trainers-panel"
-                 aria-labelledby="ut-trainers-title">
-
-            <div class="ut-panel-top">
-
-                <h2 id="ut-trainers-title">
-                    <span class="ut-icon-square">♙</span>
-                    Huấn luyện viên
-                </h2>
-
-                <a th:href="@{/trainers}"
-                   class="ut-panel-link">
-                    Xem tất cả →
-                </a>
-
-            </div>
-
-            <div class="ut-trainer-list"
-                 th:if="${!#lists.isEmpty(dashboard.featuredTrainers)}">
-
-                <article class="ut-trainer-row"
-                         th:each="t : ${dashboard.featuredTrainers}">
-
-                    <!-- Avatar từ database / Cloudinary -->
-                    <img th:if="${t.avatarUrl != null and !t.avatarUrl.isBlank()}"
-                         th:src="${t.avatarUrl}"
-                         alt="Ảnh huấn luyện viên"
-                         loading="lazy">
-
-                    <!-- PT chưa có avatar -->
-                    <div class="ut-trainer-avatar"
-                         th:unless="${t.avatarUrl != null and !t.avatarUrl.isBlank()}"
-                         aria-hidden="true">
-                        PT
-                    </div>
-
-                    <div>
-
-                        <h3 th:text="${t.fullName}">
-                            Huấn luyện viên
-                        </h3>
-
-                        <p th:text="${t.specialization ?: 'Huấn luyện cá nhân'}">
-                            Chuyên môn
-                        </p>
-
-                    </div>
-
-                    <a th:href="@{/trainers/{id}(id=${t.id})}"
-                       class="ut-inline-cta">
-                        Hồ sơ →
-                    </a>
-
-                </article>
-
-            </div>
-
-            <div class="ut-empty-state ut-empty-small"
-                 th:if="${#lists.isEmpty(dashboard.featuredTrainers)}">
-
-                <p>
-                    Chưa có PT công khai.
-                </p>
-
-                <a th:href="@{/trainers}"
-                   class="ut-panel-link">
-                    Tìm PT →
-                </a>
-
-            </div>
-
-        </section>
-
-        <!-- ======================================
-             THÔNG BÁO GẦN ĐÂY
-             ====================================== -->
-
-        <section class="ut-dash-panel ut-notify-panel"
-                 aria-labelledby="ut-notify-title">
-
-            <div class="ut-panel-top">
-
-                <h2 id="ut-notify-title">
-
-                    <span class="ut-icon-square">◉</span>
-                    Thông báo
-
-                    <span class="ut-unread"
-                          th:if="${dashboard.unreadCount > 0}"
-                          th:text="${dashboard.unreadCount}">
-                        2
-                    </span>
-
-                </h2>
-
-                <a th:href="@{/member/notifications}"
-                   class="ut-panel-link">
-                    Xem tất cả →
-                </a>
-
-            </div>
-
-            <div class="ut-notification-list"
-                 th:if="${!#lists.isEmpty(dashboard.notifications)}">
-
-                <article class="ut-notification"
-                         th:each="n : ${dashboard.notifications}">
-
-                    <span class="ut-notify-dot"
-                          th:classappend="${n.read} ? ' is-read'">
-                    </span>
-
-                    <div>
-
-                        <h3 th:text="${n.title}">
-                            Thông báo
-                        </h3>
-
-                        <p th:text="${n.content}">
-                            Nội dung
-                        </p>
-
-                        <small th:if="${n.createdAt != null}"
-                               th:text="${#temporals.format(n.createdAt,'dd/MM/yyyy HH:mm')}">
-                        </small>
-
-                    </div>
-
-                </article>
-
-            </div>
-
-            <div class="ut-empty-state ut-empty-small"
-                 th:if="${#lists.isEmpty(dashboard.notifications)}">
-
-                <p>
-                    Bạn chưa có thông báo nào.
-                </p>
 
             </div>
 

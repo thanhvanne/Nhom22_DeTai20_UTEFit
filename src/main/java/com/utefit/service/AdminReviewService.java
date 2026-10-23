@@ -1,8 +1,9 @@
-
 package com.utefit.service;
 
 import com.utefit.entity.Review;
 import com.utefit.repository.ReviewRepository;
+import com.utefit.repository.BranchRepository;
+import com.utefit.entity.Branch;
 import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,6 +21,10 @@ import java.util.List;
 public class AdminReviewService {
 
     private final ReviewRepository reviewRepository;
+    private final BranchRepository branches;
+
+    @Transactional(readOnly = true)
+    public List<Branch> listBranches() { return branches.findAll(); }
     private final EntityManager entityManager;
 
     @Getter

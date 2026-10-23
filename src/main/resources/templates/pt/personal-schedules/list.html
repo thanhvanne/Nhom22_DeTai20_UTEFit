@@ -1,41 +1,57 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head('Lịch PT cá nhân - UTEFit')}"></head>
-<body>
+<head th:replace="~{fragments/head :: head('Thời khóa biểu PT 1:1 - UTEFit')}"></head>
+<body class="ut-week-page">
 <header th:replace="~{fragments/header :: header}"></header>
-<main class="container py-5">
-    <h1 class="h3">Lịch tập cá nhân 1:1 của tôi</h1>
-    <p>Chỉ tạo lịch cho Member có yêu cầu ACCEPTED và Membership hợp lệ tại chi nhánh PT.</p>
-    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
-    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
-    <form th:action="@{/pt/personal-schedules}" method="get" class="row g-2 mb-4">
-        <div class="col-md-4"><label for="fromDate">Từ ngày</label><input class="form-control" type="date" id="fromDate" name="fromDate" th:value="${fromDate}" required></div>
-        <div class="col-md-4"><label for="toDate">Đến ngày</label><input class="form-control" type="date" id="toDate" name="toDate" th:value="${toDate}" required></div>
-        <div class="col-md-4 align-self-end"><button class="btn btn-primary">Lọc</button></div>
-    </form>
-    <div class="table-responsive">
-        <table class="table table-striped align-middle">
-            <thead><tr><th>Member</th><th>Tiêu đề</th><th>Ngày</th><th>Giờ</th><th>Chi nhánh</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
-            <tbody>
-            <tr th:each="s : ${schedules}">
-                <td th:text="${s.memberName}"></td><td th:text="${s.title}"></td>
-                <td th:text="${s.scheduleDate}"></td><td th:text="|${s.startTime} - ${s.endTime}|"></td>
-                <td th:text="${s.branchName}"></td><td th:text="${s.status}"></td>
-                <td>
-                    <form th:if="${s.status == 'SCHEDULED'}" th:action="@{/pt/personal-schedules/{id}/cancel(id=${s.id})}" method="post" class="d-inline">
-                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                        <button class="btn btn-outline-danger btn-sm">Hủy</button>
-                    </form>
-                    <form th:if="${s.status == 'SCHEDULED'}" th:action="@{/pt/personal-schedules/{id}/complete(id=${s.id})}" method="post" class="d-inline">
-                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                        <button class="btn btn-outline-success btn-sm">Đã hoàn thành</button>
-                    </form>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+<main class="container-fluid ut-week-wrap">
+    <div class="ut-week-heading">
+        <div><p class="ut-week-kicker">UTEFIT · PERSONAL TRAINER</p>
+            <h1>Thời khóa biểu <span>huấn luyện viên</span></h1>
+            <p>Lịch huấn luyện một kèm một, hủy và xác nhận hoàn thành theo quy định.</p></div>
+        <a class="btn btn-brand" th:href="@{/pt/trainer-requests}">Xem yêu cầu Member</a>
     </div>
-    <div th:if="${#lists.isEmpty(schedules)}" class="alert alert-info">Chưa có lịch PT 1:1 trong khoảng ngày đã chọn.</div>
+    <div class="alert alert-success" th:if="${success != null or successMessage != null}"
+         th:text="${success != null ? success : successMessage}"></div>
+    <div class="alert alert-danger" th:if="${error != null or errorMessage != null}"
+         th:text="${error != null ? error : errorMessage}"></div>
+    <nav class="ut-week-controls" aria-label="Chuyển tuần">
+        <a th:href="@{/pt/personal-schedules(weekStart=${week.previous()})}">← Tuần trước</a>
+        <strong th:text="|${#temporals.format(week.start,'dd/MM')} – ${#temporals.format(week.end,'dd/MM/yyyy')}|">Tuần</strong>
+        <a th:href="@{/pt/personal-schedules}">Tuần này</a>
+        <a th:href="@{/pt/personal-schedules(weekStart=${week.next()})}">Tuần sau →</a>
+    </nav>
+    <div class="ut-week-grid" role="group" aria-label="Thời khóa biểu 7 ngày">
+        <section class="ut-week-day" th:each="day : ${week.days}"
+                 th:classappend="${day.date.equals(week.today)} ? ' is-today' : ''">
+            <div class="ut-week-day-head"><span th:text="${day.label}">Thứ 2</span>
+                <strong th:text="${#temporals.format(day.date,'dd/MM')}">01/01</strong></div>
+            <div class="ut-week-events">
+                <article class="ut-week-event" th:each="slot : ${day.slots}"
+                         th:classappend="${slot.kind == 'PT'} ? ' is-pt' : ' is-class'">
+                    <span class="ut-week-type" th:text="${slot.kind == 'PT' ? 'PT 1:1' : 'Lớp nhóm'}">Lớp</span>
+                    <time th:text="|${#temporals.format(slot.start,'HH:mm')}–${#temporals.format(slot.end,'HH:mm')}|">18:00–19:00</time>
+                    <h3 th:text="${slot.title}">Tên lớp</h3>
+                    <p th:text="${slot.detail}">Chi tiết</p>
+                    <small th:text="${slot.status}">Trạng thái</small>
+                    <div class="ut-week-actions">
+                        <a th:if="${slot.detailUrl != null}" th:href="${slot.detailUrl}">Chi tiết</a>
+                        <form th:if="${slot.cancelUrl != null}" method="post" th:action="${slot.cancelUrl}"
+                              onsubmit="return confirm('Bạn chắc chắn muốn hủy lịch này?')">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <input type="hidden" name="weekStart" th:value="${week.start}">
+                            <button type="submit">Hủy</button></form>
+                        <form th:if="${slot.completeUrl != null}" method="post" th:action="${slot.completeUrl}"
+                              onsubmit="return confirm('Xác nhận hoàn thành buổi PT theo điều kiện check-in?')">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <input type="hidden" name="weekStart" th:value="${week.start}">
+                            <button class="ut-complete" type="submit">Hoàn thành</button></form>
+                    </div>
+                </article>
+                <p class="ut-week-no-events" th:if="${#lists.isEmpty(day.slots)}">Không có lịch</p>
+            </div>
+        </section>
+    </div>
+    <p class="ut-week-note">Chỉ hủy lịch 1:1 trước giờ bắt đầu; xác nhận hoàn thành sau buổi tập và khi đã check-in/check-out hợp lệ.</p>
 </main>
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 <div th:replace="~{fragments/scripts :: scripts}"></div>

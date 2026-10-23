@@ -1,4 +1,3 @@
-
 package com.utefit.controller.member;
 
 import com.utefit.dto.member.MembershipPurchaseRequest;
@@ -161,8 +160,7 @@ public class MemberMembershipController {
 
         model.addAttribute(
                 "plans",
-                catalog.searchPlans(null, 0)
-                        .getContent()
+                catalog.activePlanOptions()
         );
 
         if (!model.containsAttribute("purchaseForm")) {

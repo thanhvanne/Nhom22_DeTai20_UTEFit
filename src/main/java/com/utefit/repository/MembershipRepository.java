@@ -1,4 +1,3 @@
-
 package com.utefit.repository;
 
 import com.utefit.entity.Membership;
@@ -14,6 +13,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,6 +33,8 @@ public interface MembershipRepository
     boolean hasActiveMembersForBranch(@Param("branchId") Long branchId,
                                       @Param("status") MembershipStatus status,
                                       @Param("today") LocalDate today);
+
+    List<Membership> findByStatusAndCreatedAtBefore(MembershipStatus status, LocalDateTime before);
 
     boolean existsByUser_IdAndStatus(
             Long userId,

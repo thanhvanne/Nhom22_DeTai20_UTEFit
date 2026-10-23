@@ -1,4 +1,3 @@
-
 package com.utefit.service;
 
 import com.utefit.entity.Branch;
@@ -115,6 +114,12 @@ public class PublicCatalogService {
                 .stream()
                 .limit(3)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PlanView> activePlanOptions() {
+        return plans.findByActiveTrueOrderByNameAsc()
+                .stream().map(this::toPlanView).toList();
     }
 
     @Transactional(readOnly = true)

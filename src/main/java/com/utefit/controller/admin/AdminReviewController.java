@@ -1,7 +1,5 @@
-
 package com.utefit.controller.admin;
 
-import com.utefit.repository.BranchRepository;
 import com.utefit.service.AdminReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -15,7 +13,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AdminReviewController {
 
     private final AdminReviewService service;
-    private final BranchRepository branchRepository;
 
     @GetMapping
     public String list(
@@ -26,7 +23,7 @@ public class AdminReviewController {
     ) {
         model.addAttribute("activeMenu", "reviews");
         model.addAttribute("branches",
-                branchRepository.findAll());
+                service.listBranches());
         model.addAttribute("reviews",
                 service.search(rating, branchId, page));
         model.addAttribute("rating", rating);
