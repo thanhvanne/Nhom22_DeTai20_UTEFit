@@ -2,55 +2,108 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{fragments/head :: head('Thông báo - UTEFit')}"></head>
-<body>
+
+<body class="bg-dark">
 <header th:replace="~{fragments/header :: header}"></header>
 
-<main class="container my-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="mb-0">Thông báo</h2>
-        <form th:action="@{/notifications/read-all}" method="post">
-            <button type="submit" class="btn btn-sm btn-outline-primary">
-                Đánh dấu tất cả đã đọc
-            </button>
-        </form>
-    </div>
+<main class="py-5">
+    <style>
+        .notify-page-bg{
+            background: radial-gradient(1200px 600px at 20% 10%, rgba(27,42,77,.55), rgba(3,7,18,.95) 55%, rgba(2,3,10,1) 100%);
+            min-height: calc(100vh - 140px);
+        }
+        .notify-hero{
+            color: #fff;
+        }
+        .notify-muted{
+            color: rgba(255,255,255,0.65) !important;
+        }
+        .notify-card{
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.10);
+            border-radius: 16px;
+            box-shadow: 0 10px 26px rgba(0,0,0,.30);
+        }
+        .notify-card.unread{
+            border-left: 4px solid #2563eb;
+        }
+        .btn-outline-light-soft{
+            border-color: rgba(255,255,255,0.22);
+            color: rgba(255,255,255,0.86);
+        }
+        .btn-outline-light-soft:hover{
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.30);
+            color: #fff;
+        }
+    </style>
 
-    <div th:if="${notifications == null or #lists.isEmpty(notifications)}">
-        <p>Không có thông báo nào.</p>
-    </div>
+    <div class="notify-page-bg py-4">
+        <div class="container">
 
-    <div th:each="n : ${notifications}" class="card mb-2"
-         th:classappend="${!n.read} ? ' border-primary shadow-sm'">
-        <div class="card-body d-flex justify-content-between align-items-center">
-            <div>
-                <h6 class="mb-1" th:text="${n.title}">Tiêu đề</h6>
-                <p class="mb-1 small text-muted"
-                   th:text="${#temporals.format(n.createdAt, 'dd/MM/yyyy HH:mm')}">
-                    01/01/2024 10:00
-                </p>
-                <p class="mb-0" th:text="${n.content}">Nội dung</p>
-            </div>
-
-            <div class="text-end">
-
-                <!-- Nút cho PT: nhảy tới trang Yêu cầu từ Member để Accept/Reject -->
-                <div class="mb-2" sec:authorize="hasRole('PT')">
-                    <a class="btn btn-sm btn-outline-info"
-                       th:href="@{/pt/trainer-requests}">
-                        Xử lý yêu cầu
-                    </a>
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <div class="notify-hero">
+                    <h2 class="mb-1 text-white">Thông báo</h2>
+                    <div class="small notify-muted">Theo dõi thông báo về PT, lịch tập và các lớp đã đăng ký.</div>
                 </div>
 
-                <span class="badge bg-success mb-2" th:if="${!n.read}">Mới</span>
-
-                <form th:if="${!n.read}"
-                      th:action="@{'/notifications/' + ${n.id} + '/read'}"
-                      method="post">
-                    <button type="submit" class="btn btn-sm btn-outline-secondary">
-                        Đã đọc
+                <form th:action="@{/notifications/read-all}" method="post" class="m-0">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <button type="submit" class="btn btn-sm btn-outline-light-soft">
+                        Đánh dấu tất cả đã đọc
                     </button>
                 </form>
             </div>
+
+            <div th:if="${notifications == null or #lists.isEmpty(notifications)}" class="notify-muted">
+                <p class="mb-0">Không có thông báo nào.</p>
+            </div>
+
+            <div th:each="n : ${notifications}"
+                 class="notify-card p-3 p-md-4 mb-3"
+                 th:classappend="${!n.read} ? ' unread'">
+
+                <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                    <div style="min-width: 240px;">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <h6 class="mb-0 text-white" th:text="${n.title}">Tiêu đề</h6>
+                            <span class="badge bg-success" th:if="${!n.read}">Mới</span>
+                        </div>
+
+                        <div class="small notify-muted mb-2"
+                             th:text="${#temporals.format(n.createdAt, 'dd/MM/yyyy HH:mm')}">
+                            01/01/2024 10:00
+                        </div>
+
+                        <div class="text-white-50" th:text="${n.content}">Nội dung</div>
+                    </div>
+
+                    <div class="text-end ms-auto">
+                        <!-- Nút cho PT: nhảy tới trang Yêu cầu từ Member -->
+                        <div class="mb-2" sec:authorize="hasRole('PT')">
+                            <a class="btn btn-sm btn-outline-info"
+                               th:href="@{/pt/trainer-requests}">
+                                Xử lý yêu cầu
+                            </a>
+                        </div>
+
+                        <form th:if="${!n.read}"
+                              th:action="@{'/notifications/' + ${n.id} + '/read'}"
+                              method="post" class="m-0">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <button type="submit" class="btn btn-sm btn-outline-light-soft">
+                                Đánh dấu đã đọc
+                            </button>
+                        </form>
+
+                        <div th:if="${n.read}" class="small notify-muted mt-2">
+                            Đã đọc
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
         </div>
     </div>
 </main>

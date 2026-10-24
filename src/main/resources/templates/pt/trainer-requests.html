@@ -3,42 +3,91 @@
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
-<head th:replace="~{fragments/head :: head('Yêu cầu từ học viên - UTEFit')}">
-</head>
+<head th:replace="~{fragments/head :: head('Yêu cầu từ học viên - UTEFit')}"></head>
 
-<body>
+<body class="bg-dark">
+<header th:replace="~{fragments/header :: header}"></header>
 
-<header th:replace="~{fragments/header :: header}">
-</header>
+<main class="py-5">
+    <style>
+        .pt-page-bg{
+            background: radial-gradient(1200px 600px at 20% 10%, rgba(27,42,77,.55), rgba(3,7,18,.95) 55%, rgba(2,3,10,1) 100%);
+            min-height: calc(100vh - 140px);
+        }
+        .pt-surface{
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(0,0,0,.35);
+        }
+        .pt-title{
+            color: #fff;
+        }
+        .pt-muted{
+            color: rgba(255,255,255,0.65) !important;
+        }
 
-<main class="py-5 bg-light">
+        /* Table dark but clean */
+        .pt-table{
+            --bs-table-bg: transparent;
+            --bs-table-color: rgba(255,255,255,.92);
+            --bs-table-border-color: rgba(255,255,255,.10);
+            --bs-table-striped-bg: rgba(255,255,255,.03);
+            --bs-table-hover-bg: rgba(255,255,255,.05);
+        }
+        .pt-table thead th{
+            color: rgba(255,255,255,.70);
+            border-bottom: 1px solid rgba(255,255,255,.12);
+            font-weight: 600;
+        }
 
-    <div class="container">
+        /* Pagination dark */
+        .pagination .page-link{
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(255,255,255,0.10);
+            color: rgba(255,255,255,0.85);
+        }
+        .pagination .page-item.active .page-link{
+            background: #2563eb;
+            border-color: #2563eb;
+            color: #fff;
+        }
+        .pagination .page-item.disabled .page-link{
+            opacity: .45;
+        }
 
-        <h1 class="h3 mb-4">
-            Yêu cầu huấn luyện viên từ học viên
-        </h1>
+        /* Alerts on dark */
+        .alert{
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+    </style>
 
-        <div th:if="${successMessage}" class="alert alert-success">
-            <span th:text="${successMessage}"></span>
-        </div>
+    <div class="pt-page-bg py-4">
+        <div class="container">
 
-        <div th:if="${errorMessage}" class="alert alert-danger">
-            <span th:text="${errorMessage}"></span>
-        </div>
+            <h1 class="h3 mb-4 pt-title">
+                Yêu cầu huấn luyện viên từ học viên
+            </h1>
 
-        <div class="card shadow-sm border-0">
-            <div class="card-body">
+            <div th:if="${successMessage}" class="alert alert-success">
+                <span th:text="${successMessage}"></span>
+            </div>
 
+            <div th:if="${errorMessage}" class="alert alert-danger">
+                <span th:text="${errorMessage}"></span>
+            </div>
+
+            <div class="pt-surface p-3 p-md-4">
                 <div th:if="${requestPage == null or requestPage.empty}">
-                    <p class="mb-0 text-muted">
+                    <p class="mb-0 pt-muted">
                         Hiện chưa có yêu cầu nào từ học viên.
                     </p>
                 </div>
 
                 <div th:if="${requestPage != null and !requestPage.empty}">
                     <div class="table-responsive">
-                        <table class="table align-middle">
+                        <table class="table pt-table table-hover align-middle mb-0">
                             <thead>
                             <tr>
                                 <th>Học viên</th>
@@ -52,18 +101,18 @@
                             <tbody>
                             <tr th:each="req : ${requestPage.content}">
                                 <td>
-                                    <div class="fw-semibold"
+                                    <div class="fw-semibold text-white"
                                          th:text="${req.memberName}">
                                         Tên học viên
                                     </div>
-                                    <div class="small text-muted"
+                                    <div class="small pt-muted"
                                          th:text="${req.memberEmail}">
                                         email
                                     </div>
                                 </td>
-                                <td th:text="${req.message != null ? req.message : '—'}">
-                                    Nội dung
-                                </td>
+
+                                <td th:text="${req.message != null ? req.message : '—'}">Nội dung</td>
+
                                 <td>
                                     <span class="badge rounded-pill"
                                           th:classappend="${req.status.name() == 'PENDING'} ? ' bg-warning text-dark' :
@@ -72,14 +121,19 @@
                                         PENDING
                                     </span>
                                 </td>
-                                <td th:text="${#temporals.format(req.requestedAt, 'dd/MM/yyyy HH:mm')}">
+
+                                <td class="pt-muted"
+                                    th:text="${#temporals.format(req.requestedAt, 'dd/MM/yyyy HH:mm')}">
                                     01/01/2026 10:00
                                 </td>
-                                <td th:text="${req.respondedAt != null ? #temporals.format(req.respondedAt, 'dd/MM/yyyy HH:mm') : '—'}">
+
+                                <td class="pt-muted"
+                                    th:text="${req.respondedAt != null ? #temporals.format(req.respondedAt, 'dd/MM/yyyy HH:mm') : '—'}">
                                     —
                                 </td>
+
                                 <td>
-                                    <!-- PENDING: giữ nguyên Accept / Reject -->
+                                    <!-- PENDING: Accept/Reject -->
                                     <div th:if="${req.status.name() == 'PENDING'}" class="d-flex gap-2">
 
                                         <form th:action="@{'/pt/trainer-requests/' + ${req.id} + '/accept'}"
@@ -87,8 +141,7 @@
                                             <input type="hidden"
                                                    th:name="${_csrf.parameterName}"
                                                    th:value="${_csrf.token}"/>
-                                            <button type="submit"
-                                                    class="btn btn-success btn-sm">
+                                            <button type="submit" class="btn btn-success btn-sm">
                                                 Chấp nhận
                                             </button>
                                         </form>
@@ -98,20 +151,17 @@
                                             <input type="hidden"
                                                    th:name="${_csrf.parameterName}"
                                                    th:value="${_csrf.token}"/>
-                                            <button type="submit"
-                                                    class="btn btn-outline-danger btn-sm">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">
                                                 Từ chối
                                             </button>
                                         </form>
 
                                     </div>
 
-                                    <!-- ACCEPTED: Đã xử lý + Tạo lịch + Nhắn tin -->
+                                    <!-- ACCEPTED -->
                                     <div th:if="${req.status.name() == 'ACCEPTED'}"
                                          class="d-flex flex-column align-items-start gap-1">
-                                        <div class="text-muted small">
-                                            Đã xử lý
-                                        </div>
+                                        <div class="pt-muted small">Đã xử lý</div>
                                         <div class="d-flex gap-2 mt-1">
                                             <a class="btn btn-outline-secondary btn-sm"
                                                th:href="@{/pt/personal-schedules/create(memberId=${req.memberId})}">
@@ -124,9 +174,9 @@
                                         </div>
                                     </div>
 
-                                    <!-- REJECTED: chỉ hiển thị Đã xử lý -->
+                                    <!-- REJECTED -->
                                     <div th:if="${req.status.name() == 'REJECTED'}"
-                                         class="text-muted small">
+                                         class="pt-muted small">
                                         Đã xử lý
                                     </div>
                                 </td>
@@ -171,19 +221,13 @@
                     </nav>
 
                 </div>
-
             </div>
+
         </div>
-
     </div>
-
 </main>
 
-<footer th:replace="~{fragments/footer :: footer}">
-</footer>
-
-<div th:replace="~{fragments/scripts :: scripts}">
-</div>
-
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<div th:replace="~{fragments/scripts :: scripts}"></div>
 </body>
 </html>

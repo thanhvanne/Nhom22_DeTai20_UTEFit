@@ -1,101 +1,136 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-
 <head th:replace="~{fragments/head :: head('PT Dashboard - UTEFit')}"></head>
 
 <body class="bg-dark">
-
 <header th:replace="~{fragments/header :: header}"></header>
 
-<main class="container py-5">
+<main class="py-5">
 
-    <!-- HERO TỐI DÀNH RIÊNG CHO PT -->
-    <section class="card border-0 shadow-lg overflow-hidden mb-4"
-             style="background: radial-gradient(circle at top left, #1b2a4d 0, #030712 55%, #02030a 100%);">
-
-        <div class="card-body position-relative p-4 p-md-5 text-white">
+    <!-- HERO FULL-WIDTH -->
+    <section class="pt-hero">
+        <div class="container position-relative py-5">
 
             <div class="row g-4 align-items-center">
-                <!-- Bên trái: tiêu đề + mô tả -->
+                <!-- Left content -->
                 <div class="col-12 col-lg-8">
-                    <h1 class="fw-bold display-5 mb-3">
-                        Khu vực huấn luyện viên UTEFit
+                    <div class="pt-kicker mb-2">UTEFit • PT PORTAL</div>
+
+                    <h1 class="pt-hero-title mb-3">
+                        Khu vực huấn luyện viên<br class="d-none d-lg-block">
+                        UTEFit
                     </h1>
 
-                    <p class="mb-2 text-white-50 fs-6">
-                        Đây là không gian làm việc dành riêng cho huấn luyện viên cá nhân. Tại đây, bạn có thể
-                        theo dõi yêu cầu từ học viên, chủ động sắp xếp lịch tập 1–1 và quản lý các lớp được phân
-                        công một cách trực quan.
+                    <p class="pt-hero-desc mb-3">
+                        Đây là không gian làm việc dành riêng cho huấn luyện viên cá nhân. Tại đây, bạn có thể theo dõi yêu cầu từ học viên,
+                        chủ động sắp xếp lịch tập 1–1 và quản lý các lớp được phân công một cách trực quan.
                     </p>
 
-                    <p class="mb-0 text-white-50 fs-6">
-                        Khi một học viên chọn bạn làm huấn luyện viên, đó là bước đầu của một hành trình mới.
-                        Hãy sử dụng <strong>“Yêu cầu từ Member”</strong> để phản hồi kịp thời, và
-                        <strong>“Lịch tập cá nhân”</strong> để xây dựng lộ trình tập luyện phù hợp cho từng người.
+                    <p class="pt-hero-desc mb-0">
+                        Hãy dùng <strong>“Yêu cầu từ Member”</strong> để phản hồi kịp thời, và <strong>“Lịch PT 1:1”</strong>
+                        để xây dựng lộ trình tập luyện phù hợp cho từng người.
                     </p>
-                </div>
-            </div>
 
-            <!-- Avatar nổi góc phải -->
-            <div class="pt-hero-profile text-center"
-                 style="position: absolute; right: 32px; top: 32px; width: 140px;">
-                <div class="pt-avatar-wrap mx-auto mb-2 position-relative"
-                     style="width: 120px; height: 120px; border-radius: 999px;
-                            box-shadow: 0 0 22px rgba(255, 0, 85, .35), inset 0 0 0 2px rgba(255, 0, 85, .9);
-                            overflow: hidden; background: #1f2937;">
-                    <img th:if="${dashboard.avatarUrl != null}"
-                         th:src="${dashboard.avatarUrl}"
-                         alt="Avatar PT"
-                         style="width: 100%; height: 100%; object-fit: cover;">
-                    <div th:if="${dashboard.avatarUrl == null}"
-                         class="d-flex align-items-center justify-content-center h-100 w-100"
-                         style="color:#fff; font-size: 42px; font-weight: 700;"
-                         th:text="${#strings.isEmpty(dashboard.trainerName) ? 'PT' : #strings.substring(dashboard.trainerName,0,1)}">
-                        PT
+                    <!-- Quick actions (gọn, hữu dụng) -->
+                    <div class="d-flex flex-wrap gap-2 mt-4">
+                        <a class="btn btn-primary" th:href="@{/pt/trainer-requests}">Yêu cầu Member</a>
+                        <a class="btn btn-outline-light" th:href="@{/pt/personal-schedules}">Lịch PT 1:1</a>
+                        <a class="btn btn-outline-light" th:href="@{/pt/classes}">Lớp được phân công</a>
+                        <a class="btn btn-outline-light" th:href="@{/pt/chats}">Tin nhắn</a>
                     </div>
                 </div>
-                <div class="small fw-semibold"
-                     th:text="${#strings.isEmpty(dashboard.trainerName) ? 'Huấn luyện viên UTEFit' : dashboard.trainerName}">
-                    Huấn luyện viên UTEFit
+
+                <!-- Right profile -->
+                <div class="col-12 col-lg-4">
+                    <div class="pt-profile">
+                        <div class="pt-avatar">
+                            <img th:if="${dashboard.avatarUrl != null}"
+                                 th:src="${dashboard.avatarUrl}"
+                                 alt="Avatar PT">
+                            <div th:if="${dashboard.avatarUrl == null}"
+                                 class="pt-avatar-fallback"
+                                 th:text="${#strings.isEmpty(dashboard.trainerName) ? 'PT' : #strings.substring(dashboard.trainerName,0,1)}">
+                                PT
+                            </div>
+                        </div>
+
+                        <div class="pt-profile-name"
+                             th:text="${#strings.isEmpty(dashboard.trainerName) ? 'Huấn luyện viên UTEFit' : dashboard.trainerName}">
+                            Huấn luyện viên UTEFit
+                        </div>
+
+                        <!-- Optional: nếu sau này bạn có branchName thì mở lại -->
+                        <div class="pt-profile-sub text-white-50">
+                            UTEFit
+                        </div>
+
+                        <!-- Optional mini stats (không phải card) -->
+                        <div class="pt-mini-stats mt-3">
+                            <div class="pt-mini-stat">
+                                <div class="pt-mini-stat-label">Tin nhắn</div>
+                                <div class="pt-mini-stat-value"
+                                     th:text="${dashboard.unreadMessageCount}">
+                                    0
+                                </div>
+                            </div>
+                            <div class="pt-mini-stat">
+                                <div class="pt-mini-stat-label">Thông báo</div>
+                                <div class="pt-mini-stat-value"
+                                     th:text="${dashboard.unreadNotificationCount}">
+                                    0
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 d-flex gap-2 justify-content-center">
+                            <a class="btn btn-sm btn-outline-light" th:href="@{/pt/profile}">Hồ sơ</a>
+                            <a class="btn btn-sm btn-outline-light" th:href="@{/notifications}">Thông báo</a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
         </div>
     </section>
 
-    <!-- PHẦN NỀN ĐƠN GIẢN BÊN DƯỚI -->
-    <section class="card border-0 shadow-sm bg-dark text-white-50">
-        <div class="card-body p-4 p-md-5">
+    <!-- CONTENT (bên dưới) -->
+    <section class="container mt-5">
+        <div class="row g-4 align-items-stretch">
 
-            <div class="row g-4 align-items-center">
+            <!-- Panel trái -->
+            <div class="col-12 col-lg-7">
+                <div class="pt-panel h-100">
+                    <h3 class="pt-panel-title mb-3">Lịch tập cá nhân & lớp tại UTEFit</h3>
 
-                <div class="col-12 col-lg-6">
-                    <h3 class="fw-semibold mb-3 text-white">
-                        Lịch tập cá nhân & lớp tại UTEFit
-                    </h3>
-                    <p class="mb-2">
+                    <p class="pt-panel-text mb-3">
                         Mỗi buổi tập là một cơ hội để bạn đồng hành cùng học viên: lắng nghe mục tiêu,
-                        đánh giá thể trạng và thiết kế bài tập phù hợp. Lịch tập cá nhân được hiển thị
-                        dưới dạng bảng tuần, giúp bạn dễ dàng quan sát toàn bộ lịch làm việc.
+                        đánh giá thể trạng và thiết kế bài tập phù hợp. Lịch PT 1–1 hiển thị theo tuần,
+                        giúp bạn quan sát nhanh toàn bộ lịch làm việc.
                     </p>
-                    <p class="mb-0">
+
+                    <p class="pt-panel-text mb-0">
                         Kết hợp giữa buổi PT 1–1 và lớp nhóm, UTEFit hỗ trợ bạn tối ưu hiệu quả huấn luyện
                         mà vẫn đảm bảo sự cân bằng thời gian.
                     </p>
                 </div>
+            </div>
 
-                <div class="col-12 col-lg-6">
-                    <div class="border rounded-4 p-3 p-md-4 bg-gradient"
-                         style="background: linear-gradient(135deg, rgba(13,110,253,.2), rgba(255,51,102,.35));">
-                        <p class="mb-2 small text-white-75">Gợi ý:</p>
-                        <ul class="small mb-0">
-                            <li>Chọn <strong>“Lịch tập cá nhân”</strong> trên thanh menu để xem lịch dạng thời khóa biểu tuần.</li>
-                            <li>Dùng <strong>“Yêu cầu từ Member”</strong> để xem và xử lý yêu cầu PT đang chờ.</li>
-                            <li>Nút <strong>Tin nhắn</strong> và <strong>Thông báo</strong> trên thanh trên cùng có badge realtime.</li>
-                        </ul>
+            <!-- Panel phải (tips) -->
+            <div class="col-12 col-lg-5">
+                <div class="pt-panel pt-panel-accent h-100">
+                    <div class="pt-panel-kicker mb-2">Gợi ý thao tác nhanh</div>
+
+                    <ul class="pt-list mb-0">
+                        <li>Vào <strong>“Lịch PT 1:1”</strong> để xem lịch theo thời khóa biểu tuần.</li>
+                        <li>Dùng <strong>“Yêu cầu từ Member”</strong> để Accept/Reject yêu cầu PT đang chờ.</li>
+                        <li>Kiểm tra <strong>Tin nhắn</strong> & <strong>Thông báo</strong> trên header để xử lý realtime.</li>
+                    </ul>
+
+                    <div class="d-flex flex-wrap gap-2 mt-4">
+                        <a class="btn btn-sm btn-outline-light" th:href="@{/pt/trainer-requests}">Mở yêu cầu</a>
+                        <a class="btn btn-sm btn-outline-light" th:href="@{/pt/personal-schedules}">Mở lịch PT</a>
                     </div>
                 </div>
-
             </div>
 
         </div>
@@ -107,17 +142,144 @@
 <div th:replace="~{fragments/scripts :: scripts}"></div>
 
 <style>
-    /* Responsive: avatar xuống dưới trên mobile */
-    @media (max-width: 992px) {
-        .pt-hero-profile {
-            position: static !important;
-            width: auto !important;
-            margin-top: 16px;
-        }
-        .pt-hero-profile .pt-avatar-wrap {
-            width: 96px !important;
-            height: 96px !important;
-        }
+    /* ====== HERO full width ====== */
+    .pt-hero{
+        /* full-width rectangle */
+        width: 100%;
+        background: radial-gradient(1200px 600px at 18% 10%, #1b2a4d 0%, #030712 55%, #02030a 100%);
+        border-top: 1px solid rgba(255,255,255,.06);
+        border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+
+    .pt-kicker{
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        font-size: 12px;
+        color: rgba(255,255,255,.60);
+    }
+
+    .pt-hero-title{
+        font-weight: 800;
+        line-height: 1.05;
+        font-size: clamp(34px, 4vw, 64px);
+        color: #fff;
+    }
+
+    .pt-hero-desc{
+        color: rgba(255,255,255,.70);
+        font-size: 16px;
+        line-height: 1.7;
+        max-width: 760px;
+    }
+
+    /* ====== Profile block (không dùng card) ====== */
+    .pt-profile{
+        background: rgba(255,255,255,.06);
+        border: 1px solid rgba(255,255,255,.10);
+        border-radius: 18px;
+        padding: 22px;
+        text-align: center;
+        box-shadow: 0 14px 30px rgba(0,0,0,.35);
+    }
+
+    .pt-avatar{
+        width: 118px;
+        height: 118px;
+        margin: 0 auto 10px auto;
+        border-radius: 999px;
+        overflow: hidden;
+        position: relative;
+        background: #1f2937;
+        box-shadow: 0 0 22px rgba(255, 0, 85, .35), inset 0 0 0 2px rgba(255, 0, 85, .9);
+    }
+    .pt-avatar img{
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    .pt-avatar-fallback{
+        width:100%;
+        height:100%;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        color:#fff;
+        font-size: 42px;
+        font-weight: 800;
+    }
+
+    .pt-profile-name{
+        color: #fff;
+        font-weight: 700;
+        font-size: 16px;
+        margin-top: 6px;
+    }
+    .pt-profile-sub{
+        font-size: 13px;
+    }
+
+    .pt-mini-stats{
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    .pt-mini-stat{
+        background: rgba(255,255,255,.06);
+        border: 1px solid rgba(255,255,255,.10);
+        border-radius: 14px;
+        padding: 10px 12px;
+    }
+    .pt-mini-stat-label{
+        color: rgba(255,255,255,.65);
+        font-size: 12px;
+    }
+    .pt-mini-stat-value{
+        color: #fff;
+        font-weight: 800;
+        font-size: 18px;
+        line-height: 1.2;
+        margin-top: 2px;
+    }
+
+    /* ====== Panels (bớt card) ====== */
+    .pt-panel{
+        background: rgba(255,255,255,.05);
+        border: 1px solid rgba(255,255,255,.10);
+        border-radius: 18px;
+        padding: 24px;
+        box-shadow: 0 12px 26px rgba(0,0,0,.25);
+    }
+    .pt-panel-title{
+        color: #fff;
+        font-weight: 700;
+    }
+    .pt-panel-text{
+        color: rgba(255,255,255,.70);
+        line-height: 1.7;
+    }
+
+    .pt-panel-accent{
+        background: linear-gradient(135deg, rgba(37,99,235,.14), rgba(255,51,102,.16));
+        border-color: rgba(255,255,255,.14);
+    }
+    .pt-panel-kicker{
+        color: rgba(255,255,255,.70);
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .pt-list{
+        color: rgba(255,255,255,.78);
+        line-height: 1.8;
+        padding-left: 18px;
+        margin: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px){
+        .pt-profile{ text-align: center; }
+        .pt-hero-desc{ max-width: 100%; }
     }
 </style>
 

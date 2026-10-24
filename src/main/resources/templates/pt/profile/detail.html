@@ -1,76 +1,104 @@
 <!DOCTYPE html>
-<html lang="vi"
-      xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments/head :: head('Hồ sơ PT - UTEFit')}">
-</head>
+<head th:replace="~{fragments/head :: head('Hồ sơ PT - UTEFit')}"></head>
 
-<body>
-
+<body class="bg-dark">
 <header th:replace="~{fragments/header :: header}"></header>
 
-<main class="container py-5">
+<main class="py-5">
+    <style>
+        .pt-page-bg{
+            background: radial-gradient(1200px 600px at 20% 10%, rgba(27,42,77,.55), rgba(3,7,18,.95) 55%, rgba(2,3,10,1) 100%);
+            min-height: calc(100vh - 140px);
+        }
+        .pt-title{ color:#fff; }
+        .pt-muted{ color: rgba(255,255,255,.65) !important; }
 
-    <h1 class="fw-bold mb-4">
-        Hồ sơ huấn luyện viên
-    </h1>
+        .pt-surface{
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.10);
+            border-radius: 18px;
+            box-shadow: 0 12px 30px rgba(0,0,0,.35);
+        }
+        .pt-hr{
+            border-color: rgba(255,255,255,0.10) !important;
+        }
+        .pt-bio{
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.10);
+            color: rgba(255,255,255,0.88);
+            border-radius: 14px;
+        }
+    </style>
 
-    <div class="card shadow-sm">
+    <div class="pt-page-bg py-4">
+        <div class="container">
 
-        <div class="card-body p-4 text-center">
-            <!-- Hiển thị Avatar PT -->
-            <div class="mb-3">
-                <img th:src="${trainer.user.avatarUrl != null ? trainer.user.avatarUrl : 'https://via.placeholder.com/150'}"
-                     alt="Avatar PT"
-                     class="rounded-circle img-thumbnail shadow-sm"
-                     style="width: 130px; height: 130px; object-fit: cover;">
-            </div>
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                <h1 class="fw-bold mb-0 pt-title">Hồ sơ huấn luyện viên</h1>
 
-            <h3 th:text="${trainer.user.firstName + ' ' + trainer.user.lastName}">
-                Trainer Name
-            </h3>
-
-            <p class="text-muted" th:text="${trainer.user.email}"></p>
-
-            <hr>
-        </div>
-
-        <div class="card-body px-4 pb-4">
-            <p>
-                <strong>Chuyên môn:</strong>
-                <span th:text="${trainer.specialization}"></span>
-            </p>
-
-            <p>
-                <strong>Kinh nghiệm:</strong>
-                <span th:text="${trainer.yearsExperience}"></span> năm
-            </p>
-
-            <p>
-                <strong>Chi nhánh:</strong>
-                <span th:text="${trainer.branch != null ? trainer.branch.name : 'Chưa cập nhật chi nhánh'}"></span>
-            </p>
-
-            <p>
-                <strong>Giới thiệu bản thân:</strong>
-            </p>
-            <p class="p-3 bg-light rounded" th:text="${trainer.bio}" style="white-space: pre-line;"></p>
-
-            <div class="mt-4">
-                <a th:href="@{/pt/profile/edit}"
-                   class="btn btn-success px-4">
+                <a th:href="@{/pt/profile/edit}" class="btn btn-success px-4">
                     Chỉnh sửa hồ sơ
                 </a>
             </div>
+
+            <div class="pt-surface overflow-hidden">
+                <div class="p-4 text-center">
+                    <!-- Avatar -->
+                    <div class="mb-3">
+                        <img th:if="${trainer.user != null and trainer.user.avatarUrl != null}"
+                             th:src="${trainer.user.avatarUrl}"
+                             alt="Avatar PT"
+                             class="rounded-circle img-thumbnail shadow-sm"
+                             style="width: 130px; height: 130px; object-fit: cover; background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15);">
+
+                        <div th:if="${trainer.user == null or trainer.user.avatarUrl == null}"
+                             class="rounded-circle mx-auto d-flex align-items-center justify-content-center"
+                             style="width:130px;height:130px;
+                                    background: rgba(255,255,255,0.06);
+                                    border: 1px solid rgba(255,255,255,0.12);
+                                    color: rgba(255,255,255,0.65);">
+                            Không có ảnh
+                        </div>
+                    </div>
+
+                    <h3 class="text-white"
+                        th:text="${trainer.user != null ? (trainer.user.firstName + ' ' + trainer.user.lastName) : 'Huấn luyện viên'}">
+                        Trainer Name
+                    </h3>
+
+                    <p class="pt-muted mb-0" th:text="${trainer.user != null ? trainer.user.email : ''}"></p>
+
+                    <hr class="pt-hr my-4">
+                </div>
+
+                <div class="px-4 pb-4 text-white">
+                    <p class="mb-2">
+                        <strong>Chuyên môn:</strong>
+                        <span th:text="${trainer.specialization != null ? trainer.specialization : '—'}"></span>
+                    </p>
+
+                    <p class="mb-2">
+                        <strong>Kinh nghiệm:</strong>
+                        <span th:text="${trainer.yearsExperience != null ? trainer.yearsExperience : 0}"></span> năm
+                    </p>
+
+                    <p class="mb-3">
+                        <strong>Chi nhánh:</strong>
+                        <span th:text="${trainer.branch != null ? trainer.branch.name : 'Chưa cập nhật chi nhánh'}"></span>
+                    </p>
+
+                    <p class="mb-2"><strong>Giới thiệu bản thân:</strong></p>
+                    <p class="p-3 pt-bio mb-0" th:text="${trainer.bio != null ? trainer.bio : '—'}" style="white-space: pre-line;"></p>
+                </div>
+            </div>
+
         </div>
-
     </div>
-
 </main>
 
 <footer th:replace="~{fragments/footer :: footer}"></footer>
-
 <div th:replace="~{fragments/scripts :: scripts}"></div>
-
 </body>
 </html>
