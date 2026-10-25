@@ -90,6 +90,7 @@
                        th:text="${r.comment ?: 'Không có nhận xét'}">
                     </p>
 
+                    <video th:if="${r.videoUrl != null}" th:src="${r.videoUrl}" controls preload="none" class="w-100 rounded mb-3" style="max-height:320px"></video>
                     <img th:if="${r.imageUrl != null}"
                          th:src="${r.imageUrl}"
                          alt="Ảnh trải nghiệm"

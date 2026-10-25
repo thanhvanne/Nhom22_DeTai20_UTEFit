@@ -65,6 +65,19 @@ Member chọn Branch/Plan → tạo gói PENDING → bấm VNPay Sandbox → tha
 - Playwright SQL QA PASS: lưu Class #1, Trainer #1, Branch #1 từ giao diện; reload còn đủ ba mục; gửi thêm Class cũ không nhân bản; bỏ Branch thành công. SQL QA không phát sinh booking/yêu cầu PT. Bằng chứng `.playwright-mcp/page-2026-10-25T09-25-05-315Z.yml`, `09-25-13-613Z`, `09-25-19-316Z`, `09-25-22-494Z` và snapshot sau bỏ lưu.
 - Hồi quy QR: Member xem lịch sử có check-in/checkout #1 tại `/member/history`, snapshot `09-23-27-122Z`.
 
+## 4. Review Video
+
+- Mở rộng Review/MemberReviewService/CloudinaryService hiện có, thêm `video_url`, `video_public_id` nullable qua `V704__review_video.sql`. Không lưu binary SQL. Review cũ và ảnh cũ tương thích.
+- MP4/WebM tối đa 20 MB: kiểm tra extension + MIME + cấu trúc header ở backend, sau đó Cloudinary phải decode xác nhận video có width/height/duration/bytes hợp lệ. Không chỉ tin extension hoặc MIME của trình duyệt. Tài liệu: https://cloudinary.com/documentation/java_image_and_video_upload.
+- Upload server-side `resource_type=video`, không overwrite. Provider thất bại không cập nhật review. Commit mới dọn video cũ; rollback dọn video mới. Lỗi dọn asset được log để xử lý orphan, không phá transaction đã commit.
+- Dùng eligibility/rating/ownership và chống duplicate hiện có trước upload; update video kiểm tra lại bằng chứng trên target gốc. Không cho đổi target, không tự bật visible khi sửa review đã bị ẩn. Ẩn review loại cả URL video khỏi danh sách công khai và trang chủ; URL CDN từng được chia sẻ trước đó không phải URL private/thu hồi tự động.
+- Form hiện có cho upload/thay video hoặc chọn xóa video (không đồng thời); Member/Admin xem video trong Review, public chỉ xem review visible. Giới hạn multipart request 26 MB, mỗi file 20 MB; ImageValidator vẫn giới hạn ảnh 5 MB.
+- Build toàn bộ PASS: 52 tests, 0 failures/errors, 1 Cloudinary integration skip. Sau bổ sung rollback test và kiểm tra metadata, build/package mục tiêu PASS thêm 18 test video/validator/provider. Test mock không phải bằng chứng upload Cloudinary thật.
+- Playwright SQL QA PASS: file text đổi đuôi .mp4 bị từ chối, tạo review không media và sửa nội dung thành công, SQL chỉ có một review. Bằng chứng `.playwright-mcp/page-2026-10-25T09-36-11-910Z.yml`, `09-36-29-035Z`, `09-36-43-679Z`.
+- Upload/playback Cloudinary thật: BLOCKED, chưa có credentials QA riêng. Không dùng tài khoản Cloudinary thật hoặc ghép URL giả vào SQL để báo thành công. Cấu hình `QA_CLOUDINARY_CLOUD_NAME`, `QA_CLOUDINARY_API_KEY`, `QA_CLOUDINARY_API_SECRET` ngoài Git trước khi demo video hợp lệ.
+- Demo: Member có check-in đã checkout → Đánh giá → Viết/Sửa → chọn MP4/WebM → lưu → xem video; Admin → Đánh giá → ẩn → public không thấy review. Để xóa video, vào Sửa, tick Xóa video hiện tại và không chọn file mới.
+- Rollback code có thể giữ hai cột nullable và tài nguyên Cloudinary, không tự xóa media/dữ liệu cũ. Chưa áp dụng migration trên UTEFitDB.
+
 ## Các bước tiếp theo
 
 QR Check-in → Favorites → Review Video → Manager. Chỉ chuyển bước sau khi build/test bước trước; báo cáo và checkpoint local cập nhật theo tính năng. Không push/merge.

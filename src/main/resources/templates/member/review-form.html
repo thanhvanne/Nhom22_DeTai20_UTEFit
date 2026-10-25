@@ -178,6 +178,13 @@
                 </small>
             </div>
 
+            <div class="mb-3">
+                <label for="video" class="form-label">Video trải nghiệm (không bắt buộc)</label>
+                <input class="form-control" id="video" name="video" type="file" accept="video/mp4,video/webm">
+                <small class="ut-subtitle">MP4/WebM, tối đa 20 MB. Server kiểm tra nội dung; ảnh cũ vẫn được giữ.</small>
+                <video th:if="${currentVideo != null}" th:src="${currentVideo}" controls preload="none" class="w-100 rounded mt-2" style="max-height:320px"></video>
+                <label th:if="${currentVideo != null}" class="d-block mt-2"><input type="checkbox" th:field="*{removeVideo}"> Xóa video hiện tại</label>
+            </div>
             <button type="submit"
                     class="btn btn-brand">
                 Lưu đánh giá

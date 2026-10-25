@@ -24,4 +24,6 @@ public class ReviewForm {
 
     @Size(max = 2000, message = "Nội dung tối đa 2000 ký tự.")
     private String comment;
+
+    private boolean removeVideo;
 }

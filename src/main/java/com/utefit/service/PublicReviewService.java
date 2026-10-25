@@ -26,6 +26,7 @@ public class PublicReviewService {
             Integer rating,
             String comment,
             String imageUrl,
+            String videoUrl,
             LocalDateTime createdAt
     ) {}
 
@@ -81,6 +82,7 @@ public class PublicReviewService {
                 r.getRating(),
                 r.getComment(),
                 r.getImageUrl(),
+                r.getVideoUrl(),
                 r.getCreatedAt()
         );
     }

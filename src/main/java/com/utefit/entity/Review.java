@@ -55,6 +55,12 @@ public class Review {
     @Column(name = "image_public_id", length = 255)
     private String imagePublicId;
 
+    @Column(name = "video_url", length = 500)
+    private String videoUrl;
+
+    @Column(name = "video_public_id", length = 255)
+    private String videoPublicId;
+
     @Column(nullable = false)
     private Boolean visible;
 

@@ -57,13 +57,14 @@ public class MemberReviewService {
             Integer rating,
             String comment,
             String imageUrl,
+            String videoUrl,
             boolean visible,
             LocalDateTime createdAt,
             LocalDateTime updatedAt
     ) {}
 
     public record EditView(
-            Long id, ReviewForm form, String imageUrl
+            Long id, ReviewForm form, String imageUrl, String videoUrl
     ) {}
 
     @Transactional(readOnly = true)
@@ -97,7 +98,7 @@ public class MemberReviewService {
         form.setComment(r.getComment());
 
         return new EditView(
-                r.getId(), form, r.getImageUrl()
+                r.getId(), form, r.getImageUrl(), r.getVideoUrl()
         );
     }
 
@@ -107,6 +108,11 @@ public class MemberReviewService {
             ReviewForm form,
             MultipartFile image
     ) {
+        return create(email, form, image, null);
+    }
+
+    @Transactional
+    public Long create(String email, ReviewForm form, MultipartFile image, MultipartFile video) {
         // Khóa Member để hai POST đồng thời không tạo Review trùng.
         User user = lockedMember(email);
 
@@ -173,6 +179,7 @@ public class MemberReviewService {
             review.setImagePublicId(uploaded.publicId());
         }
 
+        replaceVideo(review, video, false);
         return reviews.saveAndFlush(review).getId();
     }
 
@@ -183,11 +190,21 @@ public class MemberReviewService {
             ReviewForm form,
             MultipartFile image
     ) {
+        update(email, id, form, image, null);
+    }
+
+    @Transactional
+    public void update(String email, Long id, ReviewForm form, MultipartFile image, MultipartFile video) {
         User user = lockedMember(email);
 
         validateRating(form);
 
         Review review = ownReview(user.getId(), id);
+
+        if (video != null && !video.isEmpty()) {
+            checkEvidence(evidence(user.getId()), review.getBranch().getId(),
+                    review.getTrainer() == null ? null : review.getTrainer().getId());
+        }
 
         // Đối tượng Review là bất biến.
         // Không nhận branchId/trainerId mới từ form.
@@ -207,6 +224,7 @@ public class MemberReviewService {
             review.setImagePublicId(uploaded.publicId());
         }
 
+        replaceVideo(review, video, form.isRemoveVideo());
         reviews.saveAndFlush(review);
     }
 
@@ -437,6 +455,7 @@ public class MemberReviewService {
                 r.getRating(),
                 r.getComment(),
                 r.getImageUrl(),
+                r.getVideoUrl(),
                 Boolean.TRUE.equals(r.getVisible()),
                 r.getCreatedAt(),
                 r.getUpdatedAt()
@@ -454,6 +473,33 @@ public class MemberReviewService {
                     List.copyOf(trainers.values())
             );
         }
+    }
+
+    private void replaceVideo(Review review, MultipartFile video, boolean remove) {
+        boolean uploading = video != null && !video.isEmpty();
+        if (!uploading && !remove) {
+            return;
+        }
+        if (uploading && remove) {
+            throw new IllegalArgumentException("Chọn thay video hoặc xóa video, không chọn cả hai.");
+        }
+        String oldId = review.getVideoPublicId();
+        MediaUploadResult uploaded = uploading ? cloudinary.uploadVideo(video, "utefit/reviews/videos") : null;
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCompletion(int status) {
+                String toDelete = status == STATUS_COMMITTED ? oldId : uploaded == null ? null : uploaded.publicId();
+                if (toDelete != null && !toDelete.isBlank()) {
+                    try {
+                        cloudinary.deleteVideo(toDelete);
+                    } catch (RuntimeException ex) {
+                        log.warn("Không dọn được video Review {}", toDelete, ex);
+                    }
+                }
+            }
+        });
+        review.setVideoUrl(uploaded == null ? null : uploaded.url());
+        review.setVideoPublicId(uploaded == null ? null : uploaded.publicId());
     }
 
     private MediaUploadResult upload(

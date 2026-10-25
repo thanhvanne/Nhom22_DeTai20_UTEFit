@@ -57,6 +57,7 @@ public class MemberReviewController {
                     value = "image",
                     required = false
             ) MultipartFile image,
+            @RequestParam(value = "video", required = false) MultipartFile video,
             Principal principal,
             Model model,
             RedirectAttributes redirect
@@ -66,7 +67,8 @@ public class MemberReviewController {
                 reviews.create(
                         principal.getName(),
                         form,
-                        image
+                        image,
+                        video
                 );
 
                 redirect.addFlashAttribute(
@@ -110,6 +112,7 @@ public class MemberReviewController {
         model.addAttribute("form", review.form());
         model.addAttribute("editId", review.id());
         model.addAttribute("currentImage", review.imageUrl());
+        model.addAttribute("currentVideo", review.videoUrl());
         model.addAttribute(
                 "targets",
                 reviews.eligibleTargets(principal.getName())
@@ -127,6 +130,7 @@ public class MemberReviewController {
                     value = "image",
                     required = false
             ) MultipartFile image,
+            @RequestParam(value = "video", required = false) MultipartFile video,
             Principal principal,
             Model model,
             RedirectAttributes redirect
@@ -137,7 +141,8 @@ public class MemberReviewController {
                         principal.getName(),
                         id,
                         form,
-                        image
+                        image,
+                        video
                 );
 
                 redirect.addFlashAttribute(
@@ -172,6 +177,7 @@ public class MemberReviewController {
         );
 
         model.addAttribute("editId", id);
+        model.addAttribute("currentVideo", original.videoUrl());
         model.addAttribute(
                 "currentImage",
                 original.imageUrl()

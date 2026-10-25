@@ -36,6 +36,7 @@ public class AdminReviewService {
         private String trainerName;
         private Integer rating;
         private String comment;
+        private String videoUrl;
         private Boolean visible;
         private LocalDateTime createdAt;
     }
@@ -52,6 +53,7 @@ public class AdminReviewService {
                 trainerName,
                 review.getRating(),
                 review.getComment(),
+                review.getVideoUrl(),
                 review.getVisible(),
                 review.getCreatedAt()
         );

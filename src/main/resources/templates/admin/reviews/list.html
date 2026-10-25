@@ -74,8 +74,10 @@
                                 <span class="badge text-bg-warning"
                                       th:text="|${r.rating} ★|"></span>
                             </td>
-                            <td style="max-width:280px;white-space:pre-wrap;overflow-wrap:anywhere"
-                                th:text="${r.comment}"></td>
+                            <td style="max-width:280px;overflow-wrap:anywhere">
+                                <p style="white-space:pre-wrap" th:text="${r.comment}"></p>
+                                <video th:if="${r.videoUrl != null}" th:src="${r.videoUrl}" controls preload="none" style="max-width:240px;max-height:200px"></video>
+                            </td>
                             <td>
                                 <span class="badge"
                                       th:classappend="${r.visible ?

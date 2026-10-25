@@ -6,6 +6,7 @@ import com.utefit.validation.ImageValidator;
 
 import com.utefit.config.CloudinaryConfig;
 import com.utefit.service.impl.CloudinaryServiceImpl;
+import com.utefit.validation.VideoValidator;
 
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +27,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringJUnitConfig(classes = {
         CloudinaryConfig.class,
         CloudinaryServiceImpl.class,
-        ImageValidator.class
+        ImageValidator.class,
+        VideoValidator.class
 })
 @TestPropertySource(properties = {
         "CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME_ENV:}",
