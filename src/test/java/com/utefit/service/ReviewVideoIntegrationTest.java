@@ -27,6 +27,7 @@ class ReviewVideoIntegrationTest {
     @Autowired BranchRepository branches;
     @Autowired CheckinRepository checkins;
     @Autowired ReviewRepository reviews;
+    @Autowired org.springframework.web.context.WebApplicationContext context;
     @Autowired org.springframework.transaction.PlatformTransactionManager transactions;
     @MockitoBean CloudinaryService cloudinary;
     private User member;
@@ -63,6 +64,18 @@ class ReviewVideoIntegrationTest {
         assertNotNull(publicReviews.search(branch.getId(), null, 0).getContent().get(0).videoUrl());
         assertNotNull(service.editForm(member.getEmail(), id).videoUrl());
         verify(cloudinary, never()).deleteVideo("new-video");
+    }
+
+    @Test
+    void oversizedRequestHasVietnameseHtmlError() throws Exception {
+        org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup(context)
+                .apply(org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity())
+                .build().perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/error")
+                        .requestAttr(jakarta.servlet.RequestDispatcher.ERROR_STATUS_CODE, 413)
+                        .accept(org.springframework.http.MediaType.TEXT_HTML))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().is(413))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(
+                        org.hamcrest.Matchers.containsString("Video Review tối đa 20 MB")));
     }
 
     @Test
