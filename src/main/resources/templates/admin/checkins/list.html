@@ -23,6 +23,32 @@
                  th:text="${error}"></div>
 
             <div class="surface-card p-4 mb-4">
+                <h5 class="fw-bold mb-3">Quét QR Check-in</h5>
+                <form th:action="@{/admin/checkins/qr}" method="post" id="qr-checkin-form" class="row g-3">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <div class="col-md-5">
+                        <label class="form-label" for="qr-branch">Chi nhánh nhận check-in</label>
+                        <select id="qr-branch" name="branchId" class="form-select" required>
+                            <option value="">-- Chọn chi nhánh --</option>
+                            <option th:each="branch : ${branches}" th:value="${branch.id}" th:text="${branch.name}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label" for="qr-token">Mã QR đã quét / nhập tại quầy</label>
+                        <input id="qr-token" name="qrToken" class="form-control" required maxlength="60" autocomplete="off">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-success w-100">Xác nhận QR</button>
+                    </div>
+                </form>
+                <button type="button" id="qr-camera-start" class="btn btn-outline-primary mt-3">Mở camera quét QR</button>
+                <button type="button" id="qr-camera-stop" class="btn btn-outline-secondary mt-3" hidden>Dừng camera</button>
+                <p id="qr-camera-status" role="status" class="mt-2"></p>
+                <video id="qr-camera" playsinline muted hidden class="w-100" style="max-width:480px"></video>
+            </div>
+            <script th:src="@{/js/qr-scanner.js}" defer></script>
+
+            <div class="surface-card p-4 mb-4">
                 <h5 class="fw-bold mb-3">Check-in Member</h5>
                 <form th:action="@{/admin/checkins}" method="post"
                       class="row g-3">

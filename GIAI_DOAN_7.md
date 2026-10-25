@@ -44,6 +44,17 @@ Member chọn Branch/Plan → tạo gói PENDING → bấm VNPay Sandbox → tha
 - Thanh toán Sandbox thật và IPN công khai: BLOCKED cho đến khi có credentials và endpoint HTTPS của merchant. Không dùng callback giả kích hoạt SQL Server đang sử dụng.
 - Playwright QA: tạo Membership PENDING thành công; nút VNPay thiếu cấu hình trả thông báo; IPN không có chữ ký trả `97`. CASH QA tạo yêu cầu → Admin xác nhận → SQL QA xác nhận Payment PAID 100000 VND và Membership ACTIVE. Bằng chứng: `.playwright-mcp/page-2026-10-25T09-02-28-946Z.yml`, `09-02-32-858Z`, `09-03-59-703Z` và snapshot sau xác nhận.
 
+## 2. QR Check-in
+
+- Dùng lại `AdminCheckinService`, không tạo lịch sử check-in song song. QR là token ngẫu nhiên 256 bit, SQL chỉ lưu SHA-256; không chứa email, mật khẩu hoặc JWT. Hết hạn sau 120 giây, một lần sử dụng, làm mới thu hồi mã cũ; kiểm tra tokenVersion của tài khoản.
+- Khóa User trước token trong transaction; kiểm tra Member ACTIVE/enabled, Membership và chi nhánh qua service hiện có. Hai lượt quét đồng thời chỉ tạo một check-in. Sai chi nhánh không đốt token. Logout/thu hồi phiên làm QR cũ mất hiệu lực.
+- Member: menu tài khoản → QR Check-in → Tạo/làm mới → đưa QR cho Admin. Admin: Check-in → chọn chi nhánh → mở camera hoặc nhập mã tại quầy → Xác nhận QR. Checkout dùng nút cũ.
+- Camera dùng BarcodeDetector của trình duyệt; thiết bị không hỗ trợ có thông báo và phương án nhập mã. Quét camera vật lý: BLOCKED trên trình duyệt QA hiện tại; không báo PASS.
+- Migration bổ sung `database/migrations/V702__qr_checkin.sql`; chưa chạy trên UTEFitDB. Không sửa lịch sử cũ. Rollback code giữ bảng token (có thể xóa token hết hạn theo chính sách vận hành sau này).
+- 29 Maven test, 0 failures/errors, 1 Cloudinary skip; 12 test QR gồm expiry/tamper/replay/refresh/locked/branch/membership/manual conflict/RBAC và hai thread đồng thời. Package PASS sau khi tách JAR chạy khỏi đầu ra build Windows.
+- Playwright SQL QA: QR ảnh PNG 300px, sai chi nhánh báo lỗi, đúng chi nhánh tạo check-in #1, dùng lại bị chặn, checkout thành công. Bằng chứng `.playwright-mcp/page-2026-10-25T09-16-57-594Z.yml`, `09-17-36-956Z`, `09-17-45-551Z`, `09-17-59-875Z`, `09-18-22-553Z`.
+- Chạy QA bằng `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-qa.ps1`; script sao chép JAR sang `target/qa-runtime` trước khi chạy để build sau không bị khóa JAR. Cấu hình WebSocket QA dùng origin 8081, không thay cấu hình môi trường chính.
+
 ## Các bước tiếp theo
 
 QR Check-in → Favorites → Review Video → Manager. Chỉ chuyển bước sau khi build/test bước trước; báo cáo và checkpoint local cập nhật theo tính năng. Không push/merge.

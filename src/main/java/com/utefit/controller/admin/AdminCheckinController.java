@@ -2,6 +2,7 @@
 package com.utefit.controller.admin;
 
 import com.utefit.service.AdminCheckinService;
+import com.utefit.service.QrCheckinService;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.format.annotation.DateTimeFormat;
@@ -18,6 +19,18 @@ import java.time.LocalDate;
 public class AdminCheckinController {
 
     private final AdminCheckinService service;
+    private final QrCheckinService qr;
+
+    @PostMapping("/qr")
+    public String scanQr(@RequestParam String qrToken, @RequestParam Long branchId, RedirectAttributes redirect) {
+        try {
+            qr.consume(qrToken.trim(), branchId);
+            redirect.addFlashAttribute("success", "Check-in bằng QR thành công.");
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            redirect.addFlashAttribute("error", ex.getMessage());
+        }
+        return "redirect:/admin/checkins";
+    }
 
     @GetMapping
     public String index(
