@@ -270,25 +270,31 @@ public class MembershipPaymentService {
             );
         }
 
-        LocalDate start = LocalDate.now();
-
-        membership.setStartDate(start);
-        membership.setEndDate(start.plusDays(duration - 1L));
-        membership.setStatus(MembershipStatus.ACTIVE);
-
         payment.setStatus(PaymentStatus.PAID);
         payment.setPaidAt(LocalDateTime.now());
         payment.setTransactionCode(
                 "CASH-" + payment.getId()
         );
-
-        memberships.save(membership);
+        activateMembership(membership, payment.getPaidAt());
         payments.save(payment);
+    }
+
+    void activateMembership(Membership membership, LocalDateTime paidAt) {
+        int duration = membership.getQuotedDurationDays() != null
+                ? membership.getQuotedDurationDays() : membership.getPlan().getDurationDays();
+        if (duration <= 0 || membership.getStatus() != MembershipStatus.PENDING) {
+            throw new IllegalStateException("Gói tập không thể kích hoạt.");
+        }
+        LocalDate start = paidAt.toLocalDate();
+        membership.setStartDate(start);
+        membership.setEndDate(start.plusDays(duration - 1L));
+        membership.setStatus(MembershipStatus.ACTIVE);
+        memberships.save(membership);
         notifications.createNotificationForUser(
                 membership.getUser().getId(),
                 NotificationType.MEMBERSHIP_ACTIVATED,
                 "Gói tập đã được kích hoạt",
-                "Thanh toán CASH đã được xác nhận. Gói tập của bạn có hiệu lực đến " + membership.getEndDate() + ".",
+                "Thanh toán đã được xác nhận. Gói tập của bạn có hiệu lực đến " + membership.getEndDate() + ".",
                 membership.getId());
     }
 
@@ -303,6 +309,10 @@ public class MembershipPaymentService {
         }
         if (membership.getStatus() != MembershipStatus.PENDING) {
             throw new IllegalStateException("Chỉ hủy được gói đang PENDING.");
+        }
+        if (payments.findByMembership_IdAndStatus(membershipId, PaymentStatus.PENDING).stream()
+                .anyMatch(payment -> payment.getMethod() == PaymentMethod.VNPAY)) {
+            throw new IllegalStateException("Giao dịch VNPay đang xử lý; cần chờ kết quả đối soát trước khi hủy gói.");
         }
         // Khóa từng payment để tuần tự với thao tác Admin xác nhận CASH.
         for (Payment payment : payments.findByMembership_IdAndStatus(

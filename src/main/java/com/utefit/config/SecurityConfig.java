@@ -76,6 +76,8 @@ public class SecurityConfig {
                                 "/forgot-password",
                                 "/reset-password",
                                 "/access-denied",
+                                "/payments/vnpay/return",
+                                "/payments/vnpay/ipn",
 
                                 "/css/**",
                                 "/js/**",

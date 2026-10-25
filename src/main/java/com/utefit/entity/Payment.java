@@ -50,6 +50,12 @@ public class Payment {
     @Column(name = "transaction_code", length = 100)
     private String transactionCode;
 
+    @Column(name = "gateway_transaction_no", length = 100)
+    private String gatewayTransactionNo;
+
+    @Column(name = "gateway_response_code", length = 10)
+    private String gatewayResponseCode;
+
     @Column(name = "paid_at")
     private LocalDateTime paidAt;
 

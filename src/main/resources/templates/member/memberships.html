@@ -120,8 +120,7 @@
                     <p class="ut-subtitle small">
                         Sau khi đăng ký, gói sẽ ở
                         trạng thái PENDING.
-                        Bạn cần tạo yêu cầu thanh toán
-                        và đến quầy đóng tiền.
+                        Bạn có thể thanh toán VNPay Sandbox hoặc tạo yêu cầu CASH và đến quầy đóng tiền.
                     </p>
 
                     <button type="submit"
@@ -213,6 +212,13 @@
                             </td>
 
                             <td>
+                                <form th:if="${m.status == 'PENDING'}"
+                                      th:action="@{/member/memberships/{id}/vnpay(id=${m.id})}"
+                                      method="post" class="mb-2">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                    <button class="btn btn-outline-info btn-sm" type="submit">VNPay Sandbox</button>
+                                </form>
+
                                 <form th:if="${m.status == 'PENDING'}"
                                       th:action="@{/member/memberships/{id}/cash(id=${m.id})}"
                                       method="post">
