@@ -44,6 +44,7 @@
                     UTEFIT BRANCH
                 </span>
 
+                <div th:replace="~{fragments/favorite :: button('BRANCH',${branch.id},'/branches')}"></div>
                 <h1 class="ut-page-title mt-3"
                     th:text="${branch.name}">
                     Tên chi nhánh

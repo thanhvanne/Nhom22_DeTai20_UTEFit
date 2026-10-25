@@ -55,6 +55,16 @@ Member chọn Branch/Plan → tạo gói PENDING → bấm VNPay Sandbox → tha
 - Playwright SQL QA: QR ảnh PNG 300px, sai chi nhánh báo lỗi, đúng chi nhánh tạo check-in #1, dùng lại bị chặn, checkout thành công. Bằng chứng `.playwright-mcp/page-2026-10-25T09-16-57-594Z.yml`, `09-17-36-956Z`, `09-17-45-551Z`, `09-17-59-875Z`, `09-18-22-553Z`.
 - Chạy QA bằng `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-qa.ps1`; script sao chép JAR sang `target/qa-runtime` trước khi chạy để build sau không bị khóa JAR. Cấu hình WebSocket QA dùng origin 8081, không thay cấu hình môi trường chính.
 
+## 3. Favorites
+
+- Member lưu PT, Class, Branch trên danh sách và chi tiết đang có; menu tài khoản → Yêu thích. Có thể mở mục hoặc bỏ lưu. Lớp chưa có trang chi tiết riêng nên mở danh sách lớp của chi nhánh.
+- Khóa Member và unique `(user_id,target_type,target_id)` chống trùng/race; service kiểm tra role/trạng thái, quyền sở hữu khi xóa, mục tiêu tồn tại/hoạt động. Xóa Favorite không xóa đối tượng. Mục ngừng hoạt động/mất được giữ như bookmark không khả dụng để Member tự bỏ.
+- Target polymorphic không đặt FK tới ba bảng khác nhau; backend xác minh mỗi lần thêm và resolve trạng thái khi đọc. Không tạo Booking/PT Request, không thay sức chứa. Redirect chỉ nhận allowlist nội bộ.
+- Migration bổ sung `V703__favorites.sql`, chưa áp dụng UTEFitDB; rollback code giữ bảng, không cần xóa dữ liệu.
+- Build/package PASS: 35 tests, 0 failures/errors, 1 skipped. Sáu test mới kiểm tra ba loại, concurrent duplicate, ownership, inactive/deleted, RBAC/CSRF và redirect.
+- Playwright SQL QA PASS: lưu Class #1, Trainer #1, Branch #1 từ giao diện; reload còn đủ ba mục; gửi thêm Class cũ không nhân bản; bỏ Branch thành công. SQL QA không phát sinh booking/yêu cầu PT. Bằng chứng `.playwright-mcp/page-2026-10-25T09-25-05-315Z.yml`, `09-25-13-613Z`, `09-25-19-316Z`, `09-25-22-494Z` và snapshot sau bỏ lưu.
+- Hồi quy QR: Member xem lịch sử có check-in/checkout #1 tại `/member/history`, snapshot `09-23-27-122Z`.
+
 ## Các bước tiếp theo
 
 QR Check-in → Favorites → Review Video → Manager. Chỉ chuyển bước sau khi build/test bước trước; báo cáo và checkpoint local cập nhật theo tính năng. Không push/merge.

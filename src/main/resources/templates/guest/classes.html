@@ -109,6 +109,7 @@
                         </strong>
                     </p>
 
+                    <div th:replace="~{fragments/favorite :: button('CLASS',${c.id},'/classes')}"></div>
                     <span class="ut-status"
                           th:classappend="${c.status}"
                           th:text="${c.status}">

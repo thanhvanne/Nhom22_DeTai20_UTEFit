@@ -61,6 +61,7 @@
 
                 <div class="ut-card-body">
 
+                    <div th:replace="~{fragments/favorite :: button('BRANCH',${b.id},'/branches')}"></div>
                     <h3 th:text="${b.name}">
                         Tên chi nhánh
                     </h3>

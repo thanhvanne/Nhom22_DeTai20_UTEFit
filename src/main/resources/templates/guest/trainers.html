@@ -259,6 +259,7 @@
 
                     </div>
 
+                    <div th:replace="~{fragments/favorite :: button('TRAINER',${trainer.id},'/trainers')}"></div>
                     <h3 class="trainer-card-name"
                         th:text="${trainer.fullName}">
 

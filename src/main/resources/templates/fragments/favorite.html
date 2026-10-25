@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<div th:fragment="button(type,targetId,returnTo)" sec:authorize="hasRole('MEMBER')"
+     th:with="favoriteId=${savedFavorites[type + ':' + targetId]}" class="mt-2">
+    <form th:if="${favoriteId == null}" th:action="@{/member/favorites/{type}/{id}(type=${type},id=${targetId})}" method="post">
+        <input type="hidden" name="returnTo" th:value="${returnTo}">
+        <button class="btn btn-outline-warning btn-sm" type="submit">♡ Yêu thích</button>
+    </form>
+    <form th:if="${favoriteId != null}" th:action="@{/member/favorites/{id}/remove(id=${favoriteId})}" method="post">
+        <input type="hidden" name="returnTo" th:value="${returnTo}">
+        <button class="btn btn-warning btn-sm" type="submit">♥ Bỏ yêu thích</button>
+    </form>
+</div>
+</body>
+</html>
