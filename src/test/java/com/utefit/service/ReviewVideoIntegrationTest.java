@@ -75,7 +75,7 @@ class ReviewVideoIntegrationTest {
                         .accept(org.springframework.http.MediaType.TEXT_HTML))
                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().is(413))
                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(
-                        org.hamcrest.Matchers.containsString("Video Review tối đa 20 MB")));
+                        org.hamcrest.Matchers.containsString("Video Review tối đa 50 MiB")));
     }
 
     @Test
@@ -100,13 +100,19 @@ class ReviewVideoIntegrationTest {
 
     @Test
     void failedUploadRollsBackAndKeepsPreviousVideoAndImage() {
-        Long id = service.create(member.getEmail(), form, null, video);
+        var image = new MockMultipartFile("image", "old.png", "image/png", new byte[]{1});
+        when(cloudinary.uploadImage(any(), anyString())).thenReturn(new MediaUploadResult("https://res.cloudinary.com/test/image/upload/old.png", "old-photo"));
+        Long id = service.create(member.getEmail(), form, image, video);
+        when(cloudinary.uploadImage(any(), anyString())).thenReturn(new MediaUploadResult("https://res.cloudinary.com/test/image/upload/new.png", "new-photo"));
         when(cloudinary.uploadVideo(any(), anyString())).thenThrow(new IllegalStateException("QA provider unavailable"));
         form.setComment("should rollback");
-        assertThrows(IllegalStateException.class, () -> service.update(member.getEmail(), id, form, null, video));
+        assertThrows(IllegalStateException.class, () -> service.update(member.getEmail(), id, form, image, video));
         Review review = reviews.findById(id).orElseThrow();
         assertEquals("QA video review", review.getComment());
         assertEquals("new-video", review.getVideoPublicId());
+        assertEquals("old-photo", review.getImagePublicId());
+        verify(cloudinary).delete("new-photo");
+        verify(cloudinary, never()).delete("old-photo");
         verify(cloudinary, never()).deleteVideo(anyString());
     }
 
@@ -151,5 +157,16 @@ class ReviewVideoIntegrationTest {
         assertThrows(IllegalArgumentException.class, () -> service.update(member.getEmail(), id, form, null, video));
         assertNull(reviews.findById(id).orElseThrow().getVideoPublicId());
         verify(cloudinary, never()).uploadVideo(any(), anyString());
+    }
+
+    @Test
+    void failedVideoUploadRollsBackNewReviewAndCleansNewImage() {
+        long before = reviews.count();
+        var image = new MockMultipartFile("image", "test.png", "image/png", new byte[]{1});
+        when(cloudinary.uploadImage(any(), anyString())).thenReturn(new MediaUploadResult("https://res.cloudinary.com/test/image/upload/new.png", "new-photo"));
+        when(cloudinary.uploadVideo(any(), anyString())).thenThrow(new IllegalStateException("unit-only provider failure"));
+        assertThrows(IllegalStateException.class, () -> service.create(member.getEmail(), form, image, video));
+        assertEquals(before, reviews.count());
+        verify(cloudinary).delete("new-photo");
     }
 }

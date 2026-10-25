@@ -13,6 +13,20 @@ import java.util.Optional;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
+    interface BranchSummary {
+        Long getTotalReviews();
+        Double getAverageRating();
+    }
+
+    @Query("""
+            SELECT COUNT(r) AS totalReviews, AVG(r.rating * 1.0) AS averageRating
+            FROM Review r WHERE r.visible = true AND r.branch.id = :branchId
+            """)
+    BranchSummary summarizeVisibleBranch(@Param("branchId") Long branchId);
+
+    @EntityGraph(attributePaths = {"branch", "trainer", "trainer.user", "user"})
+    List<Review> findByBranch_IdAndVisibleTrueOrderByCreatedAtDescIdDesc(Long branchId, Pageable pageable);
+
     @EntityGraph(attributePaths = {
             "branch", "trainer", "trainer.user"
     })

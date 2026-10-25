@@ -16,6 +16,29 @@
     max-width: 750px;
 }
 
+.branch-review-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.75rem;
+}
+
+.branch-review-average {
+    color: #ffc107;
+    font-size: 2rem;
+}
+
+.branch-review-card {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.branch-review-video {
+    max-height: 320px;
+    background: #090d16;
+    object-fit: contain;
+}
+
 .review-form .form-label {
     color: #f3f6ff;
 }

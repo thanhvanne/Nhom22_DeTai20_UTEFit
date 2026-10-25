@@ -162,7 +162,7 @@
                        accept="image/jpeg,image/png,image/gif">
 
                 <small class="ut-subtitle">
-                    JPG, PNG, GIF; tối đa 5 MB
+                    JPG, PNG, GIF; tối đa 5 MiB
                     (được kiểm tra lại ở server).
                 </small>
 
@@ -180,8 +180,9 @@
 
             <div class="mb-3">
                 <label for="video" class="form-label">Video trải nghiệm (không bắt buộc)</label>
-                <input class="form-control" id="video" name="video" type="file" accept="video/mp4,video/webm">
-                <small class="ut-subtitle">MP4/WebM, tối đa 20 MB. Server kiểm tra nội dung; ảnh cũ vẫn được giữ.</small>
+                <input class="form-control" id="video" name="video" type="file" accept="video/mp4,video/webm" data-max-bytes="52428800" aria-describedby="review-video-help review-video-error">
+                <small id="review-video-help" class="ut-subtitle">MP4/WebM, tối đa 50 MiB (52.428.800 byte) mỗi video. Ảnh vẫn tối đa 5 MiB. Server kiểm tra nội dung file.</small>
+                <p id="review-video-error" class="text-danger small" role="alert"></p>
                 <video th:if="${currentVideo != null}" th:src="${currentVideo}" controls preload="none" class="w-100 rounded mt-2" style="max-height:320px"></video>
                 <label th:if="${currentVideo != null}" class="d-block mt-2"><input type="checkbox" th:field="*{removeVideo}"> Xóa video hiện tại</label>
             </div>

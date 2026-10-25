@@ -2,6 +2,7 @@
 package com.utefit.controller.member;
 
 import com.utefit.service.PublicCatalogService;
+import com.utefit.service.PublicReviewService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -10,11 +11,13 @@ import org.springframework.web.bind.annotation.*;
 public class PublicCatalogController {
 
     private final PublicCatalogService catalog;
+    private final PublicReviewService reviews;
 
     public PublicCatalogController(
-            PublicCatalogService catalog
+            PublicCatalogService catalog, PublicReviewService reviews
     ) {
         this.catalog = catalog;
+        this.reviews = reviews;
     }
 
     @GetMapping("/branches")
@@ -40,6 +43,7 @@ public class PublicCatalogController {
                 "branch",
                 catalog.branchDetail(id)
         );
+        model.addAttribute("branchReviews", reviews.forBranch(id));
         return "guest/branch-detail";
     }
 

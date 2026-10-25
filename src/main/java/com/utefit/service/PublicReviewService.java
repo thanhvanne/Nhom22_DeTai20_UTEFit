@@ -30,6 +30,19 @@ public class PublicReviewService {
             LocalDateTime createdAt
     ) {}
 
+    public record BranchReviews(long totalReviews, Double averageRating, List<PublicReview> latest) {}
+
+    @Transactional(readOnly = true)
+    public BranchReviews forBranch(Long branchId) {
+        if (branchId == null || branchId <= 0) {
+            throw new IllegalArgumentException("Chi nhánh không hợp lệ.");
+        }
+        var summary = reviews.summarizeVisibleBranch(branchId);
+        var latest = reviews.findByBranch_IdAndVisibleTrueOrderByCreatedAtDescIdDesc(branchId, PageRequest.of(0, 5))
+                .stream().map(this::view).toList();
+        return new BranchReviews(summary.getTotalReviews(), summary.getAverageRating(), latest);
+    }
+
     @Transactional(readOnly = true)
     public Page<PublicReview> search(
             Long branchId,

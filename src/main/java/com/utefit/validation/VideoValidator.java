@@ -10,11 +10,11 @@ import java.util.Set;
 
 @Component
 public class VideoValidator {
-    public static final long MAX_BYTES = 20L * 1024 * 1024;
+    public static final long MAX_BYTES = 50L * 1024 * 1024;
 
     public void validate(MultipartFile file) {
         if (file == null || file.isEmpty() || file.getSize() > MAX_BYTES) {
-            throw new IllegalArgumentException("Video phải có dữ liệu và không vượt quá 20 MB.");
+            throw new IllegalArgumentException("Video phải có dữ liệu và không vượt quá 50 MiB (52.428.800 byte).");
         }
         String mime = file.getContentType();
         String name = file.getOriginalFilename();

@@ -59,4 +59,15 @@ class CloudinaryVideoTest {
         assertThrows(IllegalArgumentException.class, () -> service.uploadVideo(fake, "qa"));
         verify(cloud.uploader(), never()).upload(any(byte[].class), anyMap());
     }
+
+    @Test
+    void decodedVideoMetadataAllowsFiftyMiBButRejectsLargerAndCleansOnlyNewAsset() throws Exception {
+        result.put("bytes", VideoValidator.MAX_BYTES);
+        when(cloud.uploader().upload(any(byte[].class), anyMap())).thenReturn(result);
+        assertEquals("qa-video", service.uploadVideo(video, "qa").publicId());
+        verify(cloud.uploader(), never()).destroy(anyString(), anyMap());
+        result.put("bytes", VideoValidator.MAX_BYTES + 1);
+        assertThrows(IllegalArgumentException.class, () -> service.uploadVideo(video, "qa"));
+        verify(cloud.uploader()).destroy(eq("qa-video"), anyMap());
+    }
 }

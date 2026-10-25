@@ -9,7 +9,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class ReviewUploadAdvice {
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public String tooLarge(RedirectAttributes redirect) {
-        redirect.addFlashAttribute("error", "File quá lớn. Video tối đa 20 MB, ảnh tối đa 5 MB; tổng request tối đa 26 MB.");
+        redirect.addFlashAttribute("error", "File quá lớn. Video tối đa 50 MiB mỗi file, ảnh tối đa 5 MiB; tổng request tối đa 70 MiB.");
         return "redirect:/member/reviews";
     }
 }
