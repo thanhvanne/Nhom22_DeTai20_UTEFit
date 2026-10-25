@@ -20,6 +20,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class VnpayPaymentServiceTest {
+    @Mock jakarta.persistence.EntityManager entityManager;
     @Mock VnpayProperties properties;
     @Mock UserRepository users;
     @Mock MembershipRepository memberships;
@@ -38,7 +39,7 @@ class VnpayPaymentServiceTest {
         lenient().when(properties.getHashSecret()).thenReturn("unit-test-only-key");
         lenient().when(properties.getReturnUrl()).thenReturn("http://localhost/payments/vnpay/return");
         gateway = new VnpayGateway(properties);
-        service = new VnpayPaymentService(properties, gateway, users, memberships, payments, billing);
+        service = new VnpayPaymentService(properties, gateway, users, memberships, payments, billing, entityManager);
         member = User.builder().id(1L).email("member@utefit.test").role(UserRole.MEMBER)
                 .status(UserStatus.ACTIVE).enabled(true).build();
         membership = Membership.builder().id(2L).user(member).status(MembershipStatus.PENDING)

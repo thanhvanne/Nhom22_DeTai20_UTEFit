@@ -9,6 +9,7 @@ import com.utefit.repository.MembershipRepository;
 import com.utefit.repository.PaymentRepository;
 import com.utefit.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +27,7 @@ public class VnpayPaymentService {
     private final MembershipRepository memberships;
     private final PaymentRepository payments;
     private final MembershipPaymentService billing;
+    private final EntityManager entityManager;
 
     @Transactional
     public String start(String email, Long membershipId, String ipAddress) {
@@ -69,7 +71,9 @@ public class VnpayPaymentService {
             return response("01", "Order not found");
         }
         Membership membership = memberships.lockById(snapshot.getMembership().getId()).orElseThrow();
+        entityManager.refresh(membership);
         Payment payment = payments.lockById(snapshot.getId()).orElseThrow();
+        entityManager.refresh(payment);
         if (payment.getUser() == null || !payment.getUser().getId().equals(membership.getUser().getId())) {
             return response("99", "Order owner mismatch");
         }
