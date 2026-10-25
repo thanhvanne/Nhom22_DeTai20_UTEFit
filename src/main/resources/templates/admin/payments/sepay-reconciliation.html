@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/layout :: head('Đối soát SePay')}"></head>
+<body><div class="d-flex">
+<aside th:replace="~{admin/fragments/layout :: sidebar}"></aside>
+<div class="flex-grow-1 min-vh-100" style="min-width:0">
+    <nav th:replace="~{admin/fragments/layout :: topbar('Đối soát SePay')}"></nav>
+    <main class="container-fluid px-4 pb-5">
+        <h1 class="h3">Giao dịch Webhook SePay đã xác thực</h1>
+        <p>MATCHED: đã ghi PAID và kích hoạt gói. REVIEW: tiền/giao dịch cần đối soát, chưa ghi doanh thu Membership. IGNORED: không phải tiền vào. Không xác nhận thủ công bằng màn hình này.</p>
+        <p>Giao dịch Test không phải tiền thật. Không cộng sổ kỹ thuật vào doanh thu PAID lần nữa.</p>
+        <a th:href="@{/admin/payments}" class="btn btn-outline-secondary mb-3">Lịch sử Payment</a>
+        <div class="table-responsive surface-card p-3"><table class="table table-hover align-middle">
+            <thead><tr><th>SePay ID / môi trường</th><th>Ngân hàng / tài khoản</th><th>Tiền / thời gian GD</th><th>Nội dung / mã</th><th>Kết quả</th><th>Payment</th></tr></thead>
+            <tbody><tr th:each="receipt : ${transactions.content}">
+                <td><strong th:text="${receipt.transactionId}"></strong><br><span th:text="${receipt.environment}"></span><br><small th:text="${receipt.bankReference}"></small></td>
+                <td><span th:text="${receipt.gateway}"></span><br><span th:text="${receipt.accountNumber}"></span></td>
+                <td><strong th:text="|${receipt.amount} VND|"></strong><br><small th:text="${receipt.transactionDate}"></small></td>
+                <td style="max-width:300px;overflow-wrap:anywhere"><strong th:text="${receipt.paymentReference}"></strong><p th:text="${receipt.content}"></p></td>
+                <td><span th:text="${receipt.outcome}"></span><br><small th:text="${receipt.reason}"></small><p th:if="${receipt.conflictHash != null}" class="text-danger">Phát hiện ID/tham chiếu ngân hàng gửi lại với dữ liệu khác. ID: <span th:text="${receipt.conflictTransactionId}"></span>. Cần kiểm tra log SePay; không kích hoạt thêm.</p></td>
+                <td><a th:if="${receipt.payment != null}" th:href="@{/admin/payments/{id}(id=${receipt.payment.id})}" th:text="|#${receipt.payment.id}|"></a></td>
+            </tr></tbody>
+        </table><p th:if="${transactions.empty}">Chưa có Webhook đã xác thực được lưu.</p></div>
+        <nav class="d-flex gap-3 mt-3"><a th:if="${transactions.hasPrevious()}" th:href="@{/admin/payments/sepay-reconciliation(page=${transactions.number - 1})}">Trước</a><span th:text="|Trang ${transactions.number + 1}|"></span><a th:if="${transactions.hasNext()}" th:href="@{/admin/payments/sepay-reconciliation(page=${transactions.number + 1})}">Sau</a></nav>
+    </main>
+</div></div><div th:replace="~{admin/fragments/layout :: scripts}"></div></body>
+</html>

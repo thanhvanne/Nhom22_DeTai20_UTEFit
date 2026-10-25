@@ -79,7 +79,7 @@ public class MemberMembershipController {
             redirect.addFlashAttribute(
                     "success",
                     "Đã tạo đăng ký gói tập PENDING. "
-                            + "Hãy chọn CASH hoặc VNPay Sandbox."
+                            + "Hãy chọn CASH, VNPay Sandbox hoặc chuyển khoản VietQR (SePay)."
             );
         } catch (IllegalArgumentException e) {
             redirect.addFlashAttribute(

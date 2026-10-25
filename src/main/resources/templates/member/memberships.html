@@ -120,7 +120,7 @@
                     <p class="ut-subtitle small">
                         Sau khi đăng ký, gói sẽ ở
                         trạng thái PENDING.
-                        Bạn có thể thanh toán VNPay Sandbox hoặc tạo yêu cầu CASH và đến quầy đóng tiền.
+                        Bạn có thể chọn VietQR (SePay), VNPay Sandbox hoặc CASH tại quầy. Mỗi đơn chỉ có một giao dịch đang xử lý.
                     </p>
 
                     <button type="submit"
@@ -212,6 +212,9 @@
                             </td>
 
                             <td>
+                                <form th:if="${m.status == 'PENDING'}" th:action="@{/member/memberships/{id}/sepay(id=${m.id})}" method="post" class="mb-2">
+                                    <button class="btn btn-outline-warning btn-sm" type="submit">Chuyển khoản VietQR</button>
+                                </form>
                                 <form th:if="${m.status == 'PENDING'}"
                                       th:action="@{/member/memberships/{id}/vnpay(id=${m.id})}"
                                       method="post" class="mb-2">

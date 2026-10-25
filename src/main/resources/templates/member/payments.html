@@ -92,8 +92,9 @@
                         </span>
                     </td>
 
-                    <td th:text="${p.transactionCode ?: '-'}">
-                        -
+                    <td>
+                        <span th:text="${p.transactionCode ?: '-'}">-</span>
+                        <a th:if="${p.method == 'SEPAY'}" class="btn btn-outline-warning btn-sm d-block mt-1" th:href="@{/member/payments/{id}/sepay(id=${p.id})}">Xem VietQR / trạng thái</a>
                     </td>
 
                 </tr>

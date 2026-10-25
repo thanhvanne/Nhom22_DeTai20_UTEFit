@@ -311,8 +311,8 @@ public class MembershipPaymentService {
             throw new IllegalStateException("Chỉ hủy được gói đang PENDING.");
         }
         if (payments.findByMembership_IdAndStatus(membershipId, PaymentStatus.PENDING).stream()
-                .anyMatch(payment -> payment.getMethod() == PaymentMethod.VNPAY)) {
-            throw new IllegalStateException("Giao dịch VNPay đang xử lý; cần chờ kết quả đối soát trước khi hủy gói.");
+                .anyMatch(payment -> payment.getMethod() == PaymentMethod.VNPAY || payment.getMethod() == PaymentMethod.SEPAY)) {
+            throw new IllegalStateException("Giao dịch VNPay/SePay đang xử lý; cần chờ kết quả đối soát trước khi hủy gói.");
         }
         // Khóa từng payment để tuần tự với thao tác Admin xác nhận CASH.
         for (Payment payment : payments.findByMembership_IdAndStatus(

@@ -1,5 +1,7 @@
 # Kiểm kê source Giai đoạn 7
 
+Phần SePay bổ sung sau checkpoint `cb4500f` có danh sách file tạo/sửa riêng trong `SEPAY_INTEGRATION.md`. Bảng dưới là inventory lịch sử trước SePay; không phải bằng chứng kiểm thử SePay.
+
 So với baseline `6833d35`, chỉ nhánh `feat/giai-doan-7`. A = tạo mới, M = sửa. Không bao gồm dữ liệu QA/secret hay bằng chứng local bị loại khỏi commit.
 
 | Loại | File | Mục đích |

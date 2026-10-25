@@ -20,6 +20,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
+import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.http.HttpMethod;
+import com.utefit.controller.payment.SepayWebhookController;
 
 @Configuration
 public class SecurityConfig {
@@ -57,15 +62,22 @@ public class SecurityConfig {
                         userDetailsService
                 );
 
+        RequestMatcher sepayWebhook = new OrRequestMatcher(
+                PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, SepayWebhookController.TEST_PATH),
+                PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, SepayWebhookController.LIVE_PATH));
+
         http
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(
                                 new HttpSessionCsrfTokenRepository()
                         )
                         .ignoringRequestMatchers("/ws/**")
+                        .ignoringRequestMatchers(sepayWebhook)
                 )
 
                 .authorizeHttpRequests(auth -> auth
+
+                        .requestMatchers(sepayWebhook).permitAll()
 
                         .requestMatchers(
                                 "/",

@@ -2,6 +2,12 @@
 
 Branch: `feat/giai-doan-7`. Baseline: `6833d35`, tag `checkpoint/gd7-before-implementation-20261025`.
 
+## Bổ sung SePay + VietQR sau checkpoint cb4500f
+
+Source và hướng dẫn mới ở `SEPAY_INTEGRATION.md`; inventory SePay riêng trong báo cáo đó. Lượt SePay chỉ compile, không chạy Playwright/test giao dịch/migration/ứng dụng. Kết quả test lịch sử ở các mục dưới không bao gồm phần SePay mới. IntelliJ dùng profile `sepay` trên cổng **8080**, không dùng cổng QA 8081 của lượt cũ. Webhook Test: POST `/payments/sepay/webhook/test`; Live: POST `/payments/sepay/webhook/live`, mặc định Live tắt. Tag trước SePay: `checkpoint/before-sepay-20261025`.
+
+Cập nhật checkpoint 25/10/2026: chủ dự án báo đã tự kiểm thử thành công happy-path Test Mode 100.000đ/HMAC/Payment PAID/Membership ACTIVE; không phải agent tự xác minh hoặc bằng chứng Live. Kế hoạch chuyển Live, điều kiện NO-GO và rollback ở `SEPAY_LIVE_CHECKLIST.md`. Không bật Live hoặc chạy migration trong lượt checkpoint.
+
 ## Quy trình an toàn
 
 - Các lỗi giai đoạn 0–6 trong báo cáo 25/10/2026 chưa được sửa trong phạm vi này.

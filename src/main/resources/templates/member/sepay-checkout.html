@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Chuyển khoản VietQR - UTEFit')}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main class="container ut-page" id="sepay-checkout" th:attr="data-status-url=@{/member/payments/{id}/sepay/status(id=${order.id})},data-expires-at=${order.expiresAt}">
+    <h1 class="ut-page-title">Chuyển khoản VietQR</h1>
+    <div th:if="${order.testMode}" class="alert alert-warning">
+        <strong>SEPAY TEST MODE — KHÔNG CHUYỂN TIỀN THẬT.</strong>
+        Chỉ mô phỏng giao dịch trong SePay Test mode bằng tài khoản Test, mã và số tiền bên dưới.
+        <span th:if="${order.qrUrl == null}">QR ngân hàng được ẩn mặc định; quản trị viên có thể bật xem trước bằng cấu hình Test riêng.</span>
+        <span th:if="${order.qrUrl != null}">Đây chỉ là xem trước cấu trúc VietQR. KHÔNG dùng app ngân hàng chuyển khoản; QR không tự trở thành Sandbox chỉ vì trang ghi TEST.</span>
+    </div>
+    <div class="row g-4">
+        <section class="col-lg-5">
+            <div class="ut-panel text-center">
+                <img th:if="${order.qrUrl != null}" id="sepay-qr-image" th:src="${order.qrUrl}" alt="VietQR chuyển khoản cho đơn này" referrerpolicy="no-referrer" class="img-fluid rounded" style="max-width:320px">
+                <p th:if="${order.qrUrl == null and !order.testMode}">Không hiển thị QR: giao dịch đã xử lý, hết hạn, không đủ điều kiện hoặc cấu hình đang tạm ngừng. Không chuyển khoản khi chưa được xác nhận lại.</p>
+                <p class="mt-3">Không thay đổi số tiền hoặc nội dung chuyển khoản. Không chuyển lại nhiều lần nếu trạng thái chưa cập nhật.</p>
+                <p id="sepay-expiry" aria-live="polite"></p>
+            </div>
+        </section>
+        <section class="col-lg-7">
+            <div class="ut-panel">
+                <dl class="row">
+                    <dt class="col-sm-4">Môi trường</dt><dd class="col-sm-8" th:text="${order.environment}"></dd>
+                    <dt class="col-sm-4">Ngân hàng</dt><dd class="col-sm-8" th:text="${order.bankCode}"></dd>
+                    <dt class="col-sm-4">Chủ tài khoản</dt><dd class="col-sm-8" th:text="${order.accountName}"></dd>
+                    <dt class="col-sm-4">Số tài khoản</dt><dd class="col-sm-8" th:text="${order.accountNumber}"></dd>
+                    <dt class="col-sm-4">Số tiền (VND)</dt><dd class="col-sm-8"><span id="sepay-amount" th:text="${order.amount.toBigIntegerExact()}"></span> <button type="button" class="btn btn-sm btn-outline-warning" data-copy="sepay-amount">Sao chép số tiền</button></dd>
+                    <dt class="col-sm-4">Nội dung</dt><dd class="col-sm-8"><strong id="sepay-reference" th:text="${order.reference}"></strong> <button type="button" class="btn btn-sm btn-outline-warning" data-copy="sepay-reference">Sao chép nội dung</button></dd>
+                    <dt class="col-sm-4">Payment</dt><dd class="col-sm-8" id="sepay-payment-status" th:text="${order.status}"></dd>
+                    <dt class="col-sm-4">Membership</dt><dd class="col-sm-8" id="sepay-membership-status" th:text="${order.membershipStatus}"></dd>
+                </dl>
+                <p id="sepay-message" role="status">Đang đọc trạng thái từ backend. Nút kiểm tra không xác nhận thanh toán.</p>
+                <button id="sepay-refresh" class="btn btn-brand" type="button">Kiểm tra trạng thái</button>
+                <a class="btn btn-outline-warning" th:href="@{/member/memberships}">Membership của tôi</a>
+                <p class="small mt-3">Nếu chuyển thiếu/thừa, sai nội dung, chuyển trùng hoặc quá hạn: liên hệ Admin để đối soát. Tiền vào bất thường không tự kích hoạt gói và không bị xóa khỏi lịch sử kỹ thuật.</p>
+            </div>
+        </section>
+    </div>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<div th:replace="~{fragments/scripts :: scripts}"></div>
+<script th:src="@{/js/sepay-checkout.js}" defer></script>
+</body>
+</html>
