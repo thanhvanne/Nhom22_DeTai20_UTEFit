@@ -550,6 +550,10 @@
 
                 </ul>
 
+                <div sec:authorize="hasRole('MANAGER')" class="d-flex align-items-center gap-3 me-auto">
+                    <a class="nav-link" th:href="@{/manager}">UTEFit · Chi nhánh của tôi</a>
+                    <form th:action="@{/auth/logout}" method="post"><button type="submit" class="btn btn-outline-warning btn-sm">Đăng xuất</button></form>
+                </div>
                 <!-- ADMIN -->
                 <ul class="navbar-nav ut-public-menu me-auto"
                     sec:authorize="hasRole('ADMIN')">

@@ -117,6 +117,9 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**")
                         .hasRole("ADMIN")
 
+                        .requestMatchers("/manager", "/manager/**")
+                        .hasRole("MANAGER")
+
                         .requestMatchers("/ws", "/ws/**")
                         .authenticated()
 

@@ -78,6 +78,27 @@ Member chọn Branch/Plan → tạo gói PENDING → bấm VNPay Sandbox → tha
 - Demo: Member có check-in đã checkout → Đánh giá → Viết/Sửa → chọn MP4/WebM → lưu → xem video; Admin → Đánh giá → ẩn → public không thấy review. Để xóa video, vào Sửa, tick Xóa video hiện tại và không chọn file mới.
 - Rollback code có thể giữ hai cột nullable và tài nguyên Cloudinary, không tự xóa media/dữ liệu cũ. Chưa áp dụng migration trên UTEFitDB.
 
+## 5. Manager theo chi nhánh
+
+- Role MANAGER riêng, không dùng ROLE_ADMIN, không mở `/admin/**` cho Manager. Portal `/manager` chỉ vận hành lịch lớp và check-in tại chi nhánh được giao; không được quản lý User/role, Payment, cấu hình hệ thống, Plan/Promotion hay tài chính toàn chuỗi.
+- Admin → Manager chi nhánh → tạo tài khoản MỚI → phân công một/nhiều chi nhánh; có thể thu hồi từng chi nhánh. Không chuyển role tài khoản cũ, không đổi mật khẩu tài khoản đang có. Tạo mới yêu cầu mật khẩu 12–72 ký tự, BCrypt server-side.
+- `ManagerAccessService` xác minh role/ACTIVE/enabled và assignment từ DB trên mỗi request. Thao tác ghi khóa Manager để tuần tự với grant/revoke; lịch và lớp được khóa/đọc lại trước kiểm tra branch nhằm tránh đổi scope giữa kiểm tra và cập nhật.
+- `ManagerOperationsService` chỉ là lớp kiểm soát scope, gọi lại AdminScheduleService/AdminCheckinService/QrCheckinService. Kiểm tra cả branchId, scheduleId/checkinId và lớp thay thế khi sửa lịch. Không nhân bản logic thanh toán, booking, notification hoặc check-in.
+- Manager có thể tạo/sửa/hủy/mở lại lịch của lớp tại chi nhánh được giao; việc hủy booking và gửi thông báo vẫn theo nghiệp vụ hiện tại. Không khẳng định các rủi ro lịch cũ 0–6 đã được xử lý.
+- `V705__manager_scope.sql` thêm bảng assignment và mở CHECK role hiện có bằng transaction. Chỉ chấp nhận CHECK role đơn giản đã nhận diện; constraint phức tạp sẽ abort thay vì tự xóa mù. CHECK status và account hiện có không đổi. Đã chạy cả V701–V705 trên SQL QA và chạy V705 lần hai thành công; còn nguyên 4 account/1 payment trước khi tạo Manager QA. UTEFitDB chỉ được đọc metadata CHECK, không migration/thay đổi dữ liệu.
+- Build/package toàn bộ PASS: 62 tests, 0 failures/errors, 1 integration Cloudinary skip. Chín test Manager kiểm tra role/scope/record ID/class thay thế, account mới, grant trùng, revoke, lock, CSRF, create/update/cancel lịch và check-in dùng chung.
+- Playwright SQL QA PASS: Admin tạo `qa.manager@utefit.test` (#5), giao Branch #1; Manager chỉ thấy Branch #1. Fetch Branch #2, Admin Dashboard/Payment/User/Manager, Member/PT endpoints đều 403. Tạo lịch #2, sửa phòng, QR check-in #2/checkout, manual check-in #3, hủy và mở lại lịch. Admin checkout #3 vẫn hoạt động.
+- Admin thu hồi Branch #1 → login lại Manager thấy chưa được giao chi nhánh, URL branch #1 trả 403. Test backend xác nhận revoke có hiệu lực ở request tiếp theo với authority cũ. Sau kiểm thử đã giao lại Branch #1 để demo.
+- Bằng chứng: `.playwright-mcp/page-2026-10-25T09-45-19-466Z.yml`, `09-45-29-322Z`, `09-45-42-019Z`, `09-46-52-435Z`, `09-47-20-773Z`, `09-48-56-719Z`, `09-49-24-844Z`, `09-49-32-271Z`, `09-50-50-856Z`, `09-51-11-487Z`, `09-51-42-328Z`.
+- Demo scope: đăng nhập Manager QA → chỉ Branch #1; thử `/manager?branchId=2` và `/admin/payments` → 403. Đăng nhập Admin QA → thu hồi Branch #1 → Manager không còn truy cập branch đó; giao lại để tiếp tục demo. Mật khẩu nằm trong cấu hình local ignored, không ghi vào hướng dẫn này.
+- Lưu ý rollback **quan trọng**: code cũ chưa biết enum MANAGER. Không chạy binary cũ trên database đã có account MANAGER mà chưa lập phương án tương thích. Giữ enum MANAGER và chặn portal khi rollback nghiệp vụ, hoặc trên bản sao DB có backup, chuyển riêng account Manager MỚI sang MEMBER + disabled/LOCKED + tăng tokenVersion sau phê duyệt; không đụng account cũ. Không tự chạy downgrade dữ liệu. UTEFitDB chưa thay đổi nên phiên bản gốc vẫn dùng được với database gốc.
+
+## Kiểm thử liên role
+
+Manager tạo/sửa lịch #2 → Member QA đăng ký qua `/member/classes` → PT QA xem `/pt/classes/2` có đúng một học viên → Manager hủy lịch → SQL registration #1 CANCELLED. Mở lại lịch không phục hồi booking đã hủy. Membership #1 vẫn ACTIVE, Payment #1 vẫn PAID 100000 VND. Bằng chứng `09-47-34-882Z`, `09-47-56-382Z`, `09-48-34-717Z` và truy vấn QA sau hủy.
+
+Admin Statistics sau ba lượt check-in hiển thị 3 lượt và doanh thu PAID 100000 VND, Membership hiệu lực 1; khớp dữ liệu QA. Bằng chứng `09-51-46-877Z`. Review QA đã bị Admin ẩn và public không còn thấy (`09-37-57-192Z`). Video thật/tiền Sandbox thật chưa được kiểm chứng, không tính PASS.
+
 ## Các bước tiếp theo
 
 QR Check-in → Favorites → Review Video → Manager. Chỉ chuyển bước sau khi build/test bước trước; báo cáo và checkpoint local cập nhật theo tính năng. Không push/merge.

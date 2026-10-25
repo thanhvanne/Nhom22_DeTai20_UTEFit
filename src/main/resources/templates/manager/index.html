@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Manager chi nhánh - UTEFit')}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main class="container ut-page">
+    <h1 class="ut-page-title">Quản lý chi nhánh</h1>
+    <p class="ut-subtitle">Lịch lớp và check-in trong phạm vi Admin phân công. Không có quyền quản trị toàn hệ thống.</p>
+    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+    <p th:if="${branches.empty}" class="alert alert-info">Bạn chưa được giao chi nhánh. Liên hệ Admin.</p>
+    <form th:if="${!branches.empty}" th:action="@{/manager}" method="get" class="d-flex gap-2 mb-4">
+        <select name="branchId" class="form-select" aria-label="Chi nhánh của tôi"><option th:each="branch : ${branches}" th:value="${branch.id}" th:text="${branch.name}" th:selected="${branch.id == branchId}"></option></select>
+        <button class="btn btn-brand" type="submit">Xem chi nhánh</button>
+    </form>
+    <div th:if="${branchId != null}">
+        <section class="ut-panel mb-4">
+            <h2 class="h4">Check-in thủ công</h2>
+            <form th:action="@{/manager/checkins}" method="post" class="d-flex gap-2">
+                <input name="branchId" type="hidden" th:value="${branchId}">
+                <input name="email" type="email" class="form-control" placeholder="Email Member tại chi nhánh" aria-label="Email Member" required>
+                <button class="btn btn-brand text-nowrap" type="submit">Check-in</button>
+            </form>
+        </section>
+        <section class="ut-panel mb-4">
+            <h2 class="h4">QR Check-in</h2>
+            <form id="qr-checkin-form" th:action="@{/manager/checkins/qr}" method="post">
+                <input id="qr-branch" name="branchId" type="hidden" th:value="${branchId}">
+                <label for="qr-token">Mã QR do Member cung cấp</label>
+                <input id="qr-token" name="qrToken" class="form-control mb-2" maxlength="60" required autocomplete="off">
+                <button class="btn btn-brand" type="submit">Xác nhận QR</button>
+            </form>
+            <button id="qr-camera-start" type="button" class="btn btn-outline-warning mt-2">Mở camera quét QR</button>
+            <button id="qr-camera-stop" type="button" class="btn btn-outline-secondary mt-2" hidden>Dừng camera</button>
+            <p id="qr-camera-status" aria-live="polite"></p>
+            <video id="qr-camera" hidden playsinline muted style="max-width:100%;max-height:320px"></video>
+        </section>
+        <section class="ut-panel mb-4">
+            <h2 class="h4">Lịch sử tại chi nhánh</h2>
+            <div class="table-responsive"><table class="table table-dark align-middle">
+                <thead><tr><th>Member</th><th>Vào</th><th>Ra</th><th>Thao tác</th></tr></thead>
+                <tbody><tr th:each="record : ${history.content}">
+                    <td th:text="${record.user.email}"></td><td th:text="${#temporals.format(record.checkInAt,'dd/MM/yyyy HH:mm')}"></td>
+                    <td th:text="${record.checkOutAt == null ? 'Chưa checkout' : #temporals.format(record.checkOutAt,'dd/MM/yyyy HH:mm')}"></td>
+                    <td><form th:if="${record.open}" method="post" th:action="@{/manager/checkins/{id}/checkout(id=${record.id})}">
+                        <input name="branchId" type="hidden" th:value="${branchId}"><button class="btn btn-outline-warning btn-sm" type="submit">Checkout</button>
+                    </form></td>
+                </tr></tbody>
+            </table></div>
+            <p th:if="${history.empty}">Chưa có check-in.</p>
+        </section>
+        <section class="ut-panel">
+            <div class="d-flex justify-content-between mb-3"><h2 class="h4">Lịch lớp</h2><a class="btn btn-brand" th:href="@{/manager/schedules/new(branchId=${branchId})}">Tạo lịch</a></div>
+            <div class="table-responsive"><table class="table table-dark align-middle">
+                <thead><tr><th>Lớp / PT</th><th>Ngày</th><th>Giờ</th><th>Phòng</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+                <tbody><tr th:each="schedule : ${schedules.content}">
+                    <td><span th:text="${schedule.fitnessClass.name}"></span><br><small th:if="${schedule.fitnessClass.trainer != null}" th:text="${schedule.fitnessClass.trainer.user.fullName}"></small></td>
+                    <td th:text="${schedule.scheduleDate}"></td><td th:text="|${schedule.startTime}–${schedule.endTime}|"></td><td th:text="${schedule.room}"></td>
+                    <td th:text="${schedule.active ? 'ACTIVE' : 'INACTIVE'}"></td>
+                    <td><a class="btn btn-outline-warning btn-sm" th:href="@{/manager/schedules/{id}/edit(id=${schedule.id},branchId=${branchId})}">Sửa</a>
+                        <form class="d-inline" method="post" th:action="@{/manager/schedules/{id}/toggle(id=${schedule.id})}" onsubmit="return confirm('Đổi trạng thái lịch? Member đã đăng ký sẽ được xử lý theo nghiệp vụ hiện có.');">
+                            <input name="branchId" type="hidden" th:value="${branchId}"><button class="btn btn-outline-warning btn-sm" type="submit" th:text="${schedule.active ? 'Hủy lịch' : 'Mở lại'}"></button>
+                        </form>
+                    </td>
+                </tr></tbody>
+            </table></div>
+            <p th:if="${schedules.empty}">Chưa có lịch lớp.</p>
+        </section>
+        <nav class="d-flex gap-3 mt-3">
+            <a th:if="${history.hasPrevious() or schedules.hasPrevious()}" th:href="@{/manager(branchId=${branchId},page=${history.number - 1})}">Trước</a>
+            <span th:text="|Trang ${history.number + 1}|"></span>
+            <a th:if="${history.hasNext() or schedules.hasNext()}" th:href="@{/manager(branchId=${branchId},page=${history.number + 1})}">Sau</a>
+        </nav>
+    </div>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<div th:replace="~{fragments/scripts :: scripts}"></div>
+<script th:src="@{/js/qr-scanner.js}" defer></script>
+</body>
+</html>

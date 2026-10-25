@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Lịch lớp chi nhánh - UTEFit')}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main class="container ut-page">
+    <a th:href="@{/manager(branchId=${branchId})}">← Chi nhánh của tôi</a>
+    <h1 class="h3 mt-3" th:text="${editId == null ? 'Tạo lịch lớp' : 'Sửa lịch lớp'}"></h1>
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+    <form class="ut-panel" method="post" th:object="${scheduleForm}" th:action="${editId == null} ? @{/manager/schedules/new} : @{/manager/schedules/{id}/edit(id=${editId})}">
+        <input type="hidden" name="branchId" th:value="${branchId}">
+        <div class="alert alert-danger" th:if="${#fields.hasAnyErrors()}"><p th:each="error : ${#fields.allErrors()}" th:text="${error}"></p></div>
+        <label for="fitnessClassId">Lớp thuộc chi nhánh</label>
+        <select class="form-select mb-3" th:field="*{fitnessClassId}" required><option value="">Chọn lớp</option><option th:each="fitnessClass : ${classes}" th:value="${fitnessClass.id}" th:text="${fitnessClass.name}"></option></select>
+        <label for="scheduleDate">Ngày</label><input class="form-control mb-3" type="date" th:field="*{scheduleDate}" required>
+        <label for="startTime">Giờ bắt đầu</label><input class="form-control mb-3" type="time" th:field="*{startTime}" required>
+        <label for="endTime">Giờ kết thúc</label><input class="form-control mb-3" type="time" th:field="*{endTime}" required>
+        <label for="room">Phòng</label><input class="form-control mb-3" maxlength="100" th:field="*{room}">
+        <label class="d-block mb-3"><input type="checkbox" th:field="*{active}"> Lịch hoạt động</label>
+        <button class="btn btn-brand" type="submit">Lưu lịch</button>
+    </form>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<div th:replace="~{fragments/scripts :: scripts}"></div>
+</body>
+</html>

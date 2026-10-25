@@ -238,6 +238,7 @@ public class AuthController {
                 case MEMBER -> "/member/dashboard";
                 case PT -> "/pt/dashboard";
                 case ADMIN -> "/admin/dashboard";
+                case MANAGER -> "/manager";
             };
 
         } catch (AuthenticationException ex) {
