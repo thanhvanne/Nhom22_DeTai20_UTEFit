@@ -272,11 +272,17 @@
             border-radius: 50%;
         }
     </style>
+    <link rel="stylesheet" th:href="@{/css/admin-responsive.css}">
 </head>
 <body>
 
 <!-- Sidebar Fragment -->
-<aside th:fragment="sidebar" class="admin-sidebar d-flex flex-column p-3 flex-shrink-0">
+<aside th:fragment="sidebar" id="admin-sidebar" class="admin-sidebar offcanvas-lg offcanvas-start d-flex flex-column p-3 flex-shrink-0"
+       tabindex="-1" aria-labelledby="admin-sidebar-title">
+    <div class="offcanvas-header d-lg-none p-0 pb-3">
+        <h5 id="admin-sidebar-title" class="offcanvas-title text-white">Menu quản trị</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" data-bs-target="#admin-sidebar" aria-label="Đóng menu"></button>
+    </div>
     <a th:href="@{/admin/dashboard}" class="utefit-admin-logo mb-3 border-bottom border-secondary border-opacity-25 pb-3 px-2">
         <span class="brand-symbol">◆</span>
         <span>UTE<span class="highlight">FIT</span></span>
@@ -314,13 +320,19 @@
 
 <!-- Topbar Fragment -->
 <nav th:fragment="topbar(title)" class="admin-topbar mb-4">
-    <div class="container-fluid p-0 d-flex justify-content-between align-items-center">
-        <div>
+    <div class="container-fluid p-0 d-flex flex-wrap gap-3 justify-content-between align-items-center">
+        <div class="admin-topbar-heading d-flex align-items-center gap-2">
+            <button class="btn btn-outline-secondary d-lg-none admin-menu-toggle" type="button"
+                    data-bs-toggle="offcanvas" data-bs-target="#admin-sidebar" aria-controls="admin-sidebar" aria-label="Mở menu quản trị">
+                <i class="bi bi-list" aria-hidden="true"></i>
+            </button>
+            <div>
             <span class="admin-eyebrow">◆ UTEFIT FITNESS CENTER • MANAGEMENT PORTAL</span>
             <h4 class="mb-0 fw-bold text-dark" th:text="${title}">Trang quản trị</h4>
+            </div>
         </div>
-        <div class="d-flex align-items-center gap-3">
-            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill fw-semibold">
+        <div class="d-flex align-items-center gap-3 ms-auto">
+            <span class="badge d-none d-sm-inline-block bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill fw-semibold">
                 <i class="bi bi-shield-lock-fill me-1"></i> ROLE_ADMIN
             </span>
             <form th:action="@{/auth/logout}" method="post" class="m-0">

@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface QrCheckinTokenRepository extends JpaRepository<QrCheckinToken, Long> {
+    Optional<QrCheckinToken> findByIdAndUser_Id(Long id, Long userId);
+
     @Query("SELECT t.user.id FROM QrCheckinToken t WHERE t.tokenHash = :hash")
     Optional<Long> findUserIdByHash(@Param("hash") String hash);
 

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
+import java.security.Principal;
 
 @Controller
 @RequestMapping("/admin/checkins")
@@ -22,10 +23,10 @@ public class AdminCheckinController {
     private final QrCheckinService qr;
 
     @PostMapping("/qr")
-    public String scanQr(@RequestParam String qrToken, @RequestParam Long branchId, RedirectAttributes redirect) {
+    public String scanQr(@RequestParam String qrToken, @RequestParam Long branchId, Principal principal, RedirectAttributes redirect) {
         try {
-            qr.consume(qrToken.trim(), branchId);
-            redirect.addFlashAttribute("success", "Check-in bằng QR thành công.");
+            var result = qr.consumeAsAdmin(principal.getName(), qrToken.trim(), branchId);
+            redirect.addFlashAttribute("success", result.message());
         } catch (IllegalArgumentException | IllegalStateException ex) {
             redirect.addFlashAttribute("error", ex.getMessage());
         }

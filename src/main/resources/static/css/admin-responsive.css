@@ -1,0 +1,102 @@
+.admin-sidebar + .flex-grow-1 {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.admin-topbar-heading {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.admin-menu-toggle {
+    flex-shrink: 0;
+    min-width: 44px;
+    min-height: 44px;
+}
+
+.admin-checkins .surface-card,
+.admin-checkins .row > * {
+    min-width: 0;
+}
+
+.admin-checkins .qr-camera-actions .btn {
+    min-height: 44px;
+    white-space: normal;
+}
+
+.admin-checkins #qr-camera {
+    display: block;
+    width: 100%;
+    max-width: 640px;
+    aspect-ratio: 4 / 3;
+    object-fit: contain;
+    background: #090d16;
+    border-radius: 0.75rem;
+}
+
+.admin-checkins #qr-camera[hidden] {
+    display: none;
+}
+
+.admin-checkins #qr-camera-status {
+    overflow-wrap: anywhere;
+}
+
+.admin-checkins .table {
+    min-width: 760px;
+}
+
+@media (max-width: 991.98px) {
+    .admin-sidebar {
+        --bs-offcanvas-width: min(280px, 86vw);
+        width: var(--bs-offcanvas-width);
+        min-height: 0;
+        height: 100%;
+        height: 100dvh;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        z-index: 1045;
+    }
+
+    .admin-topbar {
+        padding: 0.85rem 1rem;
+    }
+
+    .admin-eyebrow {
+        display: none;
+    }
+
+    .admin-topbar h4 {
+        font-size: 1.1rem;
+    }
+
+    .admin-checkins .form-control,
+    .admin-checkins .form-select {
+        font-size: 16px;
+        min-height: 44px;
+        max-width: 100%;
+    }
+
+    .admin-checkins input[type="date"] {
+        min-width: 0;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .admin-sidebar + .flex-grow-1 > main.container-fluid {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    .admin-hero-banner {
+        padding: 1.25rem;
+    }
+
+    .admin-hero-banner h2 {
+        font-size: 1.4rem;
+    }
+
+    .admin-checkins .qr-camera-actions > * {
+        width: 100%;
+    }
+}

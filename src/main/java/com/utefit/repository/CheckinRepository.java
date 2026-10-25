@@ -11,11 +11,18 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface CheckinRepository
         extends JpaRepository<Checkin, Long> {
 
     boolean existsByUser_IdAndCheckOutAtIsNull(Long userId);
+
+    @EntityGraph(attributePaths = {"branch"})
+    Optional<Checkin> findFirstByUser_IdAndCheckOutAtIsNullOrderByCheckInAtDescIdDesc(Long userId);
+
+    @EntityGraph(attributePaths = {"branch"})
+    Optional<Checkin> findFirstByUser_IdOrderByCheckInAtDescIdDesc(Long userId);
 
     @EntityGraph(attributePaths = {"branch"})
     List<Checkin> findByUser_IdOrderByCheckInAtDesc(Long userId);

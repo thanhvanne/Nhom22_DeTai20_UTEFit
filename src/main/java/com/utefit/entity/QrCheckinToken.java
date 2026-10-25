@@ -3,6 +3,7 @@ package com.utefit.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import com.utefit.enums.QrCheckinPurpose;
 
 @Entity
 @Table(name = "qr_checkin_tokens", uniqueConstraints = @UniqueConstraint(name = "uk_qr_token_hash", columnNames = "token_hash"))
@@ -18,6 +19,13 @@ public class QrCheckinToken {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 16, updatable = false)
+    private QrCheckinPurpose purpose = QrCheckinPurpose.CHECK_IN;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "checkin_id", updatable = false)
+    private Checkin checkin;
     @Column(name = "token_hash", nullable = false, length = 64)
     private String tokenHash;
     @Column(name = "account_version", nullable = false)

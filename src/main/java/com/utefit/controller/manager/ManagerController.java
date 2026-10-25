@@ -48,8 +48,8 @@ public class ManagerController {
     @PostMapping("/checkins/qr")
     public String scan(@RequestParam Long branchId, @RequestParam String qrToken, Principal principal, RedirectAttributes redirect) {
         try {
-            operations.scan(principal.getName(), branchId, qrToken);
-            redirect.addFlashAttribute("success", "Check-in QR thành công.");
+            var result = operations.scan(principal.getName(), branchId, qrToken);
+            redirect.addFlashAttribute("success", result.message());
         } catch (IllegalArgumentException | IllegalStateException ex) {
             redirect.addFlashAttribute("error", ex.getMessage());
         }

@@ -49,9 +49,9 @@ public class ManagerOperationsService {
     }
 
     @Transactional
-    public void scan(String email, Long branchId, String value) {
+    public QrCheckinService.ScanResult scan(String email, Long branchId, String value) {
         access.requireBranch(email, branchId, true);
-        qr.consume(value == null ? null : value.trim(), branchId);
+        return qr.consume(value == null ? null : value.trim(), branchId);
     }
 
     @Transactional

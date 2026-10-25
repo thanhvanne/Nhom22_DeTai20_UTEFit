@@ -23,7 +23,7 @@
             </form>
         </section>
         <section class="ut-panel mb-4">
-            <h2 class="h4">QR Check-in</h2>
+            <h2 class="h4">QR Check-in / Check-out</h2>
             <form id="qr-checkin-form" th:action="@{/manager/checkins/qr}" method="post">
                 <input id="qr-branch" name="branchId" type="hidden" th:value="${branchId}">
                 <label for="qr-token">Mã QR do Member cung cấp</label>
@@ -33,7 +33,10 @@
             <button id="qr-camera-start" type="button" class="btn btn-outline-warning mt-2">Mở camera quét QR</button>
             <button id="qr-camera-stop" type="button" class="btn btn-outline-secondary mt-2" hidden>Dừng camera</button>
             <p id="qr-camera-status" aria-live="polite"></p>
-            <video id="qr-camera" hidden playsinline muted style="max-width:100%;max-height:320px"></video>
+            <video id="qr-camera" hidden playsinline autoplay muted style="max-width:100%;max-height:320px"></video>
+            <label for="qr-image" class="form-label mt-3">Dự phòng: đọc QR từ ảnh trên thiết bị (tối đa 10 MB)</label>
+            <input id="qr-image" type="file" accept="image/*" class="form-control">
+            <p class="small text-muted">Ảnh xử lý cục bộ. Cùng camera nhận QR Check-in và Check-out; backend kiểm tra mục đích và chi nhánh.</p>
         </section>
         <section class="ut-panel mb-4">
             <h2 class="h4">Lịch sử tại chi nhánh</h2>
@@ -75,6 +78,7 @@
 </main>
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 <div th:replace="~{fragments/scripts :: scripts}"></div>
+<script th:src="@{/vendor/jsqr/jsQR-1.4.0.js}" defer></script>
 <script th:src="@{/js/qr-scanner.js}" defer></script>
 </body>
 </html>

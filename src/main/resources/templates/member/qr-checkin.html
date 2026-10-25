@@ -4,22 +4,45 @@
 <body>
 <header th:replace="~{fragments/header :: header}"></header>
 <main class="container ut-page">
-    <div class="ut-panel">
-        <h1 class="ut-page-title">QR Check-in cá nhân</h1>
-        <p>Đưa mã cho nhân viên tại chi nhánh. QR dùng một lần, hết hạn sau 2 phút. Khi tạo mã mới, mã cũ sẽ bị thu hồi.</p>
+    <div class="ut-panel" id="member-qr" th:attr="data-status-url=@{/member/qr-checkin/status},data-token-id=${qrTokenId}">
+        <h1 class="ut-page-title">QR Check-in / Check-out cá nhân</h1>
+        <p>Chọn đúng loại QR và đưa mã cho nhân viên tại chi nhánh. QR dùng một lần, hết hạn sau 2 phút. Khi tạo mã mới, mã cũ sẽ bị thu hồi. Tạo mã không tự Check-in hoặc Check-out.</p>
         <p>Check-in chỉ thành công khi gói tập còn hiệu lực tại đúng chi nhánh và bạn đã checkout lượt trước.</p>
         <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-        <div th:if="${qrImage}" class="mb-3" id="member-qr" th:attr="data-expires=${qrExpiresAt}">
-            <img th:src="${qrImage}" alt="QR Check-in cá nhân" width="300" height="300">
-            <p role="status" id="member-qr-status">Mã có hiệu lực 120 giây kể từ khi tạo. Nếu đã hết hạn, hãy tạo mã mới.</p>
+        <div id="member-checkin-status" role="status" aria-live="polite" class="alert"
+             th:classappend="${checkinStatus != null and checkinStatus.attendanceState == 'OPEN' ? 'alert-success' : 'alert-info'}"
+             th:switch="${checkinStatus != null ? checkinStatus.attendanceState : 'UNKNOWN'}">
+            <span th:case="'OPEN'">Check-in thành công — Đang tập. Tạo QR Check-out khi ra về.</span>
+            <span th:case="'CHECKED_OUT'">Check-out thành công — Đã rời phòng tập (Đã checkout). Bạn có thể tạo QR Check-in cho lượt tiếp theo.</span>
+            <span th:case="'NONE'">Chưa có lượt check-in. Tạo QR để check-in tại quầy.</span>
+            <span th:case="*">Chưa đọc được trạng thái Check-in. Hãy thử lại đồng bộ; các chức năng vẫn hiển thị bên dưới.</span>
+        </div>
+        <p id="member-checkin-detail" class="text-muted small"></p>
+        <p id="member-qr-sync" role="status" aria-live="polite" class="small text-muted"
+           th:text="${syncError != null ? syncError : 'Trạng thái tự cập nhật mỗi 4 giây khi trang đang mở.'}">Đang đồng bộ trạng thái...</p>
+        <p role="status" aria-live="polite" id="member-qr-status">Mã QR chỉ có hiệu lực 120 giây và dùng một lần.</p>
+        <div th:if="${qrImage}" class="mb-3" id="member-qr-display"
+             th:hidden="${checkinStatus == null or checkinStatus.qrState != 'VALID' or (qrPurpose != 'CHECK_OUT' and checkinStatus.attendanceState == 'OPEN')}">
+            <p class="fw-bold" th:text="${qrPurpose == 'CHECK_OUT' ? 'QR CHECK-OUT — chỉ dùng để kết thúc lượt tập hiện tại' : 'QR CHECK-IN — chỉ dùng để bắt đầu lượt tập'}"></p>
+            <img th:src="${qrImage}" alt="QR cá nhân có mục đích Check-in hoặc Check-out" width="300" height="300" style="max-width:100%;height:auto">
             <details><summary>Mã nhập tại quầy nếu không dùng được camera</summary>
                 <input class="form-control" aria-label="Mã QR cá nhân" th:value="${qrToken}" readonly autocomplete="off">
             </details>
         </div>
-        <form th:action="@{/member/qr-checkin}" method="post">
+        <form th:action="@{/member/qr-checkin}" method="post" id="member-qr-form">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <button type="submit" class="btn btn-brand">Tạo / làm mới QR</button>
+            <button type="submit" class="btn btn-brand" id="member-qr-create"
+                    th:disabled="${checkinStatus == null or !checkinStatus.canIssue}"
+                    th:attr="data-can-issue=${checkinStatus != null and checkinStatus.canIssue}">Tạo / làm mới QR Check-in</button>
         </form>
+        <form th:action="@{/member/qr-checkin/checkout}" method="post" id="member-qr-checkout-form" class="mt-3">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button type="submit" class="btn btn-outline-warning" id="member-qr-checkout-create"
+                    th:disabled="${qrCheckoutAllowed != true}"
+                    th:attr="data-can-checkout=${qrCheckoutAllowed == true}">Tạo / làm mới QR Check-out</button>
+        </form>
+        <button type="button" id="member-qr-retry" class="btn btn-outline-secondary mt-3">Thử lại / Cập nhật trạng thái</button>
+        <noscript><p class="alert alert-warning mt-3">JavaScript đang tắt. Tải lại trang để cập nhật trạng thái Check-in/Checkout trước khi thao tác.</p></noscript>
     </div>
 </main>
 <footer th:replace="~{fragments/footer :: footer}"></footer>
