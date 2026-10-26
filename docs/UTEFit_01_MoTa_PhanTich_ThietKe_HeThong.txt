@@ -1,0 +1,171 @@
+﻿TRƯỜNG ĐẠI HỌC SƯ PHẠM KỸ THUẬT TP. HỒ CHÍ MINH
+KHOA CÔNG NGHỆ THÔNG TIN – MÔN LẬP TRÌNH WEB
+
+TÀI LIỆU MÔ TẢ, PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG UTEFITBản thiết kế chi tiết bám yêu cầu môn học, rubric và scope 3 thành viên
+
+Đề tàiXây dựng website quản lý chuỗi phòng tập thể thao UTEFit bằng Spring Boot + Thymeleaf + Bootstrap + JPA + MySQL + JWT + WebSocket + Cloudinary.Repository tham chiếuNhom22_DeTai20_UTEFitPhạm vi actor chínhGuest – Member – PT – Admin (Manager chỉ mở rộng)Mã tài liệuUTEFIT-SPEC-01Phiên bản1.0 – 07/10/2026
+Tài liệu được thiết kế để vừa phục vụ xây dựng ứng dụng, vừa tạo bằng chứng rõ ràng cho rubric chấm đồ án.
+
+
+MỤC LỤC NỘI DUNG
+1. Căn cứ xây dựng tài liệu
+2. Tổng quan đề tài và mục tiêu
+3. Chiến lược bám rubric chấm điểm
+4. Phạm vi hệ thống và vai trò
+5. Kiến trúc và công nghệ
+6. Yêu cầu chức năng chi tiết
+7. Quy tắc nghiệp vụ trọng tâm
+8. Thiết kế dữ liệu và ERD
+9. Security – Validation – Error Handling
+10. Thiết kế giao diện và điều hướng
+11. Danh mục Use Case và tiêu chí chấp nhận
+12. Kiểm thử và chất lượng
+13. Các nội dung sáng tạo
+14. Phạm vi MVP / nâng cao / cắt giảm
+15. Rủi ro và biện pháp kiểm soát
+16. Bộ bằng chứng cần chuẩn bị khi nộp
+
+
+1. Căn cứ xây dựng tài liệu
+Tài liệu này hợp nhất và chuẩn hóa nội dung từ các nguồn do nhóm cung cấp, đồng thời sửa cách tổ chức để phù hợp với đề tài UTEFit thay vì sao chép mô hình thương mại điện tử.
+NguồnCách sử dụng trong bản thiết kếẢnh yêu cầu môn học / trang LMSDùng để giữ đúng yêu cầu về khảo sát, phân vai, 01 Bootstrap template, OTP Email, Spring Security, mô hình 3 tầng, GitHub và báo cáo.LTWEB_CuoiKy(Rubric)_5tieuchi...xlsxDùng để xây ma trận bằng chứng theo 5 tiêu chí: độ khó & phân công; AI & GitHub; hình thức; chất lượng ứng dụng; tính sáng tạo.KhaoSat_PhanTichHeThong (1).docxDùng làm khung tham khảo cách trình bày Chương 2 khảo sát, Chương 3 phân tích chức năng, Use Case, Sequence Diagram, ERD và thiết kế CSDL; nội dung bán hàng không được bê nguyên vào UTEFit.QUY TRÌNH LẬP TRÌNH WEB.docxKế thừa scope Guest–Member–PT–Admin, kiến trúc, database, business rule, JWT/WebSocket/Cloudinary và luồng nghiệp vụ UTEFit.PHÂN CÔNG LẬP TRÌNH WEB.docxKế thừa ownership A/B/C nhưng thay workflow A→B→C tuần tự bằng foundation sớm + feature song song + PR ngắn.
+Nguyên tắc quan trọng — Tài liệu khảo sát mẫu chỉ là mẫu cấu trúc. Phần khảo sát hiện trạng của UTEFit phải khảo sát hệ thống fitness/gym/booking phù hợp domain, không khảo sát Tiki/Shopee/Lazada như nội dung mẫu.
+Hình nguồn do nhóm cung cấp – yêu cầu nội dung và tiêu chí môn học.
+2. Tổng quan đề tài và mục tiêu
+2.1. Tên đề tài
+“Xây dựng website quản lý chuỗi phòng tập thể thao UTEFit bằng Spring Boot + Thymeleaf + Bootstrap + JPA + MySQL + JWT + WebSocket + Cloudinary.”
+2.2. Bài toán
+UTEFit quản lý nhiều chi nhánh phòng tập trên một hệ thống thống nhất. Người dùng có thể xem chi nhánh, gói tập, lớp và PT; hội viên đăng ký gói, thanh toán, đặt lớp, tương tác với PT, check-in và đánh giá; PT xử lý yêu cầu, lịch cá nhân và chat; Admin quản trị toàn chuỗi và xem thống kê.
+2.3. Mục tiêu chính
+• Xây dựng ứng dụng web theo đúng mô hình 3 tầng và thể hiện rõ trách nhiệm Controller – Service – Repository.
+• Đảm bảo logic, validation và security ở backend; không tin dữ liệu do frontend tự khai báo.
+• Thể hiện 4 actor rõ ràng: Guest, Member, PT, Admin; Manager chỉ là mở rộng.
+• Tạo chuỗi nghiệp vụ có đầu–cuối để demo: đăng ký → OTP → membership → payment → lớp → PT → lịch/chat → check-in → review → thống kê.
+• Có lịch sử GitHub và bằng chứng AI rõ ràng, thể hiện mỗi thành viên hiểu và làm chủ phần code của mình.
+• Ưu tiên chức năng ổn định và tích hợp được hơn số lượng chức năng rời rạc.
+
+Hình 2-1. Sơ đồ ngữ cảnh hệ thống UTEFit.
+3. Chiến lược bám rubric chấm điểm
+Yêu cầu / tiêu chíMục tiêu cần đạtBằng chứng nhóm phải cóYêu cầu môn học – phân công + GitHubCó phân công rõ từng thành viên; commit/PR thể hiện quá trình.Tài liệu phân công + Issue/PR + commit theo feature.Yêu cầu – mô hình 3 tầngController → Service → Repository; không Controller → Repository.Sơ đồ kiến trúc + package + source minh họa.Yêu cầu – logic, validation, securityCác chức năng phải có business rule, server validation, mã hóa mật khẩu, phân quyền.Use case + acceptance criteria + test + Spring Security/BCrypt/JWT.Yêu cầu – giao diện responsiveDùng 01 Bootstrap template thống nhất, responsive.Wireframe + ảnh UI thực tế + checklist responsive.Yêu cầu – chức năng sáng tạoCó các nội dung ngoài chương trình cơ bản.JWT, OTP Email, WebSocket, Cloudinary, Notification, VNPay, QR, Chart.js.Yêu cầu – báo cáoBáo cáo có khảo sát, phân tích, thiết kế, triển khai, kiểm thử.File mô tả + file hướng dẫn + ảnh/sơ đồ/bằng chứng.Rubric TC1 – độ khó & phân công 10%Vấn đề cần tổng hợp nhiều kiến thức và có phân công rõ.Scope vừa sức nhưng có nhiều tích hợp; ownership không chồng chéo.Rubric TC2 – AI & GitHub 20%Thành thạo dùng AI, hiểu và sửa được code AI; cộng tác GitHub.Prompt log + review checklist + PR nhỏ + cross review.Rubric TC3 – hình thức 20%Cấu trúc dữ liệu, vai trò, UI, phương pháp rõ ràng.ERD, vai trò Guest/Member/PT/Admin, site map, template.Rubric TC4 – chất lượng ứng dụng 35%Quy trình rõ, ứng dụng vận hành tốt, chức năng hoàn thiện.Definition of Done, test matrix, full-flow demo.Rubric TC5 – sáng tạo 15%Mức cao nhất tương ứng 7–8 nội dung sáng tạo.8 nội dung được phân mức bắt buộc/khuyến khích, chỉ demo nội dung đã ổn định.
+Cách tối ưu điểm — 35% điểm nằm ở chất lượng ứng dụng/code/cài đặt. Vì vậy tài liệu và phân công đều ưu tiên business rule + integration test + full-flow demo trước khi thêm tính năng phụ.4. Phạm vi hệ thống và vai trò
+4.1. Actor chính
+ActorPhạm viKhông được làmGuestTrang chủ; xem/tìm/lọc chi nhánh, gói, lớp, PT; xem review; đăng ký; OTP; login; quên mật khẩu.Không truy cập /member/**, /pt/**, /admin/**.MemberProfile; membership; payment; class booking; lịch cá nhân; PT request; lịch PT; chat; check-in history; review; notification.Không xử lý request thay PT; không truy cập tài nguyên Member khác; không vào Admin.PTProfile PT; request từ Member; lịch cá nhân; lớp được phân công; chat; notification; thống kê cá nhân nhẹ.Không quản lý lớp/PT của người khác; không có quyền admin toàn hệ thống.AdminDashboard; User; PT; Branch; Plan; Category; Class; Schedule; Check-in; Payment; Promotion; Review; Statistics.Không xem password; không bypass business rule; thao tác nhạy cảm phải có kiểm tra quyền.Manager (mở rộng)Nếu còn thời gian: quản lý một số Branch được gán.Không thuộc MVP, không được làm trước khi 4 actor chính ổn định.
+4.2. Chuỗi nghiệp vụ xuyên suốt
+Luồng demo khuyến nghị: Guest → đăng ký → OTP → Member → đăng ký gói → thanh toán → đăng ký lớp → chọn PT → gửi yêu cầu → PT accept → tạo lịch → chat realtime → check-in → review → Admin theo dõi và thống kê.
+4.3. Phạm vi ưu tiên
+MứcNội dungMVP bắt buộcAuth + OTP + Security/JWT; Guest; Member Profile; Membership; Class Booking; PT Request; PT Schedule; Admin CRUD cốt lõi; validation; responsive.Mức điểm caoCloudinary; WebSocket Chat; Realtime Notification; Chart.js Statistics; VNPay hoặc flow thanh toán đáng tin cậy.StretchQR Check-in; Favorites; Review video; Manager.Cắt đầu tiên khi trễManager → Review video → Favorites → QR nâng cao; không cắt Security/Validation/Business Rule.
+5. Kiến trúc và công nghệ
+5.1. Stack
+NhómCông nghệ / vai tròBackendJava, Spring Boot, Spring MVC, Spring Security, Spring Data JPA/Hibernate.FrontendThymeleaf, Bootstrap 5, JavaScript, HTML/CSS; chỉ 01 template thống nhất.DatabaseMySQL.AuthenticationSpring Security + BCrypt + JWT + RBAC.RealtimeWebSocket + STOMP/SockJS nếu cần.MediaCloudinary.EmailSpring Mail, OTP qua Email.PaymentVNPay dự kiến; CASH tại quầy là fallback.StatisticsChart.js.Build / VCSMaven, Git, GitHub.
+
+Hình 5-1. Kiến trúc 3 tầng bắt buộc.
+
+Hình 5-2. Kiến trúc triển khai và tích hợp dịch vụ.
+
+Hình 5-3. Phân rã module nghiệp vụ.
+5.2. Quy tắc package
+src/main/java/com/utefit/
+  config/       controller/    dto/         entity/
+  enums/        exception/     mapper/      repository/
+  security/     service/       service/impl/
+  util/         validation/    websocket/
+ 
+src/main/resources/
+  templates/{auth,guest,member,pt,admin,fragments,error}/
+  static/{css,js,images,vendor}/
+  application.properties
+Controller chỉ điều phối request/response; Service chứa business rule và transaction; Repository chỉ truy cập dữ liệu. Shared integration (Cloudinary/Mail/WebSocket/VNPay) được gọi từ Service.
+6. Yêu cầu chức năng chi tiết
+6.1. Xác thực và bảo mật chung
+IDChức năngActorMô tảBusiness rule / securityƯu tiênAUTH-01Đăng kýGuestNhập họ tên, email, phone, password/confirm; validate; tạo User UNVERIFIED; BCrypt password; sinh OTP.Email unique; password ≥ 8; confirm khớp; không lưu plain password.P0AUTH-02Xác minh OTPGuestNhập OTP 6 số để kích hoạt tài khoản.OTP chưa dùng, đúng type, chưa hết hạn; giới hạn resend.P0AUTH-03Login/LogoutMember/PT/AdminĐăng nhập và điều hướng theo quyền.User ACTIVE; LOCKED không login; JWT hợp lệ; logout xóa token/cookie.P0AUTH-04Quên mật khẩuGuest/UserEmail → reset OTP → password mới.Không tiết lộ email có tồn tại quá chi tiết; BCrypt password mới.P0AUTH-05RBACTất cảBảo vệ /member/** /pt/** /admin/**.Backend phải trả 403 hoặc Access Denied khi trái quyền.P0
+6.2. Guest
+IDChức năngActorMô tảBusiness rule / securityƯu tiênG-01Trang chủGuestHero, branch, plan, class, PT, review nổi bật.Responsive; dữ liệu active.P0G-02Branch SearchGuest/MemberList/detail/search/filter branch.Pagination; chỉ branch active ở public.P0G-03Class SearchGuest/MemberList/detail/search/filter class/schedule.Không hiển thị class cancelled như lớp có thể đăng ký.P0G-04PT SearchGuest/MemberList/detail/search/filter PT.Chỉ PT active; filter branch/specialization.P0G-05PlanGuest/MemberXem membership plan.Chỉ plan active.P0
+6.3. Member
+IDChức năngActorMô tảBusiness rule / securityƯu tiênM-01ProfileMemberXem/sửa thông tin; đổi password; avatar.Chỉ sửa chính mình; avatar qua Cloudinary.P0M-02MembershipMemberChọn branch + plan; tạo membership; xem history.Plan/branch active; status đúng; endDate > startDate.P0M-03PaymentMemberCASH/VNPAY; xem payment history.Frontend không tự set PAID; callback/signature phải verify.P0/P1M-04Class BookingMemberĐăng ký/hủy lớp; xem lịch.Membership active; còn hạn; lớp open; capacity; duplicate; trùng lịch.P0M-05Trainer RequestMemberGửi/hủy request PT; theo dõi status.PT active; không duplicate PENDING.P0M-06PT ScheduleMemberXem/xác nhận lịch cá nhân với PT.Không trùng lịch; quan hệ request hợp lệ.P0M-07ChatMemberChat realtime với PT; history.Conversation ownership; message không rỗng.P1M-08Check-inMemberXem check-in history; QR nếu có.Membership active, branch hợp lệ.P1/P2M-09ReviewMemberRating 1–5; comment; media.Phải thực sự sử dụng dịch vụ; chống spam/duplicate trái nghiệp vụ.P1M-10NotificationMemberNhận trạng thái gói/lớp/PT/chat.DB notification + realtime khi phù hợp.P1
+6.4. PT
+IDChức năngActorMô tảBusiness rule / securityƯu tiênPT-01PT ProfilePTAvatar, bio, specialization, experience, branch.Chỉ sửa profile của chính PT.P0PT-02Request ManagementPTXem PENDING; accept/reject.PT A không xử lý request PT B; accepted không accept lần hai.P0PT-03Personal SchedulePTĐề xuất/tạo lịch sau accepted.start<end; không trùng lịch PT/Member.P0PT-04Assigned ClassesPTXem lớp, schedule, member list.Chỉ lớp được phân công.P0PT-05Realtime ChatPTChat với Member.Ownership conversation; history.P1PT-06DashboardPTRequest, lịch sắp tới, lớp, unread.Dữ liệu chỉ của PT hiện tại.P1
+6.5. Admin
+IDChức năngActorMô tảBusiness rule / securityƯu tiênA-01DashboardAdminKPI + chart + top data.Query chính xác, filter time.P0A-02User ManagementAdminList/search/filter/detail/lock/unlock.Không hiển thị password; tránh tự khóa chính mình ngoài chủ đích.P0A-03Branch ManagementAdminCRUD/active/inactive/image.name/address required; opening<closing.P0A-04PT ManagementAdminView/filter/assign branch/active/assign class.PT active, branch valid.P0A-05Plan/CategoryAdminCRUD MembershipPlan, ClassCategory.Unique/positive validation.P0A-06Class/ScheduleAdminCRUD class; schedule; cancel.PT/branch active; capacity>0; start<end; chống trùng PT.P0A-07Check-inAdminCheck-in/out; search/filter/history.Membership/branch hợp lệ; chống check-in mở trùng.P1A-08PaymentAdminXem/search/filter transaction.Read-only trạng thái online trừ nghiệp vụ rõ.P1A-09PromotionAdminCRUD code/%/limit/date/quantity.code unique; 0<discount≤100; start<end; qty≥0.P1A-10Review ModerationAdminXem/filter/ẩn vi phạm.Không sửa nội dung Member thành nội dung khác.P1A-11StatisticsAdminRevenue/member/membership/checkin/class/PT/plan.Filter tháng/năm/branch; Chart.js.P1
+7. Quy tắc nghiệp vụ trọng tâm
+Nghiệp vụRule bắt buộcĐăng ký/OTPEmail unique; password hash BCrypt; OTP type + expiration + one-time use; resend có giới hạn; tài khoản chỉ ACTIVE sau verify.MembershipPlan/Branch phải active; start/end hợp lệ; status PENDING/ACTIVE/EXPIRED/CANCELLED; thanh toán online hợp lệ mới ACTIVE.Class BookingMembership ACTIVE + chưa hết hạn; lớp OPEN; còn chỗ; không duplicate; không trùng thời gian; class CANCELLED không đăng ký.PT RequestPT active; không duplicate PENDING; PT chỉ xử lý request của chính mình; state transition hợp lệ.PT ScheduleChỉ sau request ACCEPTED; start<end; PT/Member không trùng lịch; branch hợp lệ.ChatChỉ 2 participant hợp lệ; message không rỗng; lưu DB trước/đồng thời publish; reload phải có history.Check-inMembership ACTIVE/còn hạn; branch nằm trong phạm vi plan; chống check-in mở trùng; checkout sau checkin.ReviewRating 1–5; user đã sử dụng dịch vụ; giới hạn duplicate; media qua Cloudinary.Admin Cancel ClassCập nhật CANCELLED → lấy Member liên quan → Notification DB → WebSocket realtime.Payment VNPayTạo PENDING → redirect → callback → verify signature/amount/order → PAID → activate membership; tuyệt đối không tin status từ browser.
+
+Hình 7-1. Activity đăng ký và OTP.
+
+Hình 7-2. Activity Class Booking.
+
+Hình 7-3. Activity Member–PT.
+8. Thiết kế dữ liệu và ERD
+
+Hình 8-1. ERD mức khái quát.
+8.1. Nguyên tắc dữ liệu
+• User là bảng tài khoản chung; role = MEMBER/PT/ADMIN. PT có thêm Trainer profile; Admin không cần bảng Admin riêng.
+• WebSocket không thay thế database: Conversation/Message vẫn lưu MySQL.
+• Ảnh/video không lưu binary vào MySQL; chỉ lưu URL/public_id Cloudinary.
+• Không xóa cứng dữ liệu nghiệp vụ quan trọng nếu sẽ làm mất lịch sử; dùng active/status/soft-delete khi phù hợp.
+• Các enum/status phải chốt sớm để tránh mỗi người dùng một chuỗi khác nhau.
+BảngMục đíchField chínhRàng buộcusersTài khoảnid, first_name, last_name, email, phone, password, avatar_url, role, status, enabled, created_at, updated_atemail unique; password hash; role enumotp_codesOTPid, user_id/email, code, type, expired_at, used, created_attype REGISTER/FORGOT_PASSWORD; one-timebranchesChi nhánhid, name, address, phone, description, image_url/public_id, opening_time, closing_time, activeopening < closingtrainersHồ sơ PTid, user_id, branch_id, specialization, experience, bio, activeuser 1–0..1 trainer; branch 1–Nmembership_plansGói tậpid, name, description, duration, price, activeprice>0; duration>0membershipsGói của hội viênid, user_id, branch_id, plan_id, start_date, end_date, statusPENDING/ACTIVE/EXPIRED/CANCELLEDclass_categoriesLoại lớpid, name, description, activename uniquefitness_classesLớpid, branch_id, category_id, trainer_id, name, description, capacity, statuscapacity>0; OPEN/FULL/CANCELLED/COMPLETEDclass_schedulesLịch lớpid, class_id, date, start_time, end_time, roomstart<end; PT không trùngclass_registrationsĐăng ký lớpid, user_id, schedule_id, status, registered_atunique active user+schedule; REGISTERED/CANCELLED/ATTENDED/ABSENTtrainer_requestsYêu cầu PTid, member_id, trainer_id, message, status, requested_at, responded_atPENDING/ACCEPTED/REJECTED/CANCELLEDpersonal_training_schedulesLịch PT cá nhânid, member_id, trainer_id, branch_id, training_date, start_time, end_time, status, notechống trùng member/PTcheckinsCheck-inid, user_id, branch_id, checkin_at, checkout_atmột check-in mở tại một thời điểm theo rulepaymentsThanh toánid, user_id, membership_id, amount, method, transaction_code, status, created_atCASH/VNPAY; PENDING/PAID/FAILED/REFUNDEDpromotionsKhuyến mãiid, code, description, discount_percent, max_discount, start_date, end_date, quantity, activecode unique; % 1..100promotion_usagesLịch sử dùng KMid, promotion_id, user_id, used_atgiới hạn usage theo policyreviewsĐánh giáid, user_id, branch_id, trainer_id nullable, rating, comment, created_at, updated_atrating 1..5; eligibilityreview_mediaMedia reviewid, review_id, url, public_id, media_typeCloudinary metadatafavoritesYêu thích (tùy chọn)id, user_id, targetnên tách FavoriteBranch/FavoriteTrainer nếu phức tạpconversationsHội thoạiid, member_id, trainer_id, created_at, updated_atparticipant pair hợp lệmessagesTin nhắnid, conversation_id, sender_id, content, sent_at, read_atsender phải thuộc conversationnotificationsThông báoid, user_id, title, content, type, is_read, created_atlưu DB + push realtime
+8.2. Enum cần chốt trước
+EnumGiá trịUserRoleMEMBER, PT, ADMINUserStatusUNVERIFIED, ACTIVE, LOCKEDMembershipStatusPENDING, ACTIVE, EXPIRED, CANCELLEDPaymentStatusPENDING, PAID, FAILED, REFUNDEDClassStatusOPEN, FULL, CANCELLED, COMPLETEDRegistrationStatusREGISTERED, CANCELLED, ATTENDED, ABSENTTrainerRequestStatusPENDING, ACCEPTED, REJECTED, CANCELLEDTrainingScheduleStatusSCHEDULED, COMPLETED, CANCELLEDOTPTypeREGISTER, FORGOT_PASSWORD
+9. Security – Validation – Error Handling
+9.1. Authentication
+Để vừa đáp ứng tên đề tài có JWT vừa phù hợp website Thymeleaf, hướng khuyến nghị là Spring Security xác thực JWT qua cookie HttpOnly. Token không nên được đọc/ghi tùy tiện bằng JavaScript. Với form POST dùng cookie, cần giữ cơ chế CSRF phù hợp của Spring Security thay vì tắt toàn bộ chỉ để “cho chạy”.
+9.2. Authorization
+/public/**              → permitAll
+/member/**              → ROLE_MEMBER
+/pt/**                  → ROLE_PT
+/admin/**               → ROLE_ADMIN
+ 
+Ngoài role-level còn phải kiểm tra ownership:
+PT A không được sửa request/lịch của PT B.
+Member A không được đọc conversation của Member B.
+9.3. Validation nhiều lớp
+LớpVí dụDTO/Bean Validation@NotBlank, @Email, @Size, @Pattern, @Min, @Max.Service business ruleEmail unique; membership active; capacity; overlap; state transition.Database constraintUNIQUE email/code; FK; NOT NULL; index.SecurityRole + ownership + CSRF/JWT validation.UIHiển thị lỗi thân thiện; không dùng UI validation thay backend.
+9.4. Error handling
+Nên có GlobalExceptionHandler cho validation error, business exception, access denied và lỗi hệ thống. Không hiển thị stack trace, secret hoặc thông tin nhạy cảm cho người dùng.
+10. Thiết kế giao diện và điều hướng
+Toàn hệ thống dùng một Bootstrap Template. Member/PT/Admin có thể khác sidebar/menu nhưng phải giữ cùng typography, màu chủ đạo, component, form, button, table và thông báo.
+
+Hình 10-1. Wireframe trang chủ Guest.
+
+Hình 10-2. Wireframe Member Dashboard.
+
+Hình 10-3. Wireframe PT Dashboard.
+
+Hình 10-4. Wireframe Admin Dashboard.
+10.1. Site map đề xuất
+Khu vựcRoute chínhPublic/, /branches, /branches/{id}, /membership-plans, /classes, /trainers, /login, /register, /forgot-passwordMember/member/dashboard, /member/profile, /member/memberships, /member/classes, /member/schedule, /member/trainer-requests, /member/chat, /member/payments, /member/reviews, /member/notificationsPT/pt/dashboard, /pt/profile, /pt/requests, /pt/schedules, /pt/classes, /pt/chatAdmin/admin/dashboard, /admin/users, /admin/branches, /admin/trainers, /admin/membership-plans, /admin/categories, /admin/classes, /admin/schedules, /admin/checkins, /admin/payments, /admin/promotions, /admin/reviews, /admin/statistics
+10.2. Responsive checklist
+• Navbar collapse đúng ở mobile; không tràn ngang.
+• Table admin có responsive wrapper hoặc chuyển card khi màn hình nhỏ.
+• Form không cố định chiều rộng; label/error dễ đọc.
+• Ảnh dùng object-fit; kích thước tối ưu; không load video nặng ngay trang chủ.
+• Chart resize theo container.
+• Chat panel hoạt động được trên màn hình nhỏ.
+11. Danh mục Use Case và tiêu chí chấp nhận
+IDUse CaseActorƯu tiênUC-001Đăng ký + OTPGuestP0UC-002Đăng nhập/đăng xuấtMember/PT/AdminP0UC-003Quên mật khẩuUserP0UC-004Tìm kiếm/xem BranchGuest/MemberP0UC-005Xem Membership PlanGuest/MemberP0UC-006Quản lý ProfileMemberP0UC-007Đăng ký MembershipMemberP0UC-008Thanh toánMemberP0/P1UC-009Đăng ký lớpMemberP0UC-010Hủy đăng ký lớpMemberP0UC-011Xem lịch cá nhânMemberP0UC-012Tìm/Xem PTGuest/MemberP0UC-013Gửi yêu cầu PTMemberP0UC-014PT xử lý yêu cầuPTP0UC-015Tạo lịch Member–PTPT/MemberP0UC-016Chat Member–PTMember/PTP1UC-017Check-in/outMember/AdminP1UC-018ReviewMemberP1UC-019NotificationMember/PTP1UC-020Admin UserAdminP0UC-021Admin PTAdminP0UC-022Admin BranchAdminP0UC-023Admin PlanAdminP0UC-024Admin CategoryAdminP0UC-025Admin ClassAdminP0UC-026Admin ScheduleAdminP0UC-027Admin PromotionAdminP1UC-028Admin PaymentAdminP1UC-029Admin Check-inAdminP1UC-030Admin StatisticsAdminP1
+11.1. Mẫu đặc tả một Use Case
+Thuộc tínhVí dụ UC-009 – Đăng ký lớpGoalMember đăng ký một ClassSchedule hợp lệ.Pre-conditionĐã login MEMBER; Membership ACTIVE và chưa hết hạn.Main flowChọn lịch → Service kiểm tra business rules → lưu REGISTERED → hiển thị lịch → notification.AlternativeMember hủy đăng ký theo chính sách.ExceptionClass FULL/CANCELLED, duplicate, overlap, membership invalid.Post-conditionRegistration tồn tại, capacity tính đúng, schedule cá nhân cập nhật.SecurityChỉ chính Member hiện tại được tạo registration cho chính mình.Test bắt buộcHappy path + expired membership + full + duplicate + overlap + unauthorized.
+12. Kiểm thử và chất lượng
+12.1. Definition of Done cho mỗi chức năng
+• Code đúng 3 tầng; không Controller→Repository.
+• Có server validation + business rule + security/ownership.
+• Có giao diện chạy được và responsive cơ bản.
+• Có dữ liệu demo và happy path chạy từ UI đến DB.
+• Có ít nhất 1 test lỗi/edge case thủ công; chức năng quan trọng nên có unit/integration test nếu kịp.
+• Có commit rõ + PR + người khác review.
+• Có ảnh/chứng cứ cho báo cáo: activity/sequence, source, UI, test result, prompt log.
+12.2. Integration checkpoints
+CheckpointLuồng phải chạyCP1 – AuthRegister → OTP → Login → Role redirect.CP2 – MemberMembership → Payment/CASH → Class Booking → Schedule.CP3 – PTMember Request → PT Accept → Create Schedule.CP4 – RealtimeChat/Notification realtime + reload có history.CP5 – AdminCreate Branch/Plan/Class/Schedule → Check-in → Statistics.CP6 – Full flowGuest → Member → PT → Admin, chạy trên cùng database và cùng codebase.
+13. Các nội dung sáng tạo
+#Nội dungMứcGhi chú1JWT AuthenticationP0Nằm ngay trong tên đề tài; phải làm.2OTP EmailP0Đăng ký và quên mật khẩu.3WebSocket ChatP1Member↔PT realtime.4Realtime NotificationP1PT accept, class cancel, schedule.5Cloudinary MediaP1Avatar, branch image, review media.6VNPayP1Chỉ demo khi callback/signature ổn; có CASH fallback.7QR Check-inP2Stretch, bỏ trước nếu trễ.8Chart.js StatisticsP1Admin dashboard/revenue.
+Không chạy theo số lượng — Rubric khuyến khích 7–8 nội dung sáng tạo, nhưng chỉ nên tính nội dung mà nhóm thực sự hiểu và demo ổn định. Một tích hợp lỗi có thể làm hỏng luồng chính và ảnh hưởng tiêu chí 4 (35%).14. Phạm vi MVP / nâng cao / cắt giảm
+Giai đoạnNội dungĐiều kiện chuyển bướcMVP-1Foundation + Auth + Security + GuestRegister/OTP/Login ổn; cấu trúc project chạy trên 3 máy.MVP-2Member + PT core + Admin coreCác flow chính chạy độc lập.MVP-3IntegrationMember↔PT; Admin↔domain; cross-role security.EnhancementCloudinary/WebSocket/Notification/Chart/VNPayChỉ thêm sau khi flow tương ứng có test.StretchQR/Favorites/Review video/ManagerChỉ làm nếu toàn bộ P0/P1 đã ổn.
+15. Rủi ro và biện pháp kiểm soát
+Rủi roKiểm soátA trở thành bottleneckFoundation merge sớm; không chờ A xong toàn Member mới cho B/C code.Merge conflict Entity/ConfigChốt ownership; branch ngắn; merge develop vào feature hằng ngày; thay đổi shared file phải báo.JWT + Thymeleaf cấu hình phức tạpChốt một cơ chế ngay từ đầu; dùng HttpOnly cookie; viết auth test trước.WebSocket securityChỉ publish sau khi kiểm tra participant; history nằm DB.VNPay chậm hoặc lỗi môi trườngGiữ CASH fallback; không để payment chặn toàn bộ demo.Scope quá lớnP0→P1→P2; cắt Manager/QR/Video trước.Tài liệu không khớp codeMỗi PR cập nhật tài liệu/changelog hoặc checklist bằng chứng.AI sinh code khó hiểuKhông merge code AI nếu người phụ trách không giải thích được luồng, dependency, security và failure case.
+16. Bộ bằng chứng cần chuẩn bị khi nộp
+Nhóm bằng chứngNội dungKiến trúc3-tier, context, integration, package/module.Phân tíchActor table, Use Case, activity/sequence, ERD, data dictionary.CodeẢnh Controller-Service-Repository; Security/JWT; business logic; WebSocket; Cloudinary; query statistics.Giao diệnHome, login/register/OTP, Member, PT, Admin, chat, responsive mobile.GitHubIssue, branch, commit, PR, review, merge, contribution graph.AIPrompt log thật: mục tiêu, prompt, câu trả lời/đoạn code, chỉnh sửa của nhóm, ai dùng, PR liên quan.SetupREADME/env example, MySQL setup, mail/cloudinary keys, run command, demo accounts.TestTest cases + ảnh kết quả + full-flow demo checklist.
+Kết luận: scope UTEFit hiện tại đủ khó và đủ thực tiễn cho nhóm 3 người nếu tổ chức theo module và tích hợp từng checkpoint. Mục tiêu ưu tiên là ứng dụng chạy ổn, business rule rõ, security đúng và GitHub thể hiện được quá trình cộng tác.
+UTEFit | Mô tả – Phân tích – Thiết kế hệ thống
+
+Trang 1
+

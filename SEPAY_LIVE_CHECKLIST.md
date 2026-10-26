@@ -1,5 +1,7 @@
 # UTEFit — Checklist SePay Test → Live và rollback
 
+> Cập nhật source 26/10/2026: `SEPAY_LIVE_READINESS.md` bổ sung chốt profile/catalog/DB approval, cấu hình Live riêng, API đối soát chỉ đọc và dừng tạo đơn VNPay. Ưu tiên tài liệu mới khi khác hướng dẫn cũ. Checklist SQL Server/HTTPS/ngân hàng thực tế vẫn cần chủ dự án xác nhận trước GO.
+
 Ngày rà soát: 25/10/2026. Nhánh: `feat/giai-doan-7`. **Kết luận: NO-GO cho Live cho tới khi các cổng kiểm soát dưới đây được xác nhận.** Tài liệu là kế hoạch, không phải lệnh đã thực hiện hay cho phép bật Live/chuyển tiền.
 
 ## 1. Bằng chứng và phạm vi

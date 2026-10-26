@@ -1,0 +1,333 @@
+﻿TRƯỜNG ĐẠI HỌC SƯ PHẠM KỸ THUẬT TP. HỒ CHÍ MINH
+KHOA CÔNG NGHỆ THÔNG TIN - MÔN LẬP TRÌNH WEB
+UTEFIT
+PHÂN CÔNG THEO GIAI ĐOẠN - LÀM TRỰC TIẾP TRÊN MAIN
+Mỗi giai đoạn ghi rõ: A làm gì - B làm gì - C làm gì - xong phải đạt gì - ai chờ ai - lúc nào push
+Phiên bản 5.0 - Nhóm 03 thành viên - Chỉ dùng branch main
+Đề tài: Website quản lý chuỗi phòng tập thể thao UTEFit
+Spring Boot + Thymeleaf + Bootstrap + JPA + MySQL + JWT + WebSocket + Cloudinary
+
+
+0. CÁCH ĐỌC TÀI LIỆU NÀY
+Tài liệu này cố tình bỏ cách trình bày kiểu bảng dependency phức tạp. Cả nhóm chỉ cần đi từ Giai đoạn 0 đến Giai đoạn 8. Trong mỗi giai đoạn, đọc đúng phần tên mình rồi làm theo thứ tự được ghi.
+Nguyên tắc dễ nhớ: A dựng nền và làm Guest/Member. B làm PT và mọi thứ có PT tham gia. C làm toàn bộ chức năng Admin. Ba người được code cùng lúc khi không đụng cùng file; nhưng mỗi lần push lên main chỉ có một người push.
+0.1. Chuỗi sản phẩm cuối cùng
+Guest -> Register -> OTP -> Login
+      -> Member -> Membership -> Payment -> Class Booking
+      -> Tìm PT -> Gửi Request -> PT Accept/Reject
+      -> Tạo lịch Member-PT -> Chat WebSocket -> Notification
+      -> Check-in -> Review
+      -> Admin quản lý toàn hệ thống -> Statistics
+0.2. Cách dùng main mà vẫn ít conflict
+1. Đầu buổi: cả ba người đều chạy git checkout main và git pull origin main.
+2. Mỗi người chỉ sửa phần mình được giao. Không tự ý sửa file owner của người khác.
+3. Khi sắp push, nhắn nhóm: "A/B/C chuẩn bị push, mọi người tạm đừng push".
+4. Người push chạy git pull origin main thêm một lần, chạy lại project/test, sau đó mới git push origin main.
+5. Push xong nhắn "PUSH DONE". Hai người còn lại lập tức git pull origin main rồi mới tiếp tục.
+6. Không dùng git push --force. Có conflict mà không chắc thì dừng và gọi đúng owner file xử lý.
+Quy tắc quan trọng: Code có thể song song. Push lên main phải tuần tự từng người một.
+0.3. File dùng chung ai được quyền quyết định?
+• A sở hữu: pom.xml ở giai đoạn nền, SecurityConfig, auth/security, User/OtpCode, Membership, Payment, Review, layout/fragments dùng chung.
+• B sở hữu: Trainer, TrainerRequest, PersonalTrainingSchedule, Conversation, Message, Notification, WebSocketConfig, CloudinaryService.
+• C sở hữu: Branch CRUD nghiệp vụ Admin, MembershipPlan/Category/FitnessClass/ClassSchedule quản trị, Promotion, Checkin, Admin Statistics.
+• Nếu cần sửa file của người khác: nhắn người owner sửa hoặc cả hai thống nhất một lượt sửa. Không âm thầm sửa rồi push.
+GIAI ĐOẠN 0 - CHỐT CHUẨN TRƯỚC KHI CODE
+Cách làm: Cả nhóm làm cùng nhau, chưa ai code chức năng. Chỉ chốt quy ước để sau này không mỗi người hiểu một kiểu.
+Kết quả chung phải đạt: Cả ba hiểu cùng một scope, cùng một cách đặt tên, cùng một Bootstrap template, cùng một database/enum cơ bản.
+Việc cả nhóm làm
+7. Chốt 4 actor chính: Guest, Member, PT, Admin. Manager chỉ là mở rộng, chưa làm.
+8. Chốt 01 Bootstrap template duy nhất cho toàn hệ thống.
+9. Chốt tên package gốc com.utefit.
+10. Chốt enum chính: MEMBER/PT/ADMIN; trạng thái User, Membership, Payment, Class, TrainerRequest, TrainingSchedule.
+11. Chốt tên chức năng và URL lớn: /member/**, /pt/**, /admin/**.
+12. Chốt nguyên tắc 3 tầng: Controller -> Service -> Repository -> MySQL. Controller không gọi Repository trực tiếp.
+13. Chốt cách push main và file ownership ở mục 0.2, 0.3.
+Giai đoạn 0 kết thúc khi: Không còn câu hỏi kiểu "đăng nhập ai làm?", "PT request ai làm?", "Admin class ai làm?".
+GIAI ĐOẠN 1 - A KHỞI TẠO FOUNDATION
+Cách làm: TUẦN TỰ. Chỉ A code trên repo. B và C chưa code feature trên main; có thể chuẩn bị wireframe, nội dung giao diện và đọc nghiệp vụ.
+Kết quả chung phải đạt: A push một project Spring Boot sạch, chạy được, đúng bố cục để B/C pull về và code tiếp ngay.
+A - Việc phải làm theo đúng thứ tự
+14. Tạo/kiểm tra repository Nhom22_DeTai20_UTEFit, dùng branch main.
+15. Tạo Spring Boot project với package gốc com.utefit.
+16. Thêm dependency nền: Spring Web, Thymeleaf, Spring Data JPA, MySQL Driver, Spring Security, Validation, Spring Mail, WebSocket, Lombok.
+17. Tạo cấu trúc package chuẩn ở mục bên dưới. Không để B/C tự tạo mỗi người một kiểu.
+18. Tạo cấu trúc templates/static chuẩn và một Bootstrap template chung.
+19. Cấu hình MySQL/JPA theo biến môi trường. Tạo application-example.properties, tuyệt đối không commit mật khẩu DB/Gmail/JWT secret.
+20. Tạo Entity/Enum nền tối thiểu để project compile: User, OtpCode, Branch, Trainer, MembershipPlan, Membership, ClassCategory, FitnessClass, ClassSchedule, ClassRegistration, Payment, Review và các enum đã chốt. Chỉ tạo field/quan hệ nền; logic sâu để owner từng module hoàn thiện sau.
+21. Tạo mẫu kiến trúc Controller -> Service -> Repository để B/C nhìn vào và làm giống.
+22. Tạo fragments/head.html, navbar.html, footer.html, scripts.html; tạo guest/home.html và auth/login.html ở mức khung.
+23. Tạo README: cách clone, cấu hình MySQL, biến môi trường, chạy ứng dụng.
+24. Chạy project từ máy A, kiểm tra trang Home mở được và app kết nối MySQL.
+25. Commit/push main rồi thông báo: "FOUNDATION DONE - B/C PULL MAIN".
+Bố cục A bắt buộc tạo
+src/main/java/com/utefit/
+|- UteFitApplication.java
+|- config/
+|- controller/
+|  |- auth/       # A
+|  |- guest/      # A
+|  |- member/     # A
+|  |- pt/         # B
+|  `- admin/      # C
+|- dto/
+|  |- auth/
+|  |- member/
+|  |- pt/
+|  `- admin/
+|- entity/
+|- enums/
+|- exception/
+|- mapper/
+|- repository/
+|- security/      # A
+|- service/
+|  `- impl/
+|- util/
+|- validation/
+`- websocket/     # B
+
+src/main/resources/
+|- templates/
+|  |- auth/       # A
+|  |- guest/      # A
+|  |- member/     # A
+|  |- pt/         # B
+|  |- admin/      # C
+|  |- fragments/  # A giữ layout chung
+|  `- error/
+|- static/css/
+|- static/js/
+|- static/images/
+|- static/vendor/
+|- application.properties
+`- application-example.properties
+B - Trong lúc chờ A
+• Đọc phần PT trong tài liệu và viết ra màn hình cần có: PT profile, request, personal schedule, class assigned, chat, notification, dashboard.
+• Chuẩn bị tài khoản Cloudinary và ghi lại biến môi trường cần dùng. Không gửi secret lên GitHub.
+• Vẽ wireframe PT bằng giấy/Figma/Canva nếu muốn; chưa tạo project riêng.
+C - Trong lúc chờ A
+• Liệt kê màn hình Admin: dashboard, users, branches, trainers, plans, categories, classes, schedules, checkins, payments, promotions, reviews, statistics.
+• Chuẩn bị bố cục sidebar/admin dashboard theo Bootstrap template đã chốt.
+• Chưa tạo project riêng, chưa tự dựng entity khác với A.
+Giai đoạn 1 kết thúc khi: B và C clone/pull main về, cấu hình máy mình và chạy được đúng project của A. Nếu B/C chưa chạy được thì chưa sang Giai đoạn 2.
+GIAI ĐOẠN 2 - XÁC THỰC + SECURITY + DỊCH VỤ DÙNG CHUNG
+Cách làm: Bắt đầu SONG SONG. A làm Auth/Security. B làm Cloudinary + hồ sơ PT. C dựng Admin shell + User/Branch cơ bản. C chỉ test quyền /admin/** sau khi A push Security.
+Kết quả chung phải đạt: Đăng ký/OTP/Login chạy được; role được bảo vệ; upload media dùng chung có sẵn; PT và Admin có khung chức năng đầu tiên.
+A - Auth và Security
+26. Làm Register DTO + Bean Validation.
+27. Kiểm tra email unique, BCrypt password, tạo User UNVERIFIED.
+28. Sinh OTP 6 số, lưu thời gian hết hạn/used/type, gửi email.
+29. Verify OTP đúng thì User ACTIVE; resend làm OTP cũ không còn hợp lệ.
+30. Làm Login/Logout bằng Spring Security.
+31. Cấu hình quyền: public URL; /member/** MEMBER; /pt/** PT; /admin/** ADMIN.
+32. Hoàn thiện JWT generation/validation theo thiết kế của nhóm.
+33. Làm Forgot Password -> OTP -> Reset Password.
+34. Test 403 khi Member nhập trực tiếp URL Admin/PT.
+A xong phải demo được: Guest Register -> nhận OTP -> verify -> login. Tài khoản MEMBER không vào được /admin/** và /pt/**. Quên mật khẩu bằng OTP hoạt động.
+B - Cloudinary và Trainer nền
+35. Tạo CloudinaryService dùng chung, lấy cloud_name/api_key/api_secret từ biến môi trường.
+36. Test upload 1 ảnh, nhận lại url + publicId, không lưu binary vào MySQL.
+37. Hoàn thiện Trainer entity/profile theo field đã chốt: user, branch, specialization, experience, bio, active.
+38. Làm trang public /trainers và /trainers/{id}: search/filter/pagination cơ bản.
+39. Làm /pt/profile: PT chỉ sửa profile của chính mình.
+40. Không sửa SecurityConfig nếu chưa báo A; chỉ chờ A push Security rồi pull về để test quyền PT.
+B xong phải demo được: Upload ảnh bằng CloudinaryService; Guest xem danh sách/chi tiết PT; tài khoản PT đăng nhập và sửa đúng profile của mình.
+C - Admin shell + User + Branch
+41. Dựng templates/admin/layout/sidebar/dashboard shell theo Bootstrap chung.
+42. Làm /admin/users: list, search, filter, detail, lock/unlock. Không hiển thị password.
+43. Làm /admin/branches: create, update, active/inactive, search, pagination.
+44. Ảnh Branch chỉ tích hợp sau khi B push CloudinaryService rồi C pull về; không tự viết service upload khác.
+45. Sau khi A push Security, pull main và test MEMBER/PT không vào được /admin/**.
+C xong phải demo được: Admin đăng nhập -> dashboard shell -> xem User -> lock/unlock -> CRUD Branch; quyền Admin được backend bảo vệ.
+Thứ tự push trong Giai đoạn 2
+Ba người code song song. Ai xong một phần ổn định trước thì được đăng ký lượt push trước. Tuy nhiên có hai điểm cần ưu tiên: A nên push Security sớm để B/C test quyền; B nên push CloudinaryService sớm để A/C dùng upload ảnh.
+A hoặc B báo PUSH -> người khác tạm dừng push
+Người push: git pull origin main -> chạy app/test -> git push origin main
+PUSH DONE -> hai người còn lại git pull origin main
+Sau đó người tiếp theo mới đăng ký lượt push
+GIAI ĐOẠN 3 - DỮ LIỆU NGHIỆP VỤ CỐT LÕI
+Cách làm: SONG SONG phần lớn. A làm Guest/Member/Membership/Payment. B làm TrainerRequest. C làm Plan/Category/PT Admin. Các chức năng dùng Cloudinary phải pull bản B trước.
+Kết quả chung phải đạt: Member có tài khoản/profile/gói tập; có Payment cơ bản; Member có thể gửi yêu cầu PT; Admin quản lý được gói, loại lớp và PT.
+A - Guest + Member + Membership + Payment
+46. Hoàn thiện Home, Branch public, Membership Plan public, Class public ở mức xem/search/filter/pagination.
+47. Làm Member Profile: sửa tên/phone, đổi password, avatar gọi CloudinaryService của B.
+48. Làm Membership: Member chọn Branch + Plan -> tạo Membership PENDING -> xem lịch sử/trạng thái.
+49. Làm Payment cơ bản trước bằng CASH hoặc trạng thái thủ công hợp lệ cho demo; Payment hợp lệ mới kích hoạt Membership ACTIVE theo flow đã chốt.
+50. Chưa làm VNPay nếu core chưa ổn.
+A xong phải demo được: Member login -> sửa profile/avatar -> chọn Branch + Plan -> tạo Membership -> Payment -> Membership ACTIVE -> xem lịch sử.
+B - TrainerRequest
+51. Tạo/hoàn thiện TrainerRequest: member, trainer, message, status, requestedAt, respondedAt.
+52. Làm endpoint Member gửi request đến PT; B sở hữu logic này dù URL nằm dưới /member/**.
+53. Làm PT xem request của chính mình, Accept/Reject.
+54. Chặn PT inactive, duplicate PENDING, PT A xử lý request của PT B, request ACCEPTED xử lý lần hai.
+55. Chưa làm WebSocket ở giai đoạn này; chỉ cần request lưu DB và trang hiển thị đúng.
+B xong phải demo được: Member chọn PT -> gửi Request PENDING -> PT login -> thấy đúng request của mình -> Accept/Reject -> trạng thái cập nhật ở cả hai phía.
+C - Plan + Category + Admin PT
+56. Làm /admin/membership-plans: CRUD, price > 0, duration > 0, active/inactive.
+57. Làm /admin/categories: CRUD, unique name, active/inactive.
+58. Làm /admin/trainers: list/search/filter branch, assign Branch, active/inactive.
+59. Không tự sửa Trainer entity nếu cần field mới; nhờ B là owner Trainer sửa rồi C pull.
+C xong phải demo được: Admin tạo Branch -> tạo Plan -> tạo Category -> xem PT -> gán PT vào Branch -> bật/tắt PT.
+GIAI ĐOẠN 4 - LỚP TẬP VÀ LỊCH LỚP
+Cách làm: PHẦN NÀY CÓ THỨ TỰ. C phải tạo Class + Schedule trước. Sau khi C push, A mới làm Class Booking trên dữ liệu chuẩn; B mới làm màn hình PT xem lớp được phân công.
+Kết quả chung phải đạt: Admin tạo được lớp/lịch, Member đăng ký/hủy lớp đúng business rule, PT xem được lớp và Member tham gia.
+Bước 4.1 - C làm trước: Fitness Class + Class Schedule
+60. Làm /admin/classes: create/update/cancel/search/filter.
+61. Khi tạo Class phải chọn Branch, Category, PT, capacity; Branch/PT phải ACTIVE; capacity > 0.
+62. Làm /admin/schedules: date, startTime, endTime, room; start < end.
+63. Kiểm tra PT không bị trùng lịch khi tạo/update schedule.
+64. Push main và báo: "CLASS + SCHEDULE DONE - A/B PULL".
+C xong phải demo được: Admin tạo Category -> Class -> chọn PT -> tạo lịch ngày/giờ/phòng; hệ thống chặn lịch PT bị trùng.
+Bước 4.2 - A và B làm song song sau khi pull C
+A - Member Class Booking
+65. Hiển thị danh sách lịch lớp cho Member.
+66. Đăng ký lớp và hủy đăng ký.
+67. Kiểm tra Membership ACTIVE và chưa hết hạn.
+68. Kiểm tra Class OPEN, còn capacity, chưa đăng ký cùng schedule, không trùng thời gian với lớp khác.
+69. Hiển thị /member/schedule.
+A xong phải demo được: Member ACTIVE đăng ký lớp thành công; Member hết hạn, lớp full, đăng ký trùng hoặc trùng giờ đều bị chặn.
+B - PT xem lớp được phân công
+70. Làm /pt/classes.
+71. PT chỉ thấy FitnessClass/ClassSchedule được gán cho chính PT đó.
+72. PT xem danh sách Member đã đăng ký và capacity.
+73. PT A không truy cập dữ liệu lớp của PT B.
+B xong phải demo được: PT login -> xem lớp/lịch của mình -> xem Member đăng ký; không thấy lớp của PT khác.
+GIAI ĐOẠN 5 - MEMBER - PT: LỊCH CÁ NHÂN, CHAT, NOTIFICATION
+Cách làm: B là người dẫn dắt giai đoạn. B làm dữ liệu + service realtime trước; A tích hợp giao diện Member; C chỉ tích hợp notification vào nghiệp vụ Admin sau khi B push service.
+Kết quả chung phải đạt: Member và PT có flow hai chiều hoàn chỉnh: Request -> Accept -> Personal Schedule -> Chat realtime -> Notification.
+B - Làm nền Member-PT theo thứ tự
+74. PersonalTrainingSchedule: chỉ tạo sau TrainerRequest ACCEPTED; kiểm tra start < end, PT không trùng lịch, Member không trùng lịch.
+75. Notification entity + NotificationService: lưu DB trước, có read/unread.
+76. Conversation + Message: member, trainer, sender, content, sentAt, readAt; phân quyền conversation.
+77. WebSocket/STOMP: gửi/nhận message realtime nhưng message vẫn phải lưu MySQL.
+78. Realtime notification: PT Accept Request / tạo lịch -> Member nhận thông báo; Member gửi request -> PT nhận thông báo.
+79. Làm PT Dashboard: pending requests, lịch sắp tới, class được phân công, tin nhắn chưa đọc.
+B xong phải demo được: Member gửi Request -> PT Accept -> PT tạo Personal Schedule -> Member thấy lịch -> Member gửi chat -> PT nhận realtime -> reload vẫn còn history -> PT trả lời -> Member nhận realtime.
+A - Tích hợp phía Member
+80. Trang Member xem PT và gửi request dùng service/flow do B làm, không viết TrainerRequestService thứ hai.
+81. Trang Member xem trạng thái request.
+82. Trang Member xem Personal Training Schedule.
+83. Trang Member chat với PT và xem notification/read-unread.
+84. Kiểm tra Member A không đọc conversation của Member B.
+A xong phải demo được: Từ tài khoản Member có thể đi liền mạch: chọn PT -> request -> xem PT phản hồi -> xem lịch cá nhân -> chat -> nhận notification.
+C - Tích hợp Notification vào Admin
+85. Sau khi B push NotificationService, C pull main.
+86. Khi Admin cancel Class/Schedule, lấy danh sách Member liên quan.
+87. Gọi đúng NotificationService của B để tạo thông báo; nếu B đã hỗ trợ realtime thì Member nhận realtime.
+88. Không tạo NotificationService riêng trong module Admin.
+C xong phải demo được: Admin hủy lớp -> Member đã đăng ký thấy thông báo lớp bị hủy.
+GIAI ĐOẠN 6 - CHECK-IN + REVIEW + PROMOTION + THỐNG KÊ
+Cách làm: SONG SONG. Đây là giai đoạn hoàn thiện nghiệp vụ sau khi core Member/PT/Class đã chạy.
+Kết quả chung phải đạt: Hệ thống có đủ nghiệp vụ quản lý thực tế: check-in, review, promotion, dashboard/statistics và media.
+A - Review và hoàn thiện Member
+89. Làm Review rating 1-5 + comment.
+90. Chỉ Member đã đủ điều kiện sử dụng dịch vụ tương ứng mới được review theo rule nhóm đã chốt.
+91. Ảnh review dùng CloudinaryService của B.
+92. Hoàn thiện lịch sử Membership/Payment/Class/Review để demo Member.
+93. Sửa UI responsive các trang Guest/Member.
+A xong phải demo được: Member sau khi sử dụng dịch vụ có thể đánh giá hợp lệ, upload ảnh, xem các lịch sử liên quan.
+B - Hoàn thiện PT/Realtime
+94. Hoàn thiện PT Dashboard và read/unread message/notification.
+95. Kiểm tra reconnect/reload vẫn lấy lại history từ MySQL.
+96. Kiểm tra authorization conversation và resource ownership.
+97. Hoàn thiện avatar PT/media bằng Cloudinary.
+98. Test full flow PT từ Request đến Chat.
+B xong phải demo được: PT có một dashboard dùng được, dữ liệu đúng theo PT đăng nhập, chat/notification ổn định sau reload.
+C - Check-in, Promotion, Payment Admin, Review Admin, Statistics
+99. Làm /admin/checkins: tìm Member -> kiểm tra Membership ACTIVE/còn hạn/Branch hợp lệ -> check-in; có checkout/history/filter.
+100. Làm /admin/payments: xem/search/filter method/status/detail.
+101. Làm /admin/promotions: code unique, 0 < discount <= 100, startDate < endDate, quantity >= 0.
+102. Làm /admin/reviews: xem/search/filter rating, ẩn review vi phạm nếu nhóm triển khai moderation.
+103. Làm /admin/dashboard và /admin/statistics bằng Chart.js: total Member/PT/Branch/Class, active Membership, check-in, revenue, revenue theo tháng, Member mới, top Plan/Branch.
+104. Dữ liệu thống kê phải lấy từ Service/Repository, không hard-code số trên HTML.
+C xong phải demo được: Admin check-in Member hợp lệ, xem giao dịch, quản lý promotion/review và xem biểu đồ thống kê từ dữ liệu thật.
+GIAI ĐOẠN 7 - TÍNH NĂNG MỞ RỘNG - CHỈ LÀM KHI CORE ĐÃ XANH
+Cách làm: Không bắt buộc phải làm hết. Cả nhóm chỉ chọn tính năng mở rộng nếu Giai đoạn 0-6 đã demo ổn và integration test không còn lỗi lớn.
+Kết quả chung phải đạt: Có thể cộng điểm sáng tạo mà không làm hỏng phần bắt buộc.
+Ưu tiên mở rộng
+• A - VNPay: Payment PENDING -> redirect VNPay -> backend verify callback/signature -> PAID -> Membership ACTIVE. Không cho frontend tự set PAID.
+• C - QR Check-in: chỉ làm sau check-in thường đã ổn; QR chứa identifier/token, backend vẫn phải verify User/Membership/Branch.
+• A/B - Favorites: chỉ làm nếu còn thời gian; không chen vào trước Class Booking/PT flow.
+• Review video/Manager: để cuối cùng. Manager không thuộc scope phiên bản chính.
+Luật dừng: Nếu core còn bug Security, Membership, Class Booking, PT Request, Chat hoặc Admin CRUD thì KHÔNG mở tính năng mới.
+GIAI ĐOẠN 8 - INTEGRATION TEST + SỬA LỖI + BÁO CÁO
+Cách làm: Cả nhóm làm cùng nhau. Không thêm chức năng mới. Mỗi lỗi giao về đúng owner sửa, sau đó mọi người pull lại main và test lại.
+Kết quả chung phải đạt: Một bản main duy nhất chạy được toàn flow demo và mỗi thành viên chứng minh được phần mình làm qua commit + chức năng + tài liệu.
+Bước 8.1 - Mỗi người tự test phần mình
+• A test: Guest, Register/OTP, Login/Security, Forgot Password, Member Profile, Membership, Payment, Class Booking, Review.
+• B test: Trainer, TrainerRequest, Personal Schedule, Cloudinary, Conversation, WebSocket Chat, Notification, PT Dashboard.
+• C test: Admin User/Branch/Plan/Category/Class/Schedule/PT, Check-in, Payment Admin, Promotion, Review Admin, Statistics.
+Bước 8.2 - Đổi người test
+• B test phần A như một người không viết code A.
+• C test phần B.
+• A test phần C.
+• Lỗi thuộc module ai thì người đó sửa. Người test ghi bước tái hiện rõ ràng.
+Bước 8.3 - Full flow bắt buộc trước khi nộp
+1. Guest mở Home / tìm Branch / Plan / PT
+2. Register -> OTP -> Login
+3. Member sửa Profile / Avatar
+4. Đăng ký Membership -> Payment -> ACTIVE
+5. Admin tạo Category / Class / Schedule / gán PT
+6. Member đăng ký Class -> xem Schedule
+7. Member gửi PT Request
+8. PT Accept -> tạo Personal Schedule
+9. Member <-> PT Chat realtime + Notification
+10. Admin Check-in Member
+11. Member Review
+12. Admin xem Payment + Statistics
+Bước 8.4 - Báo cáo và bằng chứng
+105. Mỗi thành viên chụp màn hình chức năng mình phụ trách.
+106. Mỗi chức năng quan trọng có mô tả kiến trúc/luồng hoạt động/Source Code/Giao diện theo file hướng dẫn AI.
+107. Giữ lịch sử commit rõ nghĩa, không commit kiểu "done", "fix", "update" chung chung.
+108. Ghi Prompt Log AI thật đã dùng: prompt, mục đích, kết quả AI sinh, nhóm đã sửa gì, commit nào liên quan.
+109. Chốt README setup từ máy sạch; một thành viên khác thử clone và chạy lại.
+110. Chỉ sau khi full flow pass mới coi main là bản nộp.
+9. NHÌN NHANH: MỖI NGƯỜI CUỐI CÙNG PHẢI BÀN GIAO GÌ?
+A - Foundation + Guest + Member
+• Project structure chuẩn + README setup ban đầu.
+• Auth: Register, OTP Email, Login/Logout, JWT/Security, Forgot Password.
+• Guest UI: Home, Branch/Plan/Class public.
+• Member: Profile, Membership, Payment, Class Booking, Schedule, Review.
+• Tích hợp phía Member cho PT Request/Schedule/Chat bằng service B cung cấp.
+• Kết quả quan trọng nhất: demo được từ Guest -> Member -> Membership -> Payment -> Class Booking.
+B - PT + Member-PT + Realtime + Cloudinary
+• CloudinaryService dùng chung.
+• Trainer profile + public trainer search/detail.
+• TrainerRequest, PersonalTrainingSchedule, PT class view.
+• Conversation, Message, WebSocket Chat, Notification, PT Dashboard.
+• Kết quả quan trọng nhất: demo được Member Request -> PT Accept -> Schedule -> Chat realtime + history.
+C - Admin toàn hệ thống
+• Admin dashboard/layout.
+• User, Branch, PT, Membership Plan, Category, Fitness Class, Class Schedule.
+• Check-in, Payment Admin, Promotion, Review Admin, Statistics.
+• Tích hợp Admin Cancel Class -> NotificationService B.
+• Kết quả quan trọng nhất: Admin tạo/quản trị dữ liệu toàn hệ thống và xem thống kê từ dữ liệu thật.
+10. LỊCH LÀM GỢI Ý 12 NGÀY - CHỈ ĐỂ NHÓM DỄ BẮT ĐẦU
+111. Ngày 1: Cả nhóm Giai đoạn 0. A bắt đầu Foundation.
+112. Ngày 2: A hoàn thiện Foundation và push. B/C pull, chạy project trên máy mình.
+113. Ngày 3: A Auth/OTP/Security; B Cloudinary; C Admin shell/User.
+114. Ngày 4: A Login/Forgot Password; B Trainer; C Branch. Cuối ngày test quyền role.
+115. Ngày 5: A Guest/Profile/Membership; B TrainerRequest; C Plan/Category/Admin PT.
+116. Ngày 6: A Payment; B tiếp tục Request; C Class + Schedule và push.
+117. Ngày 7: A Class Booking; B PT Classes + Personal Schedule; C hoàn thiện Schedule/Check-in nền.
+118. Ngày 8: B Notification + Conversation + WebSocket; A tích hợp Member-PT; C tích hợp Cancel Class notification.
+119. Ngày 9: A Review; B PT Dashboard/realtime; C Check-in/Payment/Promotion.
+120. Ngày 10: C Statistics; A/B hoàn thiện UI/responsive + test module.
+121. Ngày 11: Cross-test, sửa bug, không thêm chức năng mới.
+122. Ngày 12: Full flow demo, hoàn thiện report, screenshots, prompt log, README setup.
+Nếu chậm tiến độ: Bỏ tính năng mở rộng trước. Không bỏ Security, Validation, Membership/Class Booking, PT interaction, Admin management, WebSocket/Cloudinary vì đây là phần cốt lõi của đề tài và tiêu chí chấm.
+11. MẪU TIN NHẮN NHÓM KHI PUSH MAIN
+[PUSH LOCK] A chuẩn bị push Auth/Security. B/C tạm đừng push.
+
+A chạy:
+git checkout main
+git pull origin main
+# chạy project/test
+git add ...
+git commit -m "feat(auth): implement registration and otp"
+git push origin main
+
+[PUSH DONE] Auth/Security đã lên main. B/C pull main trước khi làm tiếp.
+Mục tiêu của quy trình này: Nhóm vẫn chỉ dùng main cho dễ học, nhưng có thứ tự rõ ràng: Foundation tuần tự -> các giai đoạn song song theo module -> các chỗ có dependency làm theo bước -> mỗi lần push chỉ một người -> integration test cuối.
+UTEFit - Phân công theo giai đoạn - Main Only v5 | 1
+

@@ -1,0 +1,264 @@
+﻿TRƯỜNG ĐẠI HỌC SƯ PHẠM KỸ THUẬT TP. HỒ CHÍ MINH
+KHOA CÔNG NGHỆ THÔNG TIN – MÔN LẬP TRÌNH WEB
+
+HƯỚNG DẪN XÂY DỰNG TỪNG CHỨC NĂNG UTEFIT VỚI SỰ HỖ TRỢ CỦA AIKiến trúc • activity • source • giao diện • setup • prompt log • kiểm thử
+
+Đề tàiXây dựng website quản lý chuỗi phòng tập thể thao UTEFit bằng Spring Boot + Thymeleaf + Bootstrap + JPA + MySQL + JWT + WebSocket + Cloudinary.Repository tham chiếuNhom22_DeTai20_UTEFitPhạm vi actor chínhGuest – Member – PT – Admin (Manager chỉ mở rộng)Mã tài liệuUTEFIT-GUIDE-02Phiên bản1.0 – 07/10/2026
+Tài liệu được thiết kế để vừa phục vụ xây dựng ứng dụng, vừa tạo bằng chứng rõ ràng cho rubric chấm đồ án.
+
+
+MỤC LỤC NỘI DUNG
+1. Cách sử dụng tài liệu và bộ bằng chứng
+2. Hướng dẫn setup ứng dụng
+3. Khởi tạo project và foundation
+4. Auth – OTP – Security – JWT
+5. Guest & giao diện công khai
+6. Member Profile – Membership – Payment
+7. Class Booking
+8. PT Request – Personal Schedule
+9. Cloudinary
+10. WebSocket Chat & Notification
+11. Check-in / QR
+12. Review
+13. Admin
+14. Statistics
+15. Hướng dẫn tạo hình/sơ đồ/source evidence
+16. Quy trình dùng AI an toàn và làm chủ code
+17. Danh sách prompt mẫu & Prompt Log
+18. Kiểm thử, demo và troubleshooting
+19. Checklist nộp bài
+
+
+1. Cách sử dụng tài liệu và bộ bằng chứng
+Giảng viên yêu cầu tài liệu hướng dẫn chi tiết xây dựng từng chức năng, kèm hình kiến trúc, sơ đồ hoạt động, hình diễn giải source code, hình giao diện, setup và danh sách prompt AI. Vì vậy mỗi chức năng quan trọng nên có cùng một bộ hồ sơ chuẩn.
+Thành phầnPhải có gì1. Mô tảMục tiêu, actor, input/output, pre/post-condition.2. Activity/SequenceHình luồng từ UI → Controller → Service → Repository/External Service.3. Source evidenceẢnh đoạn code trọng tâm, khoanh/chú thích business rule, validation, security.4. UI evidenceẢnh form/list/detail/dashboard + trạng thái lỗi/thành công.5. Database evidenceBảng/entity liên quan, record trước/sau nếu cần.6. Test evidenceHappy path + edge/error/security case.7. AI evidencePrompt thật, phần AI hỗ trợ, phần nhóm sửa/kiểm chứng, link commit/PR.
+
+Hình 1-1. Kiến trúc chung dùng xuyên suốt mọi chức năng.
+Quy tắc chụp bằng chứng — Không cần chụp mọi dòng code. Chỉ chụp đoạn thể hiện kiến trúc, business rule, security và điểm sáng tạo; kèm chú thích “dòng này làm gì, vì sao cần”.2. Hướng dẫn setup ứng dụng
+2.1. Phần mềm cần cài
+• JDK 17 hoặc phiên bản Spring Boot của nhóm đã chốt.
+• IntelliJ IDEA / VS Code có Java extensions.
+• MySQL Server + MySQL Workbench (hoặc client tương đương).
+• Git và tài khoản GitHub có quyền vào repository.
+• Maven Wrapper trong project để tránh lệch Maven giữa các máy.
+• Trình duyệt Chrome/Edge; Postman là tùy chọn vì app chính dùng Thymeleaf.
+2.2. Biến môi trường
+DB_URL=jdbc:mysql://localhost:3306/utefit_db?useUnicode=true&characterEncoding=UTF-8
+DB_USERNAME=root
+DB_PASSWORD=your_password
+JWT_SECRET=replace_with_long_random_secret
+MAIL_USERNAME=your_gmail_or_smtp_account
+MAIL_PASSWORD=app_password_or_smtp_password
+CLOUDINARY_CLOUD_NAME=...
+CLOUDINARY_API_KEY=...
+CLOUDINARY_API_SECRET=...
+VNPAY_TMN_CODE=...            # chỉ khi triển khai
+VNPAY_HASH_SECRET=...         # chỉ khi triển khai
+Không commit secret — GitHub chỉ commit .env.example hoặc README mô tả tên biến. Không commit DB password, Gmail/SMTP password, JWT secret, Cloudinary secret, VNPay secret.2.3. Database và chạy project
+CREATE DATABASE utefit_db
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
+ 
+# Terminal tại root project
+./mvnw clean test
+./mvnw spring-boot:run
+ 
+# Windows PowerShell
+.\mvnw.cmd clean test
+.\mvnw.cmd spring-boot:run
+2.4. Checklist máy mới
+1. Clone repository.
+2. Tạo DB utefit_db.
+3. Tạo biến môi trường.
+4. Mở project và chờ Maven tải dependency.
+5. Run test.
+6. Run application.
+7. Mở http://localhost:8080.
+8. Đăng nhập bằng demo account hoặc tạo tài khoản mới.
+3. Khởi tạo project và foundation
+
+Hình 3-1. Module và phụ thuộc.
+3.1. Dependencies tối thiểu
+Spring Web, Thymeleaf, Spring Data JPA, MySQL Driver, Spring Security, Validation, Spring Mail, WebSocket, Lombok. Cloudinary/VNPay thêm khi triển khai module tương ứng.
+3.2. Cấu trúc code
+com.utefit
+├─ config
+├─ controller
+├─ dto
+├─ entity
+├─ enums
+├─ exception
+├─ mapper
+├─ repository
+├─ security
+├─ service
+│  └─ impl
+├─ util
+├─ validation
+└─ websocket
+3.3. Foundation Definition of Done
+• Project build được trên cả 3 máy.
+• DB kết nối được bằng env riêng từng máy.
+• Có package structure và base exception handler.
+• Có User/Role/Status tối thiểu.
+• Có Bootstrap template + fragments header/footer.
+• Có Security basic và trang Access Denied.
+• README setup đủ để người khác clone chạy.
+4. Auth – OTP – Security – JWT
+
+Hình 4-1. Activity Register + OTP.
+
+Hình 4-2. Ví dụ hình diễn giải source Register/OTP.
+
+Hình 4-3. Ví dụ hình diễn giải source Security/JWT.
+4.1. Các lớp nên có
+LớpTrách nhiệmAuthControllerGET/POST register/login/OTP/forgot/reset; nhận DTO, trả view/redirect.AuthServiceRegister, verify OTP, reset password; business rules và transaction.OtpServiceSinh/lưu/verify/resend/expire OTP.MailServiceGửi OTP; template mail.CustomUserDetailsServiceNạp User cho Spring Security.JwtServiceGenerate/parse/validate token.JwtAuthenticationFilterĐọc token và gắn Authentication vào SecurityContext.SecurityConfigRoute policy, access denied, CSRF/cookie policy.
+4.2. Endpoint gợi ý
+MethodPathMục đíchGET/POST/registerForm + submit đăng ký.GET/POST/verify-otpForm + verify OTP.POST/resend-otpGửi OTP mới theo policy.GET/POST/loginLogin.POST/logoutLogout.GET/POST/forgot-passwordYêu cầu reset OTP.GET/POST/verify-reset-otpVerify OTP reset.GET/POST/reset-passwordĐặt password mới.
+4.3. Test bắt buộc
+CaseKỳ vọngRegister email mớiUser UNVERIFIED + OTP được tạo/gửi.Email trùngKhông tạo user thứ hai.OTP sai/hết hạn/đã dùngTừ chối.OTP đúngUser ACTIVE.Login sai passwordKhông tạo auth.User LOCKEDKhông login.Member mở /admin/dashboard403/Access Denied.PT A truy cập tài nguyên PT B403/Not Found theo policy.
+5. Guest & giao diện công khai
+
+Hình 5-1. Wireframe Home.
+Home nên lấy dữ liệu qua Service riêng (ví dụ HomeService) để Controller không chứa nhiều repository call. Public list cần search/filter/pagination nhất quán.
+TrangDữ liệu / chức năng/Hero; branch nổi bật; plan; class; PT; review./branchesSearch/filter/pagination branch./membership-plansPlan active; filter giá/thời hạn nếu cần./classesSearch/filter class/schedule./trainersSearch/filter PT; branch/specialization./trainers/{id}Profile PT, rating, schedule công khai nếu policy cho phép.
+5.1. UI evidence cần chụp
+• Desktop Home; mobile Home responsive.
+• Search/filter có dữ liệu và trường hợp “không tìm thấy”.
+• Branch detail; PT detail; Class list.
+• Navbar khác nhau khi Guest và khi đã login.
+6. Member Profile – Membership – Payment
+6.1. Member Profile
+Controller không nhận memberId tùy ý để sửa profile. Service lấy user hiện tại từ SecurityContext rồi cập nhật. Avatar gọi CloudinaryService sau khi B merge module dùng chung.
+6.2. Membership
+BướcXử lý1Member chọn Branch + MembershipPlan.2Service kiểm tra Branch/Plan active.3Tạo Membership PENDING.4Nếu CASH: Admin/flow quầy xác nhận theo thiết kế nhóm.5Nếu VNPay: tạo Payment PENDING, redirect, verify callback.6Payment hợp lệ → PAID; Membership → ACTIVE; set start/end date.7Gửi notification và hiển thị lịch sử.
+6.3. Payment/VNPay
+Member → Checkout → Payment(PENDING)
+       → VNPay Redirect
+       → VNPay Callback
+       → verify signature + amount + order reference
+       → Payment(PAID)
+       → Membership(ACTIVE)
+       → Notification
+Security payment — Không bao giờ cho frontend gửi `status=PAID` rồi backend tin trực tiếp. Nếu VNPay chưa ổn định, demo CASH tại quầy nhưng giữ Payment entity/status rõ ràng.7. Class Booking
+
+Hình 7-1. Activity Class Booking.
+
+Hình 7-2. Ví dụ source business rule Class Booking.
+7.1. Query cần có
+• existsActiveRegistration(memberId, scheduleId)
+• countActiveBySchedule(scheduleId)
+• hasTimeConflict(memberId, date, start, end)
+• findMemberSchedule(memberId, from, to)
+7.2. Test matrix
+CaseKỳ vọngMembership ACTIVE, còn hạn, class còn chỗREGISTERED.Membership PENDING/EXPIREDReject.Class FULLReject.Class CANCELLEDReject.Đăng ký cùng schedule lần 2Reject.Yoga 18:00–19:00, Boxing 18:30–19:30Reject do overlap.Hủy đăng kýStatus CANCELLED; capacity tính lại theo active registration.
+8. PT Request – Personal Schedule
+
+Hình 8-1. Activity Member–PT.
+Thành phầnGợi ý triển khaiTrainerRequestmember, trainer, message, status, requestedAt, respondedAt.Member endpointPOST /member/trainers/{id}/request; GET /member/trainer-requests.PT endpointGET /pt/requests; POST /pt/requests/{id}/accept|reject.ScheduleChỉ tạo sau ACCEPTED; check PT và Member overlap.OwnershipLấy PT hiện tại từ SecurityContext; không tin trainerId để xác định quyền.NotificationMember gửi request → PT; PT accept/reject → Member; PT tạo schedule → Member.
+9. Cloudinary
+9.1. Shared service
+CloudinaryService
+  uploadImage(MultipartFile file, String folder)
+  uploadVideo(MultipartFile file, String folder)      # tùy chọn
+  delete(String publicId)
+ 
+DB chỉ lưu:
+  url
+  publicId
+9.2. Consumer
+ModuleDùng Cloudinary choMemberAvatar.PTAvatar.Admin BranchBranch image.ReviewReview image/video nếu triển khai.
+Quy tắc shared module — CloudinaryService do một người sở hữu. Người khác chỉ gọi interface/service, không copy-paste cấu hình Cloudinary riêng trong từng module.10. WebSocket Chat & Notification
+
+Hình 10-1. Activity Chat realtime.
+
+Hình 10-2. Wireframe Chat.
+
+Hình 10-3. Ví dụ source WebSocket Chat.
+10.1. Data model
+Conversation(member_id, trainer_id) và Message(conversation_id, sender_id, content, sent_at, read_at). WebSocket chỉ vận chuyển realtime; DB là nguồn lịch sử.
+10.2. Security
+• Handshake/message phải gắn user đã xác thực.
+• Service kiểm tra sender thuộc conversation trước save/publish.
+• Không subscribe tùy ý conversation người khác.
+• Giới hạn length; reject blank; escape/sanitize khi render để giảm XSS.
+10.3. Notification
+NotificationService nên ghi DB trước, sau đó publish realtime. Nếu client offline, lần đăng nhập sau vẫn đọc được notification chưa đọc.
+11. Check-in / QR
+
+Hình 11-1. Activity Check-in.
+MVP có thể cho Admin search Member rồi check-in. QR là stretch: QR chỉ chứa identifier/token có thể verify, không chứa dữ liệu nhạy cảm hoặc cho phép client tự xác nhận check-in.
+RuleKiểm traUserTồn tại và account hợp lệ.MembershipACTIVE và chưa hết hạn.BranchNằm trong phạm vi gói.DuplicateKhông có check-in mở chưa checkout.QR*Token/identifier hợp lệ, không tái sử dụng bất thường.
+12. Review
+Review ăn điểm business rule nếu không cho mọi Member review tùy ý. Service phải kiểm tra eligibility dựa trên membership/class/PT/check-in theo loại review mà nhóm chốt.
+FieldValidationrating1–5.commentKhông rỗng nếu policy yêu cầu; giới hạn độ dài.mediaMIME/type/size; upload Cloudinary.eligibilityĐã sử dụng dịch vụ.duplicateMột review cho cùng đối tượng theo policy; hoặc cho phép update thay vì spam.
+13. Admin
+
+Hình 13-1. Wireframe Admin Dashboard.
+
+Hình 13-2. Activity Admin hủy lớp và notification.
+13.1. CRUD pattern chuẩn
+Mỗi module Admin nên dùng cùng pattern: List + Search + Filter + Pagination → Create/Edit Form → Detail → Active/Inactive hoặc Cancel. Không copy logic validation sang Controller.
+ModuleValidation/logic đáng chụp sourceUserLock/Unlock; không hiển thị password.BranchRequired + openingTime < closingTime; Cloudinary image.MembershipPlanduration>0, price>0.Categoryname unique.FitnessClassBranch/PT active; capacity>0.ClassSchedulestart<end; PT không overlap.Promotioncode unique; 0<discount≤100; start<end; qty≥0.Check-inMembership/Branch/duplicate.PaymentFilter status/method; transaction detail.ReviewFilter/moderation.StatisticsRevenue/member/checkin/plan/branch aggregation.
+14. Statistics
+Admin Dashboard dùng Chart.js. Service/Repository trả dữ liệu tổng hợp; Controller chỉ chuẩn bị model. Không query toàn bộ bảng rồi cộng bằng Java nếu DB có thể aggregate.
+Chỉ sốVí dụKPITotal Member, PT, Branch, Active Membership, Today Check-in, Revenue.RevenueTheo tháng/năm/branch.MemberMember mới theo tháng.MembershipPlan được đăng ký nhiều.Check-inLượt check-in theo ngày/branch.Class/PTTop class, rating PT hoặc workload phù hợp scope.
+15. Hướng dẫn tạo hình/sơ đồ/source evidence
+15.1. Bộ hình kiến trúc tối thiểu
+• System Context: Guest/Member/PT/Admin ↔ UTEFit.
+• 3-tier architecture.
+• Integration architecture: MySQL/Cloudinary/Email/VNPay/WebSocket.
+• ERD mức khái quát và ERD chi tiết trong báo cáo.
+• Git workflow / module ownership nếu dùng trong phần quá trình.
+15.2. Activity/Sequence nên ưu tiên
+• Register + OTP
+• Login/JWT
+• Forgot Password
+• Membership + Payment
+• Class Booking/Cancel
+• PT Request + Accept
+• Personal Schedule
+• Chat
+• Check-in
+• Review
+• Admin Create/Cancel Class
+• WebSocket Notification
+• Revenue Statistics
+15.3. Cách làm “hình diễn giải Source Code”
+Chụp đoạn code ngắn 10–30 dòng, có line number. Bên cạnh đặt 3–5 callout: Input/Validation, Business Rule, Security/Ownership, Repository/External Service, Output. Không dùng ảnh dài 200 dòng không có chú thích.
+15.4. Cách làm “hình diễn giải giao diện”
+Mỗi ảnh UI nên có caption: URL, actor, chức năng, dữ liệu hiển thị, trạng thái đang demo. Ít nhất chụp một trạng thái thành công và một trạng thái lỗi/validation ở chức năng trọng tâm.
+16. Quy trình dùng AI an toàn và làm chủ code
+BướcViệc phải làm1. Đưa contextNêu stack, package, entity, business rule, file liên quan; không gửi secret.2. Yêu cầu nhỏMỗi prompt một mục tiêu cụ thể; tránh “viết toàn bộ dự án”.3. Đòi giải thíchYêu cầu AI giải thích flow, edge cases, security, query.4. Tự reviewĐọc code, sửa naming, exception, transaction, ownership, validation.5. Chạy testBuild/run/test bằng dữ liệu thật; cố tình thử case sai.6. CommitCommit code đã hiểu; message theo feature.7. Prompt logGhi prompt, người dùng, mục tiêu, kết quả, chỉnh sửa, commit/PR.
+Rubric AI 20% — Điểm cao không đến từ việc “AI viết nhiều”, mà từ việc nhóm sử dụng thường xuyên nhưng vẫn hiểu, sửa và làm chủ code AI sinh ra. Prompt log phải chứng minh quá trình đó.17. Danh sách prompt mẫu & Prompt Log
+Các prompt dưới đây là mẫu/khung để nhóm sử dụng. Chỉ ghi là “đã sử dụng” trong báo cáo nếu nhóm thực sự dùng; Prompt Log cuối kỳ phải thay bằng prompt thực tế của nhóm.
+Nhóm promptPrompt mẫuPhân tích yêu cầuTừ mô tả UTEFit sau, hãy tách actor Guest/Member/PT/Admin, use case, pre-condition, post-condition và business rule. Không thêm Manager vào MVP.ERDThiết kế ERD MySQL/JPA cho UTEFit với User, Trainer, Branch, MembershipPlan, Membership, Class, Schedule, Registration, TrainerRequest, PersonalTrainingSchedule, Payment, Checkin, Conversation, Message, Notification. Giải thích cardinality.Register DTOViết RegisterRequest DTO dùng Bean Validation cho Spring Boot; giải thích từng annotation; không xử lý business rule trong DTO.OTPThiết kế OtpService có expire, one-time use, resend invalidation và rate-limit đơn giản. Cho test cases trước rồi mới code.JWT SecurityĐề xuất Spring Security JWT cho Thymeleaf dùng HttpOnly cookie. Phân tích CSRF và route RBAC trước khi viết code.Class BookingViết pseudo-code Service đăng ký lớp với membership active, class open, capacity, duplicate, time overlap. Chỉ sau khi tao xác nhận mới viết Java.Time overlapViết truy vấn JPA/JPQL kiểm tra khoảng thời gian overlap và giải thích điều kiện start < existingEnd AND end > existingStart.PT ownershipReview endpoint PT accept request để đảm bảo PT A không xử lý request PT B. Liệt kê lỗ hổng trước khi sửa code.WebSocketThiết kế WebSocket STOMP chat Member–PT có authentication, conversation ownership, save DB và user-specific destination.CloudinaryViết interface CloudinaryService dùng chung cho avatar/branch/review, trả MediaUploadResult(url, publicId). Không đặt secret trong code.VNPayThiết kế flow Payment PENDING → VNPay → callback → verify signature → PAID → Membership ACTIVE. Nêu các dữ liệu không được tin từ frontend.Admin statisticsViết repository query aggregate revenue theo tháng và DTO cho Chart.js; tránh load toàn bộ Payment vào RAM.Review codeĐây là Service tao viết. Hãy review theo: 3 tầng, transaction, validation, authorization/ownership, race condition, exception, naming. Không rewrite nếu chưa giải thích lỗi.Test casesTừ business rule Class Booking này, sinh bảng test gồm happy path, boundary, invalid, unauthorized và concurrency risk.UITạo HTML Thymeleaf + Bootstrap 5 cho trang danh sách PT, giữ layout fragment hiện có, responsive và có search/filter/pagination.DiagramTừ sequence sau, viết PlantUML/Mermaid activity diagram. Không thay đổi tên actor/entity của UTEFit.DocumentationTừ commit/PR này, viết phần “mục tiêu – file thay đổi – logic – test – ảnh cần chụp” cho tài liệu hướng dẫn.DebugPhân tích stack trace này, chỉ ra root cause và 3 giả thuyết kiểm chứng theo thứ tự; không đoán mò và không đề xuất xóa security để chạy.
+17.1. Mẫu Prompt Log thực tế
+NgàyNgườiFeaturePrompt / mục tiêuAI trả gìNhóm đã sửa/kiểm chứng gìCommit/PR…A/B/CAUTH-01Dán prompt thật hoặc link file prompt.Tóm tắt output.Ghi cụ thể chỉnh sửa, test, lỗi phát hiện.abc123 / #PR…………………
+18. Kiểm thử, demo và troubleshooting
+18.1. Full-flow demo script
+9. Guest mở Home, search Branch/PT.
+10. Register → nhận OTP → verify → Login Member.
+11. Member đăng ký Membership → payment/cash flow.
+12. Member đăng ký Class; thử một case trùng lịch để chứng minh validation.
+13. Member gửi PT request.
+14. Login PT → Accept → tạo schedule.
+15. Mở 2 browser/session → chat realtime; reload vẫn thấy history.
+16. Admin tạo/điều chỉnh class, check-in Member, xem Payment/Statistics.
+17. Admin hủy class → Member nhận notification.
+18.2. Lỗi thường gặp
+LỗiCách kiểm traDB connection failKiểm tra DB_URL/username/password, port, database tồn tại.Mail không gửiApp password/SMTP auth, log exception, không commit secret.403 nhầm roleKiểm tra token role prefix ROLE_, route matcher, SecurityContext.JWT hết hạnKiểm tra exp/timezone/cookie; flow login lại.WebSocket connect nhưng không nhậnDestination prefix, user principal, subscription path, security interceptor.Cloudinary upload failCredential, folder, file size/type; log response.Time overlap saiTest boundary 18:00–19:00 vs 19:00–20:00; điều kiện overlap chuẩn.Merge conflictKhông resolve bằng xóa code bên kia; hiểu shared file, pull develop, hỏi owner.
+19. Checklist nộp bài
+• Ứng dụng clone mới và setup theo README chạy được.
+• Không có secret trong Git history mới nhất; nếu từng leak thì rotate secret.
+• main là bản demo ổn định; develop đã integration test.
+• Có link GitHub, issue/PR/commit từng thành viên.
+• Có file mô tả/thiết kế, file hướng dẫn, file phân công.
+• Có ảnh kiến trúc, activity/sequence, ERD, source, UI, test.
+• Có Prompt Log thật và giải thích phần AI hỗ trợ/phần nhóm chỉnh sửa.
+• Demo account/member/PT/admin có sẵn hoặc seed rõ ràng.
+• Các chức năng P0 chạy xuyên suốt; P2 không được làm hỏng P0/P1.
+UTEFit | Hướng dẫn xây dựng ứng dụng với AI
+
+Trang 1
+

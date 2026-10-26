@@ -1,5 +1,7 @@
 # UTEFit — SePay + VietQR
 
+> Cập nhật 26/10/2026: xem `SEPAY_LIVE_READINESS.md` trước khi triển khai. VNPay đã ngừng tạo đơn mới; Live yêu cầu thêm profile/DB approval và biến ngân hàng Live riêng. Những hướng dẫn Live cũ bên dưới không còn đủ để bật Live.
+
 ## 1. Trạng thái và phạm vi
 
 Đã bổ sung source trên `feat/giai-doan-7`, mở rộng Payment/Membership hiện có. Không tạo checkout nghiệp vụ độc lập: Member vẫn đăng ký Membership PENDING tại trang gói hiện tại, sau đó chọn phương thức SePay. Không thay QR Check-in, Favorites, Manager, Review Video hoặc luồng VNPay.
