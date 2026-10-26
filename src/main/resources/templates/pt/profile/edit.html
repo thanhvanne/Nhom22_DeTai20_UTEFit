@@ -4,7 +4,7 @@
 
 <head th:replace="~{fragments/head :: head('Chỉnh sửa hồ sơ huấn luyện viên - UTEFit')}"></head>
 
-<body>
+<body class="uf-theme uf-area-pt uf-page-pt-profile-edit">
 
 <header th:replace="~{fragments/header :: header}"></header>
 
@@ -39,7 +39,7 @@
                              style="width: 140px; height: 140px; border: 3px solid #0d6efd;">
                             <img th:if="${trainer.user != null and trainer.user.avatarUrl != null}"
                                  th:src="${trainer.user.avatarUrl}"
-                                 alt="Avatar huấn luyện viên"
+                                 alt="Ảnh đại diện huấn luyện viên"
                                  class="img-fluid h-100 w-100 object-fit-cover">
 
                             <div th:if="${trainer.user == null or trainer.user.avatarUrl == null}"
@@ -103,7 +103,7 @@
                         <!-- Ẩn avatarFile để form này không bắt buộc upload -->
                         <input type="hidden" name="avatarFile"/>
 
-                        <p class="form-text">Chi nhánh do Admin phân công:
+                        <p class="form-text">Chi nhánh do quản trị viên phân công:
                             <strong th:text="${trainer.branch != null ? trainer.branch.name : 'Chưa phân công'}"></strong>
                         </p>
 

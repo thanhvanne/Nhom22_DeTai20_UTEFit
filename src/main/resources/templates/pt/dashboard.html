@@ -3,7 +3,7 @@
 
 <head th:replace="~{fragments/head :: head('PT Dashboard - UTEFit')}"></head>
 
-<body class="bg-dark">
+<body class="bg-dark uf-theme uf-area-pt uf-page-pt-dashboard">
 
 <header th:replace="~{fragments/header :: header}"></header>
 
@@ -11,7 +11,7 @@
 
     <!-- HERO TỐI DÀNH RIÊNG CHO PT -->
     <section class="card border-0 shadow-lg overflow-hidden mb-4"
-             style="background: radial-gradient(circle at top left, #1b2a4d 0, #030712 55%, #02030a 100%);">
+             style="background: radial-gradient(circle at top left, #1b2a4d 0, #030712 55%, #02030a 100%);" data-uf-surface>
 
         <div class="card-body position-relative p-4 p-md-5 text-white">
 
@@ -30,7 +30,7 @@
 
                     <p class="mb-0 text-white-50 fs-6">
                         Khi một học viên chọn bạn làm huấn luyện viên, đó là bước đầu của một hành trình mới.
-                        Hãy sử dụng <strong>“Yêu cầu từ Member”</strong> để phản hồi kịp thời, và
+                        Hãy sử dụng <strong>“Yêu cầu từ Hội viên”</strong> để phản hồi kịp thời, và
                         <strong>“Lịch tập cá nhân”</strong> để xây dựng lộ trình tập luyện phù hợp cho từng người.
                     </p>
                 </div>
@@ -45,7 +45,7 @@
                             overflow: hidden; background: #1f2937;">
                     <img th:if="${dashboard.avatarUrl != null}"
                          th:src="${dashboard.avatarUrl}"
-                         alt="Avatar PT"
+                         alt="Ảnh huấn luyện viên"
                          style="width: 100%; height: 100%; object-fit: cover;">
                     <div th:if="${dashboard.avatarUrl == null}"
                          class="d-flex align-items-center justify-content-center h-100 w-100"
@@ -90,7 +90,7 @@
                         <p class="mb-2 small text-white-75">Gợi ý:</p>
                         <ul class="small mb-0">
                             <li>Chọn <strong>“Lịch tập cá nhân”</strong> trên thanh menu để xem lịch dạng thời khóa biểu tuần.</li>
-                            <li>Dùng <strong>“Yêu cầu từ Member”</strong> để xem và xử lý yêu cầu PT đang chờ.</li>
+                            <li>Dùng <strong>“Yêu cầu từ Hội viên”</strong> để xem và xử lý yêu cầu PT đang chờ.</li>
                             <li>Nút <strong>Tin nhắn</strong> và <strong>Thông báo</strong> trên thanh trên cùng có badge realtime.</li>
                         </ul>
                     </div>

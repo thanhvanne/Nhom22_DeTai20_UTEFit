@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/layout :: head(${isEdit ? 'Cập nhật Gói tập' : 'Thêm Gói tập'})}"></head>
-<body>
+<body class="uf-theme uf-area-admin uf-page-admin-plans-form">
+
 <div class="d-flex">
     <div th:replace="~{admin/fragments/layout :: sidebar}"></div>
 
@@ -17,32 +18,60 @@
 
             <div class="surface-card col-lg-8 p-4">
                 <div th:if="${errorMessage}" class="alert alert-danger rounded-3">
-                    <i class="bi bi-exclamation-octagon-fill me-2"></i> <span th:text="${errorMessage}"></span>
+                    <i class="bi bi-exclamation-octagon-fill me-2"></i> <span th:text="${errorMessage}" data-uf-label></span>
                 </div>
 
                 <form th:action="${isEdit ? '/admin/membership-plans/' + planForm.id + '/edit' : '/admin/membership-plans/create'}"
-                      th:object="${planForm}" method="post">
+                      th:object="${planForm}" method="post" id="membership-plan-form">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6"><label class="form-label">Quyền lợi</label><select class="form-select" th:field="*{benefit}" required><option value="ALL">Tất cả dịch vụ</option><option value="GYM">Phòng gym</option><option value="YOGA">Yoga</option><option value="PT">Huấn luyện viên cá nhân</option></select></div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="planBranch">Chi nhánh cố định</label>
+                            <select id="planBranch" name="branchIds" class="form-select" required>
+                                <option value="">-- Chọn một chi nhánh --</option>
+                                <option th:each="branch : ${scopeBranches}" th:value="${branch.id}" th:text="${@membershipDisplay.name(branch.name) + (branch.active ? '' : ' — ngừng hoạt động')}"
+                                        th:selected="${planForm.branchIds != null and planForm.branchIds.size() == 1 and planForm.branchIds.contains(branch.id)}"
+                                        th:disabled="${!branch.active}"></option>
+                            </select>
+                            <input type="hidden" name="_branchIds" value="on">
+                            <input type="hidden" name="accessScope" value="SINGLE_BRANCH">
+                            <small class="text-muted">Mỗi gói mới thuộc đúng một chi nhánh. Hội viên có thể mua gói riêng tại chi nhánh khác.</small>
+                            <p th:if="${planForm.accessScope?.name() != 'SINGLE_BRANCH' or planForm.branchIds == null or planForm.branchIds.size() != 1}" class="small text-warning mt-2">Gói cũ chưa có một chi nhánh cố định. Hãy chọn lại trước khi lưu; quyền của Gói tập đã mua không thay đổi.</p>
+                        </div>
+                    </div>
 
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Tên gói tập <span class="text-danger">*</span></label>
                         <input type="text" th:field="*{name}" class="form-control"
                                th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
-                               placeholder="VD: Gói VIP 6 Tháng (All Branches)">
+                               placeholder="VD: Gói 3 tháng tặng 2 tuần">
                         <div class="invalid-feedback" th:errors="*{name}"></div>
                     </div>
 
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Thời hạn (Số ngày) <span class="text-danger">*</span></label>
+                            <label class="form-label fw-semibold">Thời gian cơ bản</label>
                             <div class="input-group">
-                                <input type="number" th:field="*{durationDays}" min="0" class="form-control"
-                                       th:classappend="${#fields.hasErrors('durationDays')} ? 'is-invalid'"
-                                       placeholder="VD: 30, 90, 180, 365">
-                                <span class="input-group-text">ngày</span>
+                                <input type="number" th:field="*{durationQuantity}" class="form-control" min="1" max="36600" required aria-label="Số lượng thời hạn">
+                                <select th:field="*{durationUnit}" class="form-select" required aria-label="Đơn vị thời hạn">
+                                    <option th:each="unit : ${T(com.utefit.enums.MembershipDurationUnit).values()}" th:value="${unit}" th:text="${unit.label}"></option>
+                                </select>
                             </div>
-                            <!-- Thêm thẻ div báo lỗi màu đỏ nằm ngay bên dưới input-group -->
-                            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('durationDays')}" th:errors="*{durationDays}"></div>
+                            <div class="text-danger small" th:errors="*{durationQuantity}"></div>
+                            <div class="text-danger small" th:errors="*{durationUnit}"></div>
                         </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Thời gian thưởng</label>
+                            <div class="input-group">
+                                <input type="number" th:field="*{bonusQuantity}" class="form-control" min="0" max="36600" required aria-label="Số lượng thời gian thưởng">
+                                <select th:field="*{bonusUnit}" class="form-select" required aria-label="Đơn vị thời gian thưởng">
+                                    <option th:each="unit : ${T(com.utefit.enums.MembershipDurationUnit).values()}" th:value="${unit}" th:text="${unit.label}"></option>
+                                </select>
+                            </div>
+                            <div class="text-danger small" th:errors="*{bonusQuantity}"></div>
+                            <div class="text-danger small" th:errors="*{bonusUnit}"></div>
+                        </div>
+                        <div class="col-12 small text-muted">Cộng thời gian cơ bản rồi cộng thưởng theo lịch; ngày hết hạn là ngày trước mốc kết thúc. Ngày không tồn tại ở cuối tháng/năm được chốt về cuối tháng (LocalDate). Không quy đổi tháng/năm thành số ngày cố định.</div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Giá gói tập (VNĐ) <span class="text-danger">*</span></label>
                             <div class="input-group">
@@ -77,5 +106,6 @@
     </div>
 </div>
 <div th:replace="~{admin/fragments/layout :: scripts}"></div>
+
 </body>
 </html>

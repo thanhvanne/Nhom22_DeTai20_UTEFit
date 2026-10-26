@@ -3,7 +3,7 @@
 
 <head th:replace="~{fragments/head :: head('Đánh giá của tôi - UTEFit')}"></head>
 
-<body>
+<body class="uf-theme uf-area-member uf-page-member-reviews">
 <header th:replace="~{fragments/header :: header}"></header>
 
 <main class="container ut-page">
@@ -29,11 +29,11 @@
 
     <div th:if="${success}"
          class="alert alert-success"
-         th:text="${success}"></div>
+         th:text="${success}" data-uf-label></div>
 
     <div th:if="${error}"
          class="alert alert-danger"
-         th:text="${error}"></div>
+         th:text="${error}" data-uf-label></div>
 
     <div class="row g-3">
 
@@ -47,7 +47,7 @@
 
                     <div>
                         <h2 class="h5 mb-1"
-                            th:text="${r.branchName}"></h2>
+                            th:text="${@membershipDisplay.name(r.branchName)}" data-uf-label></h2>
 
                         <p class="ut-subtitle mb-1"
                            th:if="${r.trainerName != null}"

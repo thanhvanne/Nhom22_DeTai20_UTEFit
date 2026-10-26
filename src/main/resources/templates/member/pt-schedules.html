@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/head :: head('Lịch tập PT 1:1 - UTEFit')}"></head>
-<body>
+<body class="uf-theme uf-area-member uf-page-member-pt-schedules">
 <header th:replace="~{fragments/header :: header}"></header>
 <main class="container ut-page">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
@@ -11,7 +11,7 @@
         </div>
         <a th:href="@{/member/trainer-requests}" class="btn btn-outline-light">Xem yêu cầu PT</a>
     </div>
-    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}" data-uf-label></div>
     <form th:action="@{/member/pt-schedules}" method="get" class="ut-panel row g-3 align-items-end mb-4">
         <div class="col-md-5">
             <label class="form-label" for="from">Từ ngày</label>
@@ -26,7 +26,7 @@
     <div class="row g-3" th:if="${!#lists.isEmpty(schedules)}">
         <div class="col-md-6 col-xl-4" th:each="s : ${schedules}">
             <div class="ut-panel h-100">
-                <h3 class="h5" th:text="${s.title != null ? s.title : 'Buổi tập cá nhân'}"></h3>
+                <h3 class="h5" th:text="${s.title != null ? s.title : 'Buổi tập cá nhân'}" data-uf-label></h3>
                 <p class="mb-2"><strong>PT:</strong> <span th:text="${s.trainerName}"></span></p>
                 <p class="mb-2"><strong>Ngày:</strong> <span th:text="${#temporals.format(s.scheduleDate, 'dd/MM/yyyy')}"></span></p>
                 <p class="mb-2"><strong>Giờ:</strong>

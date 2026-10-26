@@ -6,7 +6,7 @@
 <head th:replace="~{fragments/head :: head('Đăng ký lớp tập - UTEFit')}">
 </head>
 
-<body>
+<body class="uf-theme uf-area-member uf-page-member-classes">
 
 <header th:replace="~{fragments/header :: header}">
 </header>
@@ -22,7 +22,7 @@
             </h1>
 
             <p class="ut-subtitle mb-0">
-                Chỉ đăng ký được khi có gói ACTIVE,
+                Chỉ đăng ký được khi có gói đang hoạt động,
                 còn hạn tại chi nhánh của lớp.
             </p>
         </div>
@@ -35,12 +35,12 @@
 
     <div th:if="${success}"
          class="alert alert-success"
-         th:text="${success}">
+         th:text="${success}" data-uf-label>
     </div>
 
     <div th:if="${error}"
          class="alert alert-danger"
-         th:text="${error}">
+         th:text="${error}" data-uf-label>
     </div>
 
     <!-- Tìm kiếm và lọc lịch lớp -->
@@ -106,13 +106,13 @@
                     </span>
 
                     <h3 class="mt-3"
-                        th:text="${s.className}">
+                        th:text="${s.className}" data-uf-label>
                         Tên lớp
                     </h3>
 
                     <p class="mb-2">
                         Chi nhánh:
-                        <strong th:text="${s.branchName}">
+                        <strong th:text="${@membershipDisplay.name(s.branchName)}">
                             UTEFit
                         </strong>
                     </p>

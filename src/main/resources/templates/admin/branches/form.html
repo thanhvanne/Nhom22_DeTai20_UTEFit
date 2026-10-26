@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/layout :: head(${isEdit ? 'Cập nhật Chi nhánh' : 'Thêm Chi nhánh'})}"></head>
-<body>
+<body class="uf-theme uf-area-admin uf-page-admin-branches-form">
 <div class="d-flex">
     <div th:replace="~{admin/fragments/layout :: sidebar}"></div>
 
@@ -17,7 +17,7 @@
 
             <div class="card border-0 shadow-sm col-lg-8">
                 <div class="card-body p-4">
-                    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+                    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}" data-uf-label></div>
 
                     <form th:action="${isEdit ? '/admin/branches/' + branchForm.id + '/edit' : '/admin/branches/create'}"
                           th:object="${branchForm}" method="post" enctype="multipart/form-data">

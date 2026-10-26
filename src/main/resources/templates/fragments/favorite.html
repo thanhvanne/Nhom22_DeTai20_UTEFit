@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<body>
+<body class="uf-theme uf-area-shared uf-page-fragments-favorite">
 <div th:fragment="button(type,targetId,returnTo)" sec:authorize="hasRole('MEMBER')"
      th:with="favoriteId=${savedFavorites[type + ':' + targetId]}" class="mt-2">
     <form th:if="${favoriteId == null}" th:action="@{/member/favorites/{type}/{id}(type=${type},id=${targetId})}" method="post">

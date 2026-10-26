@@ -6,7 +6,7 @@
 <head th:replace="~{fragments/head :: head('Gửi yêu cầu huấn luyện viên - UTEFit')}">
 </head>
 
-<body>
+<body class="uf-theme uf-area-member uf-page-member-trainer-request-form">
 
 <header th:replace="~{fragments/header :: header}">
 </header>
@@ -33,11 +33,11 @@
             <div class="col-lg-8">
 
                 <div th:if="${errorMessage}" class="alert alert-danger">
-                    <span th:text="${errorMessage}"></span>
+                    <span th:text="${errorMessage}" data-uf-label></span>
                 </div>
 
                 <div th:if="${successMessage}" class="alert alert-success">
-                    <span th:text="${successMessage}"></span>
+                    <span th:text="${successMessage}" data-uf-label></span>
                 </div>
 
                 <div class="card shadow-sm border-0">
@@ -54,7 +54,7 @@
 
                         <div class="mb-4 p-3 rounded bg-white border">
                             <h3 class="h5 mb-1"
-                                th:text="${trainer.fullName}">
+                                th:text="${trainer.fullName}" data-uf-label>
                                 Tên huấn luyện viên
                             </h3>
                             <p class="mb-1 text-muted" th:text="${trainer.specialization}">

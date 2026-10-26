@@ -1,0 +1,245 @@
+.uf-theme {
+    --uf-canvas: #090a0b;
+    --uf-surface: #17191c;
+    --uf-surface-raised: #202226;
+    --uf-border: #35383d;
+    --uf-text: #f5f5f3;
+    --uf-muted: #a7abb2;
+    --uf-accent: #d92332;
+    --uf-accent-hover: #b91c29;
+    --uf-success: #9bd4b4;
+    --uf-warning: #e7c382;
+    --uf-danger: #ffa4a9;
+    --uf-radius-sm: 8px;
+    --uf-radius-md: 14px;
+    --uf-radius-lg: 20px;
+    --uf-space-1: .5rem;
+    --uf-space-2: 1rem;
+    --uf-space-3: 1.5rem;
+    --uf-space-4: 2rem;
+    --uf-space-5: 3rem;
+    --uf-font: "Be Vietnam Pro", "Segoe UI", sans-serif;
+    --ut-bg: var(--uf-canvas);
+    --ut-surface: var(--uf-surface);
+    --ut-surface-2: var(--uf-surface-raised);
+    --ut-border: var(--uf-border);
+    --ut-text: var(--uf-text);
+    --ut-muted: var(--uf-muted);
+    --ut-pink: var(--uf-accent);
+    --ut-violet: #b48392;
+    --utefit-dark: var(--uf-canvas);
+    --utefit-sidebar: var(--uf-surface);
+    --utefit-accent: var(--uf-accent);
+    --utefit-accent-hover: var(--uf-accent-hover);
+    --utefit-accent-glow: transparent;
+    --utefit-bg: var(--uf-canvas);
+    --bs-body-bg: var(--uf-canvas);
+    --bs-body-color: var(--uf-text);
+    --bs-border-color: var(--uf-border);
+    --bs-secondary-color: var(--uf-muted);
+    --bs-tertiary-bg: var(--uf-surface-raised);
+    --bs-link-color: #f19aa3;
+    --bs-link-hover-color: #ffc5cb;
+    --bs-primary-rgb: 217, 35, 50;
+    --bs-success-rgb: 92, 155, 119;
+    --bs-info-rgb: 150, 183, 216;
+    --bs-warning-rgb: 231, 195, 130;
+    --bs-danger-rgb: 217, 35, 50;
+    color-scheme: dark;
+    color: var(--uf-text);
+    background: var(--uf-canvas);
+    font-family: var(--uf-font);
+    font-size: .875rem;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+}
+
+.uf-theme *,
+.uf-theme *::before,
+.uf-theme *::after {
+    box-sizing: border-box;
+}
+
+.uf-theme [hidden] {
+    display: none !important;
+}
+
+.uf-theme :where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+    outline: 3px solid var(--uf-text);
+    outline-offset: 4px;
+}
+
+.uf-theme ::selection {
+    color: #fff;
+    background: #932330;
+}
+
+.uf-theme .uf-shell {
+    width: min(1280px, calc(100% - 80px));
+    margin-inline: auto;
+}
+
+.uf-theme .uf-muted {
+    color: var(--uf-muted);
+}
+
+.uf-theme .uf-icon {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    vertical-align: middle;
+}
+
+.uf-theme .uf-button {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: .625rem;
+    min-height: 46px;
+    padding: .75rem 1.125rem;
+    border: 1px solid transparent;
+    border-radius: var(--uf-radius-sm);
+    font: 600 .8125rem/1.5 var(--uf-font);
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color .16s, border-color .16s;
+}
+
+.uf-theme .uf-button-primary {
+    color: #fff;
+    background: var(--uf-accent);
+    border-color: var(--uf-accent);
+}
+
+.uf-theme .uf-button-primary:hover {
+    color: #fff;
+    background: var(--uf-accent-hover);
+    border-color: var(--uf-accent-hover);
+}
+
+.uf-theme .uf-button-secondary {
+    color: var(--uf-text);
+    background: var(--uf-surface-raised);
+    border-color: var(--uf-border);
+}
+
+.uf-theme .uf-button-secondary:hover {
+    color: #fff;
+    background: #2d3035;
+    border-color: #666b74;
+}
+
+.uf-theme .uf-button-danger {
+    color: var(--uf-danger);
+    background: transparent;
+    border-color: #713239;
+}
+
+.uf-theme .uf-button-danger:hover {
+    background: #382025;
+    border-color: var(--uf-danger);
+}
+
+.uf-theme .uf-badge {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: .3rem .625rem;
+    border: 1px solid var(--uf-border);
+    border-radius: 6px;
+    color: #d6d8dc;
+    background: #ffffff04;
+    font-size: .6875rem;
+    font-weight: 500;
+    line-height: 1.6;
+}
+
+.uf-theme .uf-notice {
+    margin: 0 0 var(--uf-space-3);
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--uf-border);
+    border-left-width: 3px;
+    border-radius: var(--uf-radius-sm);
+    color: #d6d8dc;
+    background: var(--uf-surface);
+    font-size: .8125rem;
+    overflow-wrap: anywhere;
+}
+
+.uf-theme .uf-notice p:last-child {
+    margin-bottom: 0;
+}
+
+.uf-theme .uf-notice-success {
+    color: #b9e3cb;
+    border-color: #3f6751;
+    background: #16231d;
+}
+
+.uf-theme .uf-notice-danger {
+    color: #ffc0c4;
+    border-color: #7d3942;
+    background: #301c21;
+}
+
+.uf-theme .uf-notice-warning {
+    color: #eed2a0;
+    border-color: #6a5635;
+    background: #28231b;
+}
+
+.uf-theme .uf-select {
+    width: 100%;
+    min-height: 46px;
+    padding: .7rem 2.5rem .7rem .875rem;
+    border: 1px solid var(--uf-border);
+    border-radius: var(--uf-radius-sm);
+    color: var(--uf-text);
+    background-color: var(--uf-surface);
+    font: inherit;
+    cursor: pointer;
+}
+
+.uf-theme .uf-empty {
+    padding: var(--uf-space-5) var(--uf-space-3);
+    border: 1px dashed var(--uf-border);
+    border-radius: var(--uf-radius-md);
+    color: var(--uf-muted);
+    text-align: center;
+}
+
+.uf-theme .uf-skip-link {
+    position: fixed;
+    top: 8px;
+    left: 12px;
+    z-index: 1100;
+    padding: .75rem 1rem;
+    border-radius: var(--uf-radius-sm);
+    color: #fff;
+    background: var(--uf-accent);
+    transform: translateY(-160%);
+}
+
+.uf-theme .uf-skip-link:focus {
+    transform: translateY(0);
+}
+
+@media (max-width: 767.98px) {
+    .uf-theme .uf-shell {
+        width: calc(100% - 32px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .uf-theme *,
+    .uf-theme *::before,
+    .uf-theme *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
+    html:has(.uf-theme) {
+        scroll-behavior: auto;
+    }
+}

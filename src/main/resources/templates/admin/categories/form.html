@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/layout :: head(${isEdit ? 'Cập nhật Loại lớp' : 'Thêm Loại lớp'})}"></head>
-<body>
+<body class="uf-theme uf-area-admin uf-page-admin-categories-form">
 <div class="d-flex">
     <div th:replace="~{admin/fragments/layout :: sidebar}"></div>
 
@@ -17,11 +17,12 @@
 
             <div class="surface-card col-lg-8 p-4">
                 <div th:if="${errorMessage}" class="alert alert-danger rounded-3">
-                    <i class="bi bi-exclamation-octagon-fill me-2"></i> <span th:text="${errorMessage}"></span>
+                    <i class="bi bi-exclamation-octagon-fill me-2"></i> <span th:text="${errorMessage}" data-uf-label></span>
                 </div>
 
                 <form th:action="${isEdit ? '/admin/categories/' + categoryForm.id + '/edit' : '/admin/categories/create'}"
                       th:object="${categoryForm}" method="post">
+                    <div class="mb-3"><label class="form-label">Quyền lợi Gói tập cần có để đặt lớp</label><select class="form-select" th:field="*{requiredBenefit}"><option value="">Giữ tương thích: chấp nhận mọi loại gói</option><option value="GYM">Gym</option><option value="YOGA">Yoga</option><option value="PT">PT</option></select></div>
 
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Tên loại lớp (Category Name) <span class="text-danger">*</span></label>

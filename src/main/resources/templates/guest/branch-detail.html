@@ -6,7 +6,7 @@
 <head th:replace="~{fragments/head :: head('Chi tiết chi nhánh - UTEFit')}">
 </head>
 
-<body>
+<body class="uf-theme uf-area-guest uf-page-guest-branch-detail">
 
 <header th:replace="~{fragments/header :: header}">
 </header>
@@ -31,7 +31,7 @@
             <div th:unless="${branch.imageUrl != null}"
                  class="ut-empty-image rounded-4"
                  style="height:360px">
-                UTEFIT FITNESS CENTER
+                UTEFIT Trung tâm thể hình
             </div>
 
         </div>
@@ -46,7 +46,7 @@
 
                 <div th:replace="~{fragments/favorite :: button('BRANCH',${branch.id},'/branches')}"></div>
                 <h1 class="ut-page-title mt-3"
-                    th:text="${branch.name}">
+                    th:text="${@membershipDisplay.name(branch.name)}" data-uf-label>
                     Tên chi nhánh
                 </h1>
 
@@ -111,7 +111,7 @@
                 <article class="ut-card h-100 branch-review-card">
                     <div class="ut-card-body">
                         <p class="text-warning fw-bold" th:text="|${review.rating} / 5 sao|"></p>
-                        <h3 class="h5" th:text="${review.author}"></h3>
+                        <h3 class="h5" th:text="${review.author}" data-uf-label></h3>
                         <p th:if="${review.trainer != null}" class="ut-subtitle" th:text="|PT: ${review.trainer}|"></p>
                         <p class="review-text" th:text="${review.comment ?: 'Không có nhận xét'}"></p>
                         <img th:if="${review.imageUrl != null}" th:src="${review.imageUrl}" alt="Ảnh trải nghiệm của hội viên" loading="lazy" class="review-photo img-fluid rounded mb-3">

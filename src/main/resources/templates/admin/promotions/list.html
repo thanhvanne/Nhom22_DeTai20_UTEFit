@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/layout :: head('Khuyến mãi')}"></head>
-<body>
+<body class="uf-theme uf-area-admin uf-page-admin-promotions-list">
 <div class="d-flex">
     <aside th:replace="~{admin/fragments/layout :: sidebar}"></aside>
     <div class="flex-grow-1 min-vh-100" style="min-width:0">
@@ -17,14 +17,14 @@
             </div>
 
             <div th:if="${success}" class="alert alert-success"
-                 th:text="${success}"></div>
+                 th:text="${success}" data-uf-label></div>
             <div th:if="${error}" class="alert alert-danger"
-                 th:text="${error}"></div>
+                 th:text="${error}" data-uf-label></div>
 
             <div class="surface-card p-4 mb-4">
                 <h5 class="fw-bold mb-3"
                     th:text="${editId == null ? 'Tạo khuyến mãi mới' :
-                                            'Chỉnh sửa khuyến mãi'}"></h5>
+                                            'Chỉnh sửa khuyến mãi'}" data-uf-label></h5>
 
                 <form th:action="@{/admin/promotions/save}"
                       th:object="${form}" method="post"
@@ -101,8 +101,8 @@
                             <td class="fw-bold" th:text="${p.code}"></td>
                             <td th:text="|${p.discountPercent}%|"></td>
                             <td>
-                                <span th:text="${p.startDate}"></span>
-                                đến <span th:text="${p.endDate}"></span>
+                                <span th:text="${p.startDate}" data-uf-date></span>
+                                đến <span th:text="${p.endDate}" data-uf-date></span>
                             </td>
                             <td th:text="${p.quantity}"></td>
                             <td>

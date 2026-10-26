@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/layout :: head('Check-in')}"></head>
-<body>
+<body class="uf-theme uf-area-admin uf-page-admin-checkins-list">
 <div class="d-flex">
     <aside th:replace="~{admin/fragments/layout :: sidebar}"></aside>
     <div class="flex-grow-1 min-vh-100" style="min-width:0">
@@ -10,33 +10,33 @@
 
         <main class="container-fluid px-4 pb-5 admin-checkins">
             <div class="admin-hero-banner mb-4">
-                <h2 class="fw-bold">Quản lý Check-in / Checkout</h2>
+                <h2 class="fw-bold">Quản lý Vào tập / Ra về</h2>
                 <p class="mb-0 text-white-50">
-                    Xác nhận Member đến phòng tập, kiểm tra gói tập
+                    Xác nhận Hội viên đến phòng tập, kiểm tra gói tập
                     và quản lý lịch sử ra vào.
                 </p>
             </div>
 
             <div th:if="${success}" class="alert alert-success"
-                 th:text="${success}"></div>
+                 th:text="${success}" data-uf-label></div>
             <div th:if="${error}" class="alert alert-danger"
-                 th:text="${error}"></div>
+                 th:text="${error}" data-uf-label></div>
 
             <div class="surface-card p-3 p-md-4 mb-4">
-                <h5 class="fw-bold mb-3">Quét QR Check-in / Check-out</h5>
+                <h5 class="fw-bold mb-3">Quét Quét QR vào tập / ra về</h5>
                 <form th:action="@{/admin/checkins/qr}" method="post" id="qr-checkin-form" class="row g-3">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     <div class="col-12 col-xl-5">
                         <label class="form-label" for="qr-branch">Chi nhánh xác nhận vào / ra</label>
                         <select id="qr-branch" name="branchId" class="form-select" required>
                             <option value="">-- Chọn chi nhánh --</option>
-                            <option th:each="branch : ${branches}" th:value="${branch.id}" th:text="${branch.name}"></option>
+                            <option th:each="branch : ${branches}" th:value="${branch.id}" th:text="${@membershipDisplay.name(branch.name)}"></option>
                         </select>
                     </div>
                     <div class="col-12 col-xl-5">
                         <label class="form-label" for="qr-token">Mã QR đã quét / nhập tại quầy</label>
                         <input id="qr-token" name="qrToken" class="form-control" required maxlength="60" autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="qr-token-help">
-                        <div id="qr-token-help" class="form-text">Dán QR Check-in hoặc Check-out của Member. Backend xác định thao tác từ token; mã có hiệu lực 120 giây và dùng một lần.</div>
+                        <div id="qr-token-help" class="form-text">Dán QR vào tập hoặc Ra về của Hội viên. Backend xác định thao tác từ token; mã có hiệu lực 120 giây và dùng một lần.</div>
                     </div>
                     <div class="col-12 col-xl-2 d-flex align-items-end">
                         <button type="submit" class="btn btn-success w-100">Xác nhận QR</button>
@@ -47,24 +47,24 @@
                     <button type="button" id="qr-camera-stop" class="btn btn-outline-secondary" hidden>Dừng camera</button>
                 </div>
                 <p id="qr-camera-status" role="status" aria-live="polite" class="mt-2">Chọn chi nhánh rồi mở camera. Hình ảnh được đọc ngay trên thiết bị, không tải lên máy chủ.</p>
-                <video id="qr-camera" playsinline autoplay muted hidden aria-label="Camera quét QR Check-in"></video>
+                <video id="qr-camera" playsinline autoplay muted hidden aria-label="Camera quét QR vào tập"></video>
                 <div class="mt-3">
                     <label for="qr-image" class="form-label">Dự phòng: đọc QR từ ảnh trên thiết bị</label>
                     <input id="qr-image" class="form-control" type="file" accept="image/*" aria-describedby="qr-image-help">
-                    <div id="qr-image-help" class="form-text">Ảnh tối đa 10 MB, xử lý cục bộ. Nếu không đọc được, dán mã ở ô trên hoặc dùng Check-in Member bên dưới.</div>
+                    <div id="qr-image-help" class="form-text">Ảnh tối đa 10 MB, xử lý cục bộ. Nếu không đọc được, dán mã ở ô trên hoặc dùng Vào tập Hội viên bên dưới.</div>
                 </div>
             </div>
             <script th:src="@{/vendor/jsqr/jsQR-1.4.0.js}" defer></script>
             <script th:src="@{/js/qr-scanner.js}" defer></script>
 
             <div class="surface-card p-3 p-md-4 mb-4">
-                <h5 class="fw-bold mb-3">Check-in Member</h5>
+                <h5 class="fw-bold mb-3">Vào tập Hội viên</h5>
                 <form th:action="@{/admin/checkins}" method="post"
                       class="row g-3">
                     <input type="hidden" th:name="${_csrf.parameterName}"
                            th:value="${_csrf.token}">
                     <div class="col-12 col-xl-5">
-                        <label class="form-label">Email Member</label>
+                        <label class="form-label">Email Hội viên</label>
                         <input type="email" name="email" required
                                class="form-control"
                                placeholder="member@gmail.com">
@@ -80,14 +80,14 @@
                     </div>
                     <div class="col-12 col-xl-2 d-flex align-items-end">
                         <button class="btn btn-success w-100" type="submit">
-                            <i class="bi bi-check-circle"></i> Check-in
+                            <i class="bi bi-check-circle"></i> Vào tập
                         </button>
                     </div>
                 </form>
             </div>
 
             <div class="surface-card p-3 p-md-4">
-                <h5 class="fw-bold mb-3">Lịch sử Check-in</h5>
+                <h5 class="fw-bold mb-3">Lịch sử Vào tập</h5>
 
                 <form method="get" th:action="@{/admin/checkins}"
                       class="row g-2 mb-4">
@@ -113,10 +113,10 @@
                         <select name="open" class="form-select">
                             <option value="">Tất cả</option>
                             <option value="true" th:selected="${open == true}">
-                                Chưa checkout
+                                Chưa ra về
                             </option>
                             <option value="false" th:selected="${open == false}">
-                                Đã checkout
+                                Đã ra về
                             </option>
                         </select>
                     </div>
@@ -129,8 +129,8 @@
                     <table class="table table-hover align-middle">
                         <thead>
                         <tr>
-                            <th>ID</th><th>Member</th><th>Chi nhánh</th>
-                            <th>Check-in</th><th>Checkout</th><th>Thao tác</th>
+                            <th>ID</th><th>Hội viên</th><th>Chi nhánh</th>
+                            <th>Vào tập</th><th>Ra về</th><th>Thao tác</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -141,7 +141,7 @@
                                 <div class="small text-muted"
                                      th:text="${c.user.email}"></div>
                             </td>
-                            <td th:text="${c.branch.name}"></td>
+                            <td th:text="${@membershipDisplay.name(c.branch.name)}"></td>
                             <td th:text="${#temporals.format(c.checkInAt,
                                                'dd/MM/yyyy HH:mm')}"></td>
                             <td th:text="${c.checkOutAt == null ? 'Chưa checkout' :
@@ -157,7 +157,7 @@
                                     <button type="submit"
                                             class="btn btn-outline-danger btn-sm"
                                             onclick="return confirm('Xác nhận checkout?')">
-                                        Checkout
+                                        Ra về
                                     </button>
                                 </form>
                                 <span th:if="${c.checkOutAt != null}"
@@ -168,7 +168,7 @@
                         </tr>
                         <tr th:if="${checkinPage.empty}">
                             <td colspan="6" class="text-center text-muted py-4">
-                                Chưa có dữ liệu check-in.
+                                Chưa có dữ liệu vào tập.
                             </td>
                         </tr>
                         </tbody>

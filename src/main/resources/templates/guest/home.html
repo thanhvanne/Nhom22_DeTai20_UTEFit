@@ -5,7 +5,7 @@
 <head th:replace="~{fragments/head :: head('UTEFit - Fitness Center')}">
 </head>
 
-<body>
+<body class="uf-theme uf-area-guest uf-page-guest-home">
 
 <header th:replace="~{fragments/header :: header}">
 </header>
@@ -15,7 +15,7 @@
     <section id="gioi-thieu" class="hero-section">
         <div class="container hero-content">
 
-            <span class="eyebrow">UTEFIT FITNESS CENTER</span>
+            <span class="eyebrow">UTEFIT Trung tâm thể hình</span>
 
             <h1 class="hero-title mt-4">
                 Bắt đầu hành trình
@@ -44,9 +44,9 @@
             </div>
 
             <div class="hero-features">
-                <span>ĐA DẠNG CHƯƠNG TRÌNH</span>
-                <span>NHIỀU CHI NHÁNH</span>
-                <span>HUẤN LUYỆN CÙNG PT</span>
+                <span>Nhiều chương trình tập</span>
+                <span>Nhiều chi nhánh</span>
+                <span>Đồng hành cùng huấn luyện viên</span>
             </div>
         </div>
     </section>
@@ -55,7 +55,7 @@
         <div class="container">
 
             <div class="section-heading">
-                <span class="eyebrow">OUR LOCATIONS</span>
+                <span class="eyebrow">Không gian tập luyện</span>
                 <h2>Chi nhánh <span>UTEFit</span></h2>
                 <p>
                     Tìm không gian luyện tập phù hợp
@@ -72,7 +72,7 @@
 
                         <div class="program-icon">◆</div>
 
-                        <h3 th:text="${b.name}">Chi nhánh</h3>
+                        <h3 th:text="${b.name}" data-uf-label>Chi nhánh</h3>
 
                         <p th:text="${b.address}">
                             Địa chỉ chi nhánh
@@ -108,7 +108,7 @@
         <div class="container">
 
             <div class="section-heading">
-                <span class="eyebrow">MEMBERSHIP PLANS</span>
+                <span class="eyebrow">Gói tập</span>
                 <h2>Gói tập <span>linh hoạt</span></h2>
                 <p>
                     Lựa chọn thời hạn và mức giá
@@ -124,10 +124,10 @@
                     <div class="pricing-card">
 
                         <span class="pricing-label">
-                            UTEFIT MEMBERSHIP
+                            Gói tập UTEFit
                         </span>
 
-                        <h3 th:text="${p.name}">Tên gói</h3>
+                        <h3 th:text="${@membershipDisplay.name(p.name)}" data-uf-label>Tên gói</h3>
 
                         <p th:text="${p.description}">
                             Mô tả gói tập
@@ -135,15 +135,14 @@
 
                         <h3 class="mt-4"
                             style="color:#ff326b"
-                            th:text="${p.price} + ' VND'">
+                            th:text="${@membershipDisplay.money(p.price)}" data-uf-label>
                             0 VND
                         </h3>
 
                         <div class="pricing-status">
-                            <span th:text="${p.durationDays}">
+                            <span th:text="${p.durationDescription}">
                                 30
                             </span>
-                            ngày
                         </div>
 
                         <a class="btn btn-brand w-100 mt-4"
@@ -175,7 +174,7 @@
         <div class="container">
 
             <div class="section-heading">
-                <span class="eyebrow">FITNESS CLASSES</span>
+                <span class="eyebrow">Lớp tập</span>
                 <h2>Khám phá <span>lớp tập</span></h2>
                 <p>
                     Lựa chọn lớp tập theo mục tiêu,
@@ -196,7 +195,7 @@
                         </span>
 
                         <h3 class="mt-3"
-                            th:text="${c.name}">
+                            th:text="${c.name}" data-uf-label>
                             Tên lớp
                         </h3>
 
@@ -206,7 +205,7 @@
 
                         <p>
                             Chi nhánh:
-                            <strong th:text="${c.branchName}">
+                            <strong th:text="${@membershipDisplay.name(c.branchName)}">
                                 UTEFit
                             </strong>
                         </p>
@@ -266,7 +265,7 @@
                            th:text="|${r.rating} / 5 sao|">
                         </p>
 
-                        <h3 th:text="${r.branch}"></h3>
+                        <h3 th:text="${r.branch}" data-uf-label></h3>
 
                         <p th:if="${r.trainer != null}"
                            th:text="|PT: ${r.trainer}|">

@@ -1,10 +1,34 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/head :: head('Chuyển khoản VietQR - UTEFit')}"></head>
-<body>
+<body class="uf-theme uf-area-member uf-page-member-sepay-checkout">
+<link rel="stylesheet" th:href="@{/css/sepay-checkout.css}">
 <header th:replace="~{fragments/header :: header}"></header>
-<main class="container ut-page" id="sepay-checkout" th:attr="data-status-url=@{/member/payments/{id}/sepay/status(id=${order.id})},data-expires-at=${order.expiresAt}">
+<main class="container ut-page" id="sepay-checkout" th:attr="data-status-url=@{/member/payments/{id}/sepay/status(id=${order.id})},data-expires-at=${order.expiresAt},data-display-state=${order.displayState},data-period-state=${order.membership.periodState},data-membership-status=${order.membershipStatus}">
+    <section th:if="${order.displayState == 'PAID'}" class="ut-panel sepay-success" id="sepay-success" aria-labelledby="sepay-success-title">
+        <div class="sepay-success-icon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="m12 24 8 8 16-17" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <p class="sepay-eyebrow">UTEFIT · THANH TOÁN ĐÃ XÁC NHẬN</p>
+        <h1 id="sepay-success-title">Thanh toán thành công!</h1>
+        <p>Hệ thống đã ghi nhận khoản thanh toán của bạn. Không cần chuyển thêm tiền cho đơn này.</p>
+        <div class="sepay-paid-amount" th:text="${@membershipDisplay.money(order.amount)}"></div>
+        <div class="sepay-period-note" th:switch="${order.membership.periodState}">
+            <p th:case="'FUTURE'">Kỳ tập đã thanh toán, chưa bắt đầu. Quyền lợi có hiệu lực từ <strong th:text="${#temporals.format(order.membership.startDate, 'dd/MM/yyyy')}"></strong>; thời hạn đã thanh toán trước đó được bảo toàn.</p>
+            <p th:case="'CURRENT'">Gói đang hiệu lực — bạn đã sẵn sàng tập luyện!</p>
+            <p th:case="'EXPIRED'">Khoản thanh toán đã được ghi nhận. Kỳ tập này hiện đã hết hạn.</p>
+            <p th:case="*">Khoản thanh toán đã được ghi nhận. Gói chưa ở trạng thái sử dụng hiện tại; xem Gói tập của tôi hoặc liên hệ quản trị viên để kiểm tra.</p>
+        </div>
+        <div class="sepay-actions">
+            <a class="btn btn-brand" th:href="@{/member/memberships}">Gói tập của tôi</a>
+            <a class="btn btn-outline-warning" th:href="@{/member/classes}">Đăng ký lớp tập</a>
+            <a class="btn btn-outline-light" th:href="@{/member/qr-checkin}">QR vào tập</a>
+        </div>
+    </section>
+    <section th:if="${order.displayState == 'PENDING'}" id="sepay-transfer">
     <h1 class="ut-page-title">Chuyển khoản VietQR</h1>
+    <div th:if="${order.legacyTransferBlocked}" class="alert alert-danger" role="alert">
+        Đơn cũ chưa có snapshot tài khoản ảo (VA). Không chuyển thêm tiền hoặc dùng lại mã này.
+        Liên hệ quản trị viên đối soát khoản đã chuyển; cấu hình VA mới không thay đổi tài khoản của đơn cũ.
+    </div>
     <div th:if="${order.testMode}" class="alert alert-warning">
         <strong>SEPAY TEST MODE — KHÔNG CHUYỂN TIỀN THẬT.</strong>
         Chỉ mô phỏng giao dịch trong SePay Test mode bằng tài khoản Test, mã và số tiền bên dưới.
@@ -26,19 +50,44 @@
                     <dt class="col-sm-4">Môi trường</dt><dd class="col-sm-8" th:text="${order.environment}"></dd>
                     <dt class="col-sm-4">Ngân hàng</dt><dd class="col-sm-8" th:text="${order.bankCode}"></dd>
                     <dt class="col-sm-4">Chủ tài khoản</dt><dd class="col-sm-8" th:text="${order.accountName}"></dd>
-                    <dt class="col-sm-4">Số tài khoản</dt><dd class="col-sm-8" th:text="${order.accountNumber}"></dd>
-                    <dt class="col-sm-4">Số tiền (VND)</dt><dd class="col-sm-8"><span id="sepay-amount" th:text="${order.amount.toBigIntegerExact()}"></span> <button type="button" class="btn btn-sm btn-outline-warning" data-copy="sepay-amount">Sao chép số tiền</button></dd>
-                    <dt class="col-sm-4">Nội dung</dt><dd class="col-sm-8"><strong id="sepay-reference" th:text="${order.reference}"></strong> <button type="button" class="btn btn-sm btn-outline-warning" data-copy="sepay-reference">Sao chép nội dung</button></dd>
-                    <dt class="col-sm-4">Payment</dt><dd class="col-sm-8" id="sepay-payment-status" th:text="${order.status}"></dd>
-                    <dt class="col-sm-4">Membership</dt><dd class="col-sm-8" id="sepay-membership-status" th:text="${order.membershipStatus}"></dd>
+                    <dt class="col-sm-4" th:text="${order.virtualAccount ? 'Tài khoản ảo (VA) nhận tiền' : 'Số tài khoản nhận'}"></dt>
+                    <dd class="col-sm-8" th:text="${order.accountNumber ?: 'Không khả dụng — cần đối soát, không chuyển thêm'}"></dd>
+                    <dt class="col-sm-4">Số tiền</dt><dd class="col-sm-8"><span th:text="${@membershipDisplay.money(order.amount)}"></span><span id="sepay-amount" class="visually-hidden" th:text="${order.amount.toBigIntegerExact()}" data-uf-money></span> <button type="button" class="btn btn-sm btn-outline-warning" data-copy="sepay-amount" th:disabled="${order.legacyTransferBlocked}">Sao chép số tiền</button></dd>
+                    <dt class="col-sm-4">Nội dung</dt><dd class="col-sm-8"><strong id="sepay-reference" th:text="${order.reference}"></strong> <button type="button" class="btn btn-sm btn-outline-warning" data-copy="sepay-reference" th:disabled="${order.legacyTransferBlocked}">Sao chép nội dung</button></dd>
                 </dl>
-                <p id="sepay-message" role="status">Đang đọc trạng thái từ backend. Nút kiểm tra không xác nhận thanh toán.</p>
-                <button id="sepay-refresh" class="btn btn-brand" type="button">Kiểm tra trạng thái</button>
-                <a class="btn btn-outline-warning" th:href="@{/member/memberships}">Membership của tôi</a>
-                <p class="small mt-3">Nếu chuyển thiếu/thừa, sai nội dung, chuyển trùng hoặc quá hạn: liên hệ Admin để đối soát. Tiền vào bất thường không tự kích hoạt gói và không bị xóa khỏi lịch sử kỹ thuật.</p>
+                <a class="btn btn-outline-warning" th:href="@{/member/memberships}">Gói tập của tôi</a>
+                <p class="small mt-3">Nếu chuyển thiếu/thừa, sai nội dung, chuyển trùng hoặc quá hạn: liên hệ quản trị viên để đối soát. Tiền vào bất thường không tự kích hoạt gói và không bị xóa khỏi lịch sử kỹ thuật.</p>
             </div>
         </section>
     </div>
+    </section>
+    <section th:if="${order.displayState != 'PENDING' and order.displayState != 'PAID'}" class="ut-panel" th:switch="${order.displayState}">
+        <div th:case="'REVIEW'"><h1>Thanh toán đang chờ đối soát</h1><p>Giao dịch cần quản trị viên kiểm tra với ngân hàng trước khi xác nhận. Không chuyển thêm tiền; cung cấp mã Giao dịch khi liên hệ quầy.</p></div>
+        <div th:case="'EXPIRED'"><h1>Đã hết hạn thanh toán</h1><p>Không chuyển khoản cho mã này. Nếu bạn đã chuyển tiền, liên hệ quản trị viên đối soát. Hệ thống vẫn tiếp nhận kết quả xác minh hợp lệ từ backend.</p></div>
+        <div th:case="'CANCEL_REQUESTED'"><h1>Đang yêu cầu hủy</h1><p>Chờ quản trị viên xử lý. Không chuyển tiền vào mã đơn này; khoản đã chuyển cần đối soát riêng.</p></div>
+        <div th:case="'CANCELLED'"><h1>Đã hủy đơn chờ thanh toán</h1><p>Bạn có thể mua gói khác. Không chuyển tiền vào mã cũ. Hủy đơn không phải xác nhận hoàn tiền; tiền đến muộn sẽ được ghi nhận để đối soát.</p></div>
+        <div th:case="'REFUNDED'"><h1>Khoản thanh toán đã hoàn tiền</h1><p>Hệ thống đã ghi nhận việc hoàn tiền. Quyền sử dụng gói tuân theo trạng thái Gói tập hiện tại.</p></div>
+        <div th:case="*"><h1>Thanh toán không thành công</h1><p>Đơn này không còn chờ thanh toán. Không chuyển thêm tiền; liên hệ quản trị viên nếu ngân hàng đã ghi nhận tiền vào.</p></div>
+        <a class="btn btn-brand" th:href="@{/member/memberships}">Gói tập của tôi</a>
+    </section>
+    <section class="ut-panel sepay-summary mt-4" aria-labelledby="sepay-summary-title">
+        <h2 id="sepay-summary-title" class="h4">Thông tin đơn và gói tập</h2>
+        <dl class="sepay-details">
+            <dt>Mã Giao dịch</dt><dd><strong th:text="${'#' + order.id}"></strong> · <span th:text="${order.reference}"></span></dd>
+            <dt>Số tiền</dt><dd th:text="${@membershipDisplay.money(order.amount)}"></dd>
+            <dt>Gói tập</dt><dd th:text="${@membershipDisplay.name(order.membership.planName)}"></dd>
+            <dt>Chi nhánh đăng ký</dt><dd th:text="${@membershipDisplay.name(order.membership.branchName)}"></dd>
+            <dt>Quyền lợi</dt><dd th:text="${@membershipDisplay.benefit(order.membership.benefit)}" data-uf-label></dd>
+            <dt>Phạm vi sử dụng</dt><dd th:text="${order.membership.scope}" data-uf-label></dd>
+            <dt th:text="${order.membership.renewal ? 'Thời hạn kỳ gia hạn' : 'Thời hạn gói'}"></dt><dd th:text="${order.membership.durationDescription}"></dd>
+            <dt>Ngày bắt đầu</dt><dd th:text="${order.membership.startDate != null ? #temporals.format(order.membership.startDate, 'dd/MM/yyyy') : 'Chưa xác lập'}"></dd>
+            <dt>Ngày hết hạn kỳ này</dt><dd th:text="${order.membership.endDate != null ? #temporals.format(order.membership.endDate, 'dd/MM/yyyy') : 'Chưa xác lập'}"></dd>
+            <dt>Thanh toán</dt><dd id="sepay-payment-status" th:text="${@membershipDisplay.paymentStatus(order.status)}" data-uf-label></dd>
+            <dt>Gói tập</dt><dd id="sepay-membership-status" th:text="${order.membershipStatus}"></dd>
+        </dl>
+        <p id="sepay-message" role="status">Trạng thái được xác định từ hệ thống. Kiểm tra trạng thái không xác nhận thanh toán hoặc gia hạn thêm.</p>
+        <button id="sepay-refresh" class="btn btn-outline-light" type="button">Kiểm tra trạng thái</button>
+    </section>
 </main>
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 <div th:replace="~{fragments/scripts :: scripts}"></div>

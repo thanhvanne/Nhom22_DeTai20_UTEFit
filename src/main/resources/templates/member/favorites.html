@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/head :: head('Yêu thích - UTEFit')}"></head>
-<body>
+<body class="uf-theme uf-area-member uf-page-member-favorites">
 <header th:replace="~{fragments/header :: header}"></header>
 <main class="container ut-page">
     <h1 class="ut-page-title">Yêu thích của tôi</h1>
     <p class="ut-subtitle">Lưu để tìm lại nhanh. Yêu thích không phải đăng ký lớp hoặc gửi yêu cầu PT.</p>
-    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
-    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+    <div class="alert alert-success" th:if="${success}" th:text="${success}" data-uf-label></div>
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}" data-uf-label></div>
     <p th:if="${favorites.empty}">Bạn chưa lưu mục yêu thích nào.</p>
     <div class="row g-3">
         <div class="col-md-4" th:each="favorite : ${favorites}">
             <article class="ut-panel h-100">
                 <small th:text="${favorite.type}"></small>
-                <h3 th:text="${favorite.name}"></h3>
+                <h3 th:text="${favorite.name}" data-uf-label></h3>
                 <a class="btn btn-brand btn-sm" th:if="${favorite.available}" th:href="${favorite.url}">Mở mục đã lưu</a>
                 <p th:unless="${favorite.available}" class="text-warning">Không còn hoạt động hoặc đã được gỡ.</p>
                 <form class="mt-2" method="post" th:action="@{/member/favorites/{id}/remove(id=${favorite.id})}">

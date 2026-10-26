@@ -6,7 +6,7 @@
 <head th:replace="~{fragments/head :: head('Yêu cầu từ học viên - UTEFit')}">
 </head>
 
-<body>
+<body class="uf-theme uf-area-pt uf-page-pt-trainer-requests">
 
 <header th:replace="~{fragments/header :: header}">
 </header>
@@ -20,11 +20,11 @@
         </h1>
 
         <div th:if="${successMessage}" class="alert alert-success">
-            <span th:text="${successMessage}"></span>
+            <span th:text="${successMessage}" data-uf-label></span>
         </div>
 
         <div th:if="${errorMessage}" class="alert alert-danger">
-            <span th:text="${errorMessage}"></span>
+            <span th:text="${errorMessage}" data-uf-label></span>
         </div>
 
         <div class="card shadow-sm border-0">
@@ -68,7 +68,7 @@
                                     <span class="badge rounded-pill"
                                           th:classappend="${req.status.name() == 'PENDING'} ? ' bg-warning text-dark' :
                                                           (${req.status.name() == 'ACCEPTED'} ? ' bg-success' : ' bg-secondary')"
-                                          th:text="${req.status}">
+                                          th:text="${req.status}" data-uf-label>
                                         PENDING
                                     </span>
                                 </td>

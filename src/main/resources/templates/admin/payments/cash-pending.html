@@ -6,7 +6,7 @@
 <head th:replace="~{admin/fragments/layout :: head('Duyệt thanh toán CASH')}">
 </head>
 
-<body>
+<body class="uf-theme uf-area-admin uf-page-admin-payments-cash-pending">
 
 <div class="d-flex">
 
@@ -28,7 +28,7 @@
                 </span>
 
                 <h2 class="fw-bold mb-2">
-                    Xác nhận thanh toán CASH
+                    Xác nhận thanh toán tiền mặt
                 </h2>
 
                 <p class="mb-0 text-white-50">
@@ -40,12 +40,12 @@
 
             <div th:if="${success}"
                  class="alert alert-success"
-                 th:text="${success}">
+                 th:text="${success}" data-uf-label>
             </div>
 
             <div th:if="${error}"
                  class="alert alert-danger"
-                 th:text="${error}">
+                 th:text="${error}" data-uf-label>
             </div>
 
             <div class="surface-card p-4">
@@ -71,7 +71,7 @@
                         <thead>
                         <tr>
                             <th>Mã GD</th>
-                            <th>Email Member</th>
+                            <th>Email Hội viên</th>
                             <th>Gói tập</th>
                             <th>Chi nhánh</th>
                             <th>Số tiền</th>
@@ -92,16 +92,16 @@
                                 member@example.com
                             </td>
 
-                            <td th:text="${p.planName}">
+                            <td th:text="${@membershipDisplay.name(p.planName)}">
                                 Gói tập
                             </td>
 
-                            <td th:text="${p.branchName}">
+                            <td th:text="${@membershipDisplay.name(p.branchName)}">
                                 Chi nhánh
                             </td>
 
                             <td class="fw-bold"
-                                th:text="${p.amount} + ' VND'">
+                                th:text="${@membershipDisplay.money(p.amount)}">
                                 0 VND
                             </td>
 
@@ -138,7 +138,7 @@
                 <div th:if="${#lists.isEmpty(payments)}"
                      class="text-center text-secondary py-5">
 
-                    Hiện không có giao dịch CASH
+                    Hiện không có giao dịch tiền mặt
                     đang chờ xác nhận.
 
                 </div>

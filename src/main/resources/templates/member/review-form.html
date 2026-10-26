@@ -3,7 +3,7 @@
 
 <head th:replace="~{fragments/head :: head('Viết đánh giá - UTEFit')}"></head>
 
-<body>
+<body class="uf-theme uf-area-member uf-page-member-review-form">
 <header th:replace="~{fragments/header :: header}"></header>
 
 <main class="container ut-page">
@@ -18,7 +18,7 @@
         <h1 class="h3"
             th:text="${editId == null
                 ? 'Viết đánh giá'
-                : 'Chỉnh sửa đánh giá'}">
+                : 'Chỉnh sửa đánh giá'}" data-uf-label>
         </h1>
 
         <p class="ut-subtitle">
@@ -28,7 +28,7 @@
 
         <div class="alert alert-danger"
              th:if="${error}"
-             th:text="${error}">
+             th:text="${error}" data-uf-label>
         </div>
 
         <form method="post"
@@ -181,7 +181,7 @@
             <div class="mb-3">
                 <label for="video" class="form-label">Video trải nghiệm (không bắt buộc)</label>
                 <input class="form-control" id="video" name="video" type="file" accept="video/mp4,video/webm" data-max-bytes="52428800" aria-describedby="review-video-help review-video-error">
-                <small id="review-video-help" class="ut-subtitle">MP4/WebM, tối đa 50 MiB (52.428.800 byte) mỗi video. Ảnh vẫn tối đa 5 MiB. Server kiểm tra nội dung file.</small>
+                <small id="review-video-help" class="ut-subtitle">MP4/WebM, tối đa 50 MiB (52.428.800 byte) mỗi video. Ảnh vẫn tối đa 5 MiB. Server kiểm tra nội dung tệp.</small>
                 <p id="review-video-error" class="text-danger small" role="alert"></p>
                 <video th:if="${currentVideo != null}" th:src="${currentVideo}" controls preload="none" class="w-100 rounded mt-2" style="max-height:320px"></video>
                 <label th:if="${currentVideo != null}" class="d-block mt-2"><input type="checkbox" th:field="*{removeVideo}"> Xóa video hiện tại</label>

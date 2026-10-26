@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/head :: head('Thời khóa biểu huấn luyện viên - UTEFit')}"></head>
-<body class="ut-week-page">
+<body class="ut-week-page uf-theme uf-area-pt uf-page-pt-classes-list">
 <header th:replace="~{fragments/header :: header}"></header>
 <main class="container-fluid ut-week-wrap">
     <div class="ut-week-heading">
-        <div><p class="ut-week-kicker">UTEFIT · PERSONAL TRAINER</p>
+        <div><p class="ut-week-kicker">UTEFIT · Huấn luyện viên cá nhân</p>
             <h1>Thời khóa biểu <span>huấn luyện viên</span></h1>
             <p>Lịch lớp nhóm và PT 1:1 theo từng ngày trong tuần.</p></div>
         <a class="btn btn-brand" th:href="@{/pt/personal-schedules}">Quản lý lịch PT 1:1</a>
@@ -30,9 +30,9 @@
                          th:classappend="${slot.kind == 'PT'} ? ' is-pt' : ' is-class'">
                     <span class="ut-week-type" th:text="${slot.kind == 'PT' ? 'PT 1:1' : 'Lớp nhóm'}">Lớp</span>
                     <time th:text="|${#temporals.format(slot.start,'HH:mm')}–${#temporals.format(slot.end,'HH:mm')}|">18:00–19:00</time>
-                    <h3 th:text="${slot.title}">Tên lớp</h3>
+                    <h3 th:text="${slot.title}" data-uf-label>Tên lớp</h3>
                     <p th:text="${slot.detail}">Chi tiết</p>
-                    <small th:text="${slot.status}">Trạng thái</small>
+                    <small th:text="${slot.status}" data-uf-label>Trạng thái</small>
                     <div class="ut-week-actions">
                         <a th:if="${slot.detailUrl != null}" th:href="${slot.detailUrl}">Chi tiết</a>
                         <form th:if="${slot.cancelUrl != null}" method="post" th:action="${slot.cancelUrl}"
@@ -51,7 +51,7 @@
             </div>
         </section>
     </div>
-    <p class="ut-week-note">PT chỉ hủy buổi 1:1 chưa bắt đầu hoặc xác nhận hoàn thành khi đủ điều kiện. Lớp nhóm do Admin quản lý; xem chi tiết để điểm danh.</p>
+    <p class="ut-week-note">PT chỉ hủy buổi 1:1 chưa bắt đầu hoặc xác nhận hoàn thành khi đủ điều kiện. Lớp nhóm do quản trị viên quản lý; xem chi tiết để điểm danh.</p>
 </main>
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 <div th:replace="~{fragments/scripts :: scripts}"></div>

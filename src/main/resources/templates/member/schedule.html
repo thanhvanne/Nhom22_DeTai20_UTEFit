@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/head :: head('Thời khóa biểu hội viên - UTEFit')}"></head>
-<body class="ut-week-page">
+<body class="ut-week-page uf-theme uf-area-member uf-page-member-schedule">
 <header th:replace="~{fragments/header :: header}"></header>
 <main class="container-fluid ut-week-wrap">
     <div class="ut-week-heading">
@@ -30,9 +30,9 @@
                          th:classappend="${slot.kind == 'PT'} ? ' is-pt' : ' is-class'">
                     <span class="ut-week-type" th:text="${slot.kind == 'PT' ? 'PT 1:1' : 'Lớp nhóm'}">Lớp</span>
                     <time th:text="|${#temporals.format(slot.start,'HH:mm')}–${#temporals.format(slot.end,'HH:mm')}|">18:00–19:00</time>
-                    <h3 th:text="${slot.title}">Tên lớp</h3>
+                    <h3 th:text="${slot.title}" data-uf-label>Tên lớp</h3>
                     <p th:text="${slot.detail}">Chi tiết</p>
-                    <small th:text="${slot.status}">Trạng thái</small>
+                    <small th:text="${slot.status}" data-uf-label>Trạng thái</small>
                     <div class="ut-week-actions">
                         <a th:if="${slot.detailUrl != null}" th:href="${slot.detailUrl}">Chi tiết</a>
                         <form th:if="${slot.cancelUrl != null}" method="post" th:action="${slot.cancelUrl}"
@@ -51,7 +51,7 @@
             </div>
         </section>
     </div>
-    <p class="ut-week-note">Member chỉ hủy được lớp chưa bắt đầu; không được xóa lịch đã học.</p>
+    <p class="ut-week-note">Hội viên chỉ hủy được lớp chưa bắt đầu; không được xóa lịch đã học.</p>
 </main>
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 <div th:replace="~{fragments/scripts :: scripts}"></div>

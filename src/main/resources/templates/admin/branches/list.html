@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/layout :: head('Quản lý Chi nhánh')}"></head>
-<body>
+<body class="uf-theme uf-area-admin uf-page-admin-branches-list">
 <div class="d-flex">
     <div th:replace="~{admin/fragments/layout :: sidebar}"></div>
 
@@ -10,11 +10,11 @@
 
         <main class="container-fluid px-4 pb-5">
             <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm rounded-4 border-0">
-                <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}"></span>
+                <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}" data-uf-label></span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
             <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm rounded-4 border-0">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${errorMessage}"></span>
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${errorMessage}" data-uf-label></span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
 

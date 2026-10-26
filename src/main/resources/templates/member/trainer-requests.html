@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/head :: head('Yêu cầu PT của tôi - UTEFit')}"></head>
-<body>
+<body class="uf-theme uf-area-member uf-page-member-trainer-requests">
 <header th:replace="~{fragments/header :: header}"></header>
 <main class="container py-5">
     <div class="d-flex justify-content-between flex-wrap gap-3 align-items-center mb-4">
@@ -11,8 +11,8 @@
         </div>
         <a th:href="@{/trainers}" class="btn btn-primary">Tìm PT</a>
     </div>
-    <div class="alert alert-success" th:if="${successMessage}" th:text="${successMessage}"></div>
-    <div class="alert alert-danger" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+    <div class="alert alert-success" th:if="${successMessage}" th:text="${successMessage}" data-uf-label></div>
+    <div class="alert alert-danger" th:if="${errorMessage}" th:text="${errorMessage}" data-uf-label></div>
     <div class="table-responsive bg-white rounded shadow-sm p-3">
         <table class="table table-striped align-middle">
             <thead><tr>
@@ -28,7 +28,7 @@
                 <td th:text="${req.message ?: '—'}"></td>
                 <td>
                     <span class="badge" th:text="${req.status}"
-                          th:classappend="${req.status.name() == 'ACCEPTED'} ? ' bg-success' : (${req.status.name() == 'PENDING'} ? ' bg-warning text-dark' : ' bg-secondary')"></span>
+                          th:classappend="${req.status.name() == 'ACCEPTED'} ? ' bg-success' : (${req.status.name() == 'PENDING'} ? ' bg-warning text-dark' : ' bg-secondary')" data-uf-label></span>
                 </td>
                 <td th:text="${#temporals.format(req.requestedAt, 'dd/MM/yyyy HH:mm')}"></td>
                 <td th:text="${req.respondedAt != null ? #temporals.format(req.respondedAt, 'dd/MM/yyyy HH:mm') : '—'}"></td>

@@ -5,7 +5,7 @@
 <head th:replace="~{fragments/head :: head('Hồ sơ PT - UTEFit')}">
 </head>
 
-<body>
+<body class="uf-theme uf-area-pt uf-page-pt-profile-detail">
 
 <header th:replace="~{fragments/header :: header}"></header>
 
@@ -21,12 +21,12 @@
             <!-- Hiển thị Avatar PT -->
             <div class="mb-3">
                 <img th:src="${trainer.user.avatarUrl != null ? trainer.user.avatarUrl : 'https://via.placeholder.com/150'}"
-                     alt="Avatar PT"
+                     alt="Ảnh huấn luyện viên"
                      class="rounded-circle img-thumbnail shadow-sm"
                      style="width: 130px; height: 130px; object-fit: cover;">
             </div>
 
-            <h3 th:text="${trainer.user.firstName + ' ' + trainer.user.lastName}">
+            <h3 th:text="${trainer.user.firstName + ' ' + trainer.user.lastName}" data-uf-label>
                 Trainer Name
             </h3>
 

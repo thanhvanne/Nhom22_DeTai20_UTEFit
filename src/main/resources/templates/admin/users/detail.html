@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/layout :: head('Chi tiết Người dùng')}"></head>
-<body>
+<body class="uf-theme uf-area-admin uf-page-admin-users-detail">
 <div class="d-flex">
     <div th:replace="~{admin/fragments/layout :: sidebar}"></div>
 
@@ -19,16 +19,16 @@
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
                         <img th:src="${user.avatarUrl != null and !#strings.isEmpty(user.avatarUrl) ? user.avatarUrl : 'https://ui-avatars.com/api/?background=10b981&color=fff&name=' + user.fullName}"
-                             alt="Avatar" class="rounded-circle border shadow-sm me-3" width="76" height="76" style="object-fit: cover;">
+                             alt="Ảnh đại diện" class="rounded-circle border shadow-sm me-3" width="76" height="76" style="object-fit: cover;">
                         <div>
                             <span class="admin-eyebrow">USER PROFILE</span>
-                            <h4 class="fw-bold mb-2 text-dark" th:text="${user.fullName}">Họ tên</h4>
+                            <h4 class="fw-bold mb-2 text-dark" th:text="${user.fullName}" data-uf-label>Họ tên</h4>
                             <span class="badge me-1"
                                   th:classappend="${user.role.name() == 'ADMIN' ? 'bg-danger' : (user.role.name() == 'PT' ? 'bg-warning text-dark' : 'bg-info text-dark')}"
-                                  th:text="${user.role}">ROLE</span>
+                                  th:text="${user.role}" data-uf-label>ROLE</span>
                             <span class="badge"
                                   th:classappend="${user.status.name() == 'ACTIVE' ? 'bg-success' : 'bg-secondary'}"
-                                  th:text="${user.status}">STATUS</span>
+                                  th:text="${user.status}" data-uf-label>STATUS</span>
                         </div>
                     </div>
 
@@ -74,7 +74,7 @@
                                     th:classappend="${user.status.name() == 'LOCKED' ? 'btn-success' : 'btn-outline-danger'}"
                                     onclick="return confirm('Bạn có chắc muốn thay đổi trạng thái khóa tài khoản này?');">
                                 <i class="bi me-1" th:classappend="${user.status.name() == 'LOCKED' ? 'bi-unlock' : 'bi-lock'}"></i>
-                                <span th:text="${user.status.name() == 'LOCKED' ? 'Mở khóa tài khoản này' : 'Khóa tài khoản này'}"></span>
+                                <span th:text="${user.status.name() == 'LOCKED' ? 'Mở khóa tài khoản này' : 'Khóa tài khoản này'}" data-uf-label></span>
                             </button>
                         </form>
                     </div>

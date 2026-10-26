@@ -4,7 +4,7 @@
 
 <head th:replace="~{fragments/head :: head('Chi tiết lịch lớp - UTEFit')}"></head>
 
-<body>
+<body class="uf-theme uf-area-pt uf-page-pt-classes-detail">
 
 <header th:replace="~{fragments/header :: header}"></header>
 
@@ -30,14 +30,14 @@
         <div class="card-body p-4">
 
             <h4 class="fw-semibold mb-3"
-                th:text="${schedule.className}">
+                th:text="${schedule.className}" data-uf-label>
             </h4>
 
             <div class="row mb-3">
                 <div class="col-md-6">
                     <p class="mb-1">
                         <strong>Chi nhánh: </strong>
-                        <span th:text="${schedule.branchName}"></span>
+                        <span th:text="${@membershipDisplay.name(schedule.branchName)}"></span>
                     </p>
                     <p class="mb-1">
                         <strong>Loại lớp: </strong>
@@ -79,8 +79,8 @@
         </div>
     </div>
 
-    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
-    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}" data-uf-label></div>
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}" data-uf-label></div>
 
     <!-- Danh sách học viên -->
     <div class="card shadow-sm border-0">

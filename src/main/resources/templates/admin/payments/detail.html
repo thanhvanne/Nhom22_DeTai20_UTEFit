@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/layout :: head('Chi tiết thanh toán')}"></head>
-<body>
+<body class="uf-theme uf-area-admin uf-page-admin-payments-detail">
 <div class="d-flex">
     <aside th:replace="~{admin/fragments/layout :: sidebar}"></aside>
     <div class="flex-grow-1 min-vh-100" style="min-width:0">
@@ -11,40 +11,54 @@
 
             <div class="admin-hero-banner mb-4">
                 <h2 class="fw-bold"
-                    th:text="|Giao dịch #${payment.id}|"></h2>
+                    th:text="|Giao dịch #${payment.id}|" data-uf-label></h2>
                 <p class="text-white-50 mb-0">
                     Thông tin thanh toán được lấy từ Database.
                 </p>
             </div>
 
+            <div th:if="${success}" class="alert alert-success" th:text="${success}" data-uf-label></div>
+            <div th:if="${error}" class="alert alert-danger" th:text="${error}" data-uf-label></div>
             <div class="surface-card p-4">
+                <p th:if="${payment.membershipId != null}" th:text="|Membership #${payment.membershipId} — ${payment.membershipStatus}|"></p>
+                <p th:if="${payment.needsReview}" class="alert alert-warning">Có giao dịch cần đối soát. Hủy đơn không đồng nghĩa chưa nhận tiền hay đã hoàn tiền. Không được xác nhận PAID bằng thao tác hủy.</p>
+                <p th:if="${payment.cancellationRequestedAt != null}" th:text="|Hội viên yêu cầu hủy lúc: ${payment.cancellationRequestedAt}|"></p>
+                <p th:if="${payment.cancelledAt != null}" th:text="|Đã hủy lúc ${payment.cancelledAt}; người xử lý: ${payment.cancelledBy}. Lý do: ${payment.cancellationReason}|"></p>
+                <pre th:if="${payment.lateGatewayEvidence != null}" class="text-wrap" th:text="${payment.lateGatewayEvidence}"></pre>
+                <form th:if="${payment.status.name() == 'CANCEL_REQUESTED'}" th:action="@{/admin/payments/{id}/approve-cancellation(id=${payment.id})}" method="post" class="border rounded p-3 mb-4">
+                    <h3 class="h5">Xử lý yêu cầu hủy đơn chưa thanh toán</h3>
+                    <p>Đóng mã thanh toán cũ, không kích hoạt gói. Tiền đến muộn vẫn phải đối soát và xử lý hoàn thực tế riêng.</p>
+                    <label class="form-label" for="cancel-reason">Lý do xử lý</label><textarea id="cancel-reason" class="form-control mb-2" name="reason" minlength="10" maxlength="500" required></textarea>
+                    <label class="d-block mb-3"><input type="checkbox" name="reviewed" value="true" required> Đã kiểm tra trạng thái đơn và lịch sử ngân hàng/đối soát; đây không phải xác nhận thu tiền hoặc hoàn tiền.</label>
+                    <button class="btn btn-danger">Duyệt hủy gói chờ</button>
+                </form>
                 <div class="row g-4">
                     <div class="col-md-6">
-                        <div class="text-muted small">Member</div>
+                        <div class="text-muted small">Hội viên</div>
                         <div class="fw-semibold"
                              th:text="${payment.memberEmail}"></div>
                     </div>
                     <div class="col-md-6">
                         <div class="text-muted small">Gói tập</div>
                         <div class="fw-semibold"
-                             th:text="${payment.planName}"></div>
+                             th:text="${@membershipDisplay.name(payment.planName)}"></div>
                     </div>
                     <div class="col-md-6">
                         <div class="text-muted small">Chi nhánh</div>
-                        <div th:text="${payment.branchName}"></div>
+                        <div th:text="${@membershipDisplay.name(payment.branchName)}"></div>
                     </div>
                     <div class="col-md-6">
                         <div class="text-muted small">Số tiền</div>
                         <div class="fs-4 fw-bold text-success"
-                             th:text="|${#numbers.formatDecimal(payment.amount,1,0)} đ|"></div>
+                     th:text="${@membershipDisplay.money(payment.amount)}"></div>
                     </div>
                     <div class="col-md-6">
                         <div class="text-muted small">Phương thức</div>
-                        <div th:text="${payment.method}"></div>
+                        <div th:text="${payment.method}" data-uf-label></div>
                     </div>
                     <div class="col-md-6">
                         <div class="text-muted small">Trạng thái</div>
-                        <div class="fw-bold" th:text="${payment.status}"></div>
+                        <div class="fw-bold" th:text="${payment.status.label}" data-uf-label></div>
                     </div>
                     <div class="col-md-6">
                         <div class="text-muted small">Mã giao dịch</div>
@@ -63,6 +77,8 @@
                     </div>
                 </div>
 
+                <a th:if="${payment.method.name() == 'SEPAY'}" th:href="@{/admin/payments/sepay-reconciliation/{id}(id=${payment.id})}"
+                   class="btn btn-outline-primary mt-4">Đối soát ngân hàng SePay</a>
                 <a th:href="@{/admin/payments}"
                    class="btn btn-outline-secondary mt-4">
                     Quay lại danh sách

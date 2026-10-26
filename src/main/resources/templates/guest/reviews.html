@@ -3,7 +3,7 @@
 
 <head th:replace="~{fragments/head :: head('Đánh giá hội viên - UTEFit')}"></head>
 
-<body>
+<body class="uf-theme uf-area-guest uf-page-guest-reviews">
 <header th:replace="~{fragments/header :: header}"></header>
 
 <main class="container ut-page">
@@ -79,7 +79,7 @@
                     </p>
 
                     <h2 class="h5"
-                        th:text="${r.branch}"></h2>
+                        th:text="${r.branch}" data-uf-label></h2>
 
                     <p class="ut-subtitle"
                        th:if="${r.trainer != null}"

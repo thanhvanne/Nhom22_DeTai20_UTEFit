@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/layout :: head(${isEdit ? 'Cập nhật Lớp tập' : 'Tạo Lớp tập mới'})}"></head>
-<body>
+<body class="uf-theme uf-area-admin uf-page-admin-classes-form">
 <div class="d-flex">
     <div th:replace="~{admin/fragments/layout :: sidebar}"></div>
 
@@ -17,7 +17,7 @@
 
             <div class="surface-card col-lg-8 p-4">
                 <div th:if="${errorMessage}" class="alert alert-danger rounded-3">
-                    <i class="bi bi-exclamation-octagon-fill me-2"></i> <span th:text="${errorMessage}"></span>
+                    <i class="bi bi-exclamation-octagon-fill me-2"></i> <span th:text="${errorMessage}" data-uf-label></span>
                 </div>
 
                 <form th:action="${isEdit ? '/admin/classes/' + classForm.id + '/edit' : '/admin/classes/create'}"
@@ -33,7 +33,7 @@
 
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Chi nhánh tổ chức (Active) <span class="text-danger">*</span></label>
+                            <label class="form-label fw-semibold">Chi nhánh tổ chức (đang hoạt động) <span class="text-danger">*</span></label>
                             <select th:field="*{branchId}" id="branchId" class="form-select"
                                     th:classappend="${#fields.hasErrors('branchId')} ? 'is-invalid'">
                                 <option value="">-- Chọn chi nhánh --</option>
@@ -43,7 +43,7 @@
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Danh mục Loại lớp (Active) <span class="text-danger">*</span></label>
+                            <label class="form-label fw-semibold">Danh mục Loại lớp (đang hoạt động) <span class="text-danger">*</span></label>
                             <select th:field="*{categoryId}" id="categoryId" class="form-select"
                                     th:classappend="${#fields.hasErrors('categoryId')} ? 'is-invalid'">
                                 <option value="">-- Chọn loại lớp --</option>
@@ -55,7 +55,7 @@
 
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Huấn luyện viên phụ trách (PT Active)</label>
+                            <label class="form-label fw-semibold">Huấn luyện viên phụ trách (PT đang hoạt động)</label>
                             <select th:field="*{trainerId}" id="trainerSelect" class="form-select">
                                 <option value="">-- Chưa phân công / Chọn PT --</option>
                                 <option th:each="t : ${trainers}"
@@ -82,7 +82,7 @@
                         <div class="col-md-3">
                             <label class="form-label fw-semibold">Trạng thái lớp</label>
                             <select th:field="*{status}" class="form-select">
-                                <option th:each="st : ${statuses}" th:value="${st}" th:text="${st}"></option>
+                                <option th:each="st : ${statuses}" th:value="${st}" th:text="${st}" data-uf-label></option>
                             </select>
                         </div>
                     </div>

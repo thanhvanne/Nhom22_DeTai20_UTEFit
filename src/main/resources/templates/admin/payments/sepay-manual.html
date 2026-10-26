@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/layout :: head('Đối soát ngân hàng SePay')}"></head>
+<body class="uf-theme uf-area-admin uf-page-admin-payments-sepay-manual"><div class="d-flex">
+<aside th:replace="~{admin/fragments/layout :: sidebar}"></aside>
+<div class="flex-grow-1 min-vh-100" style="min-width:0">
+<nav th:replace="~{admin/fragments/layout :: topbar('Đối soát ngân hàng SePay')}"></nav>
+<main class="container-fluid px-3 pb-5" th:with="order=${caseView.order},payment=${caseView.order.payment}">
+    <a th:href="@{/admin/payments/sepay-reconciliation}" class="btn btn-outline-secondary mb-3">Về đối soát SePay</a>
+    <h1 class="h3" th:text="|Đối soát Payment #${payment.id}|" data-uf-label></h1>
+    <div class="alert alert-success" role="status" th:if="${manualSuccess}" th:text="${manualSuccess}"></div>
+    <div class="alert alert-danger" role="alert" th:if="${manualError}" th:text="${manualError}"></div>
+    <p class="alert alert-info" role="status" th:if="${notReceived}">Chưa nhận tiền: không có dữ liệu nào được cập nhật. Nếu đơn còn PENDING, Giao dịch và Gói tập tiếp tục PENDING. Lựa chọn này không phải bằng chứng ngân hàng chưa nhận tiền.</p>
+    <section class="surface-card p-3 mb-3" style="overflow-wrap:anywhere">
+        <h2 class="h5">Thông tin từ snapshot đơn hàng</h2>
+        <dl class="row mb-0">
+            <dt class="col-sm-4">Mã đơn</dt><dd class="col-sm-8" th:text="${order.paymentReference}"></dd>
+            <dt class="col-sm-4">Số tiền cần đối chiếu</dt><dd class="col-sm-8 fw-bold" th:text="|${@membershipDisplay.money(payment.amount)}|"></dd>
+            <dt class="col-sm-4">Ngân hàng / chủ tài khoản</dt><dd class="col-sm-8"><span th:text="${order.gateway}"></span> / <span th:text="${order.accountName}"></span></dd>
+            <dt class="col-sm-4">Tài khoản chính</dt><dd class="col-sm-8" th:text="${order.accountNumber}"></dd>
+            <dt class="col-sm-4">VA</dt><dd class="col-sm-8" th:text="${#strings.isEmpty(order.vaNumber) ? 'Không có — đối chiếu tài khoản chính theo snapshot gốc' : order.vaNumber}"></dd>
+            <dt class="col-sm-4">Tạo / hết hạn</dt><dd class="col-sm-8"><span th:text="${payment.createdAt}" data-uf-date></span> / <span th:text="${order.expiresAt}" data-uf-date></span></dd>
+            <dt class="col-sm-4">Môi trường / Giao dịch</dt><dd class="col-sm-8"><span th:text="${order.environment}"></span> / <strong th:text="${payment.status}" data-uf-label></strong></dd>
+            <dt class="col-sm-4">Gói tập</dt><dd class="col-sm-8" th:text="|#${payment.membership.id} / ${payment.membership.status}|" data-uf-label></dd>
+            <dt class="col-sm-4">Ngày ghi nhận thanh toán</dt><dd class="col-sm-8" th:text="${payment.paidAt ?: 'Chưa ghi nhận'}" data-uf-date></dd>
+        </dl>
+    </section>
+    <section class="surface-card p-3 mb-3" th:if="${order.environment == 'LIVE' and payment.status.name() == 'PENDING'}">
+        <p>Kiểm tra trực tiếp ngân hàng nhận: đúng số tiền, tài khoản chính/VA, mã đơn và không phải giao dịch đã dùng cho đơn khác. Không chỉ dựa vào ảnh người chuyển.</p>
+        <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-outline-secondary" th:href="@{/admin/payments/sepay-reconciliation/{id}(id=${payment.id},notReceived=true)}">Chưa nhận tiền</a>
+            <button class="btn btn-success" type="button" data-bs-toggle="modal" data-bs-target="#confirmReceivedModal">Đã nhận tiền</button>
+        </div>
+        <div class="modal fade" id="confirmReceivedModal" tabindex="-1" aria-labelledby="confirmReceivedTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+                <form th:action="@{/admin/payments/sepay-reconciliation/{id}/confirm-received(id=${payment.id})}" method="post">
+                    <div class="modal-header"><h2 class="modal-title fs-5" id="confirmReceivedTitle">Xác nhận tiền thực nhận</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div>
+                    <div class="modal-body" style="overflow-wrap:anywhere">
+                        <p><strong th:text="|${@membershipDisplay.money(payment.amount)}|"></strong> — <span th:text="${order.paymentReference}"></span></p>
+                        <label for="bankReference" class="form-label">Mã giao dịch duy nhất từ ngân hàng nhận</label>
+                        <input id="bankReference" class="form-control mb-3" name="bankReference" required minlength="3" maxlength="100" pattern="[A-Za-z0-9][A-Za-z0-9._\/\-]{2,99}" autocomplete="off">
+                        <label class="d-flex gap-2"><input type="checkbox" class="form-check-input flex-shrink-0" name="independentlyVerified" value="true" required><span>Tôi đã kiểm tra giao dịch thật tại ngân hàng nhận, đúng số tiền, tài khoản chính/VA và mã đơn ở trên, phát sinh sau khi tạo đơn và trước hạn thanh toán; không chỉ dựa vào ảnh người chuyển.</span></label>
+                        <p class="small text-muted mt-2 mb-0">Hệ thống dùng thời gian đã xác minh nếu có; nếu chưa có, chỉ đơn còn hạn được ghi nhận tại lúc xác nhận (không phải giờ hạch toán ngân hàng). Đơn hết hạn cần bằng chứng thời gian thực nhận ở xử lý riêng.</p>
+                    </div>
+                    <div class="modal-footer"><button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Quay lại</button><button class="btn btn-success" type="submit">Xác nhận và kích hoạt gói</button></div>
+                </form>
+            </div></div>
+        </div>
+    </section>
+    <a th:if="${order.environment == 'LIVE' and (payment.status.name() == 'PENDING' or payment.status.name() == 'PAID')}" class="d-inline-block small mb-3" th:href="@{/admin/payments/sepay-reconciliation/{id}/refund-details(id=${payment.id})}">Xử lý riêng / xác nhận hoàn tiền thực tế</a>
+    <p th:if="${order.environment != 'LIVE'}">Đơn TEST chỉ xem lịch sử; không đối soát thủ công.</p>
+    <details class="surface-card p-3 mb-3"><summary>Lịch sử đối soát và lý do chưa khớp</summary>
+        <p class="mt-2" th:if="${caseView.webhooks.empty}">Chưa có webhook liên kết. Không được suy ra tiền chưa nhận.</p>
+        <ul><li th:each="receipt : ${caseView.webhooks}" th:text="|${receipt.receivedAt}: ${receipt.outcome} / ${receipt.reason} / ${receipt.bankReference} / ${@membershipDisplay.money(receipt.amount)}|"></li></ul>
+        <section class="border-top pt-2 mt-2" th:each="record : ${caseView.records}" style="overflow-wrap:anywhere">
+            <h2 class="h6" th:text="|#${record.id}: ${record.outcome} — ${record.method}|" data-uf-label></h2>
+            <p th:text="|${record.bankReference} — ${@membershipDisplay.money(record.amount)} — thời điểm dùng để ghi nhận: ${record.bankDate}|"></p>
+            <p>quản trị viên xác minh ID: <span th:text="${record.verifiedBy?.id}"></span>; lúc <span th:text="${record.verifiedAt}"></span>. quản trị viên kết luận ID: <span th:text="${record.resolvedBy?.id}"></span>; lúc <span th:text="${record.resolvedAt}"></span>.</p>
+            <p th:text="${record.evidence}"></p><p th:text="${record.reason}"></p>
+            <p th:if="${record.refundReference}" th:text="|Đã hoàn: ${record.refundReference}, ${record.refundedAt}. ${record.resolutionEvidence}|"></p>
+        </section>
+    </details>
+</main></div></div><div th:replace="~{admin/fragments/layout :: scripts}"></div></body></html>

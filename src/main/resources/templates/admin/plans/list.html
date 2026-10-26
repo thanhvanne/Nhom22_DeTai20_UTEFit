@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/layout :: head('Quản lý Gói tập')}"></head>
-<body>
+<body class="uf-theme uf-area-admin uf-page-admin-plans-list">
 <div class="d-flex">
     <div th:replace="~{admin/fragments/layout :: sidebar}"></div>
 
@@ -10,11 +10,11 @@
 
         <main class="container-fluid px-4 pb-5">
             <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm rounded-4 border-0">
-                <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}"></span>
+                <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}" data-uf-label></span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
             <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm rounded-4 border-0">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${errorMessage}"></span>
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${errorMessage}" data-uf-label></span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
 
@@ -73,19 +73,22 @@
                         <tr th:each="p : ${planPage.content}">
                             <td class="ps-4 fw-bold text-secondary" th:text="'#' + ${p.id}">#1</td>
                             <td>
-                                <div class="fw-bold text-dark fs-6" th:text="${p.name}">Gói 1 Tháng</div>
+                                <div class="fw-bold text-dark fs-6" th:text="${@membershipDisplay.name(p.name)}">Gói 1 Tháng</div>
+                                <div class="small text-primary" th:text="${@membershipDisplay.benefit(p.effectiveBenefit())}" data-uf-label></div>
+                                <small th:each="branch : ${scopeBranches}" th:if="${p.branchIds.contains(branch.id)}" class="d-block" th:text="${@membershipDisplay.name(branch.name)}"></small>
+                                <small th:if="${!p.fixedBranch()}" class="text-warning">Gói cũ cần chọn một chi nhánh trước khi mở bán mới.</small>
                                 <div class="text-muted small text-truncate" style="max-width: 380px;"
                                      th:text="${p.description != null and !#strings.isEmpty(p.description) ? p.description : 'Chưa có mô tả chi tiết.'}"></div>
                             </td>
                             <td>
                                 <span class="badge bg-info bg-opacity-10 text-dark border border-info border-opacity-25 px-3 py-2 rounded-pill fw-semibold">
                                     <i class="bi bi-calendar2-week text-info me-1"></i>
-                                    <span th:text="${p.durationDays + ' ngày'}">30 ngày</span>
+                                    <span th:text="${p.durationDescription()}">30 ngày</span>
                                 </span>
                             </td>
                             <td>
                                 <span class="fw-bolder text-success fs-6"
-                                      th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT') + ' ₫'}">500,000 ₫</span>
+                                      th:text="${@membershipDisplay.money(p.price)}">500.000đ</span>
                             </td>
                             <td>
                                 <span th:if="${p.active}" class="status-pill bg-success bg-opacity-10 text-success">

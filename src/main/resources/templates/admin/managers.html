@@ -1,32 +1,32 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/layout :: head('Quản lý Manager')}"></head>
-<body>
+<body class="uf-theme uf-area-admin uf-page-admin-managers">
 <div class="d-flex">
     <aside th:replace="~{admin/fragments/layout :: sidebar}"></aside>
     <div class="flex-grow-1 min-vh-100" style="min-width:0">
         <nav th:replace="~{admin/fragments/layout :: topbar('Manager theo chi nhánh')}"></nav>
         <main class="container-fluid px-4 pb-5">
-            <h1 class="h3">Manager theo chi nhánh</h1>
-            <p>Chỉ phân quyền vận hành lịch lớp và check-in. Không cấp Admin, xác nhận Payment hoặc quản lý role.</p>
-            <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
-            <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+            <h1 class="h3">Quản lý theo chi nhánh</h1>
+            <p>Chỉ phân quyền vận hành lịch lớp và vào tập. Không cấp quản trị viên, xác nhận Giao dịch hoặc quản lý role.</p>
+            <div class="alert alert-success" th:if="${success}" th:text="${success}" data-uf-label></div>
+            <div class="alert alert-danger" th:if="${error}" th:text="${error}" data-uf-label></div>
             <section class="surface-card p-4 mb-4">
-                <h2 class="h5">Tạo tài khoản Manager mới</h2>
+                <h2 class="h5">Tạo tài khoản Quản lý mới</h2>
                 <p>Không chuyển role tài khoản hiện có. Mật khẩu cấp ban đầu cần trao riêng cho người quản lý.</p>
                 <form th:action="@{/admin/managers}" method="post" class="row g-2" autocomplete="off">
                     <div class="col-md-3"><label for="manager-name">Tên</label><input id="manager-name" class="form-control" name="name" maxlength="50" required></div>
                     <div class="col-md-3"><label for="manager-email">Email mới</label><input id="manager-email" class="form-control" type="email" name="email" maxlength="100" required></div>
                     <div class="col-md-4"><label for="manager-password">Mật khẩu mới (12–72 ký tự)</label><input id="manager-password" class="form-control" type="password" name="password" minlength="12" maxlength="72" autocomplete="new-password" required></div>
-                    <div class="col-md-2 d-flex align-items-end"><button class="btn btn-primary" type="submit">Tạo Manager</button></div>
+                    <div class="col-md-2 d-flex align-items-end"><button class="btn btn-primary" type="submit">Tạo Quản lý</button></div>
                 </form>
             </section>
             <section class="surface-card p-4 mb-3" th:each="manager : ${managers}">
-                <h2 class="h5" th:text="${manager.name}"></h2>
+                <h2 class="h5" th:text="${manager.name}" data-uf-label></h2>
                 <p th:text="${manager.email}"></p>
                 <ul>
                     <li th:each="branch : ${manager.branches}" class="mb-2">
-                        <span th:text="${branch.name}"></span>
+                        <span th:text="${@membershipDisplay.name(branch.name)}"></span>
                         <form class="d-inline" th:action="@{/admin/managers/{id}/branches/{branchId}/remove(id=${manager.id},branchId=${branch.id})}" method="post">
                             <button class="btn btn-outline-danger btn-sm" type="submit">Thu hồi</button>
                         </form>
@@ -35,12 +35,12 @@
                 <p th:if="${manager.branches.empty}">Chưa được giao chi nhánh.</p>
                 <form class="d-flex gap-2" th:action="@{/admin/managers/{id}/branches(id=${manager.id})}" method="post">
                     <select class="form-select" name="branchId" required aria-label="Chi nhánh phân công">
-                        <option value="">Chọn chi nhánh</option><option th:each="branch : ${branches}" th:value="${branch.id}" th:text="${branch.name}"></option>
+                        <option value="">Chọn chi nhánh</option><option th:each="branch : ${branches}" th:value="${branch.id}" th:text="${@membershipDisplay.name(branch.name)}"></option>
                     </select>
                     <button class="btn btn-primary text-nowrap" type="submit">Phân công</button>
                 </form>
             </section>
-            <p th:if="${managers.empty}">Chưa có Manager.</p>
+            <p th:if="${managers.empty}">Chưa có Quản lý.</p>
         </main>
     </div>
 </div>

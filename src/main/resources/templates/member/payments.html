@@ -6,7 +6,7 @@
 <head th:replace="~{fragments/head :: head('Lịch sử thanh toán - UTEFit')}">
 </head>
 
-<body>
+<body class="uf-theme uf-area-member uf-page-member-payments">
 
 <header th:replace="~{fragments/header :: header}">
 </header>
@@ -58,22 +58,22 @@
 
                     <td th:text="${p.id}">1</td>
 
-                    <td th:text="${p.planName}">
-                        Membership
+                    <td th:text="${@membershipDisplay.name(p.planName)}">
+                        Gói tập
                     </td>
 
-                    <td th:text="${p.amount} + ' VND'">
+                    <td th:text="${@membershipDisplay.money(p.amount)}">
                         0 VND
                     </td>
 
-                    <td th:text="${p.method}">
-                        CASH
+                    <td th:text="${p.method}" data-uf-label>
+                        tiền mặt
                     </td>
 
                     <td>
                         <span class="ut-status"
                               th:classappend="${p.status}"
-                              th:text="${p.status}">
+                              th:text="${@membershipDisplay.paymentStatus(p.status)}" data-uf-label>
                             PENDING
                         </span>
                     </td>

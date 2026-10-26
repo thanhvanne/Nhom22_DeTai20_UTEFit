@@ -6,7 +6,7 @@
 <head th:replace="~{fragments/head :: head('Gói tập - UTEFit')}">
 </head>
 
-<body>
+<body class="uf-theme uf-area-guest uf-page-guest-membership-plans">
 
 <header th:replace="~{fragments/header :: header}">
 </header>
@@ -56,7 +56,7 @@
                     </span>
 
                     <h3 class="mt-3"
-                        th:text="${p.name}">
+                        th:text="${@membershipDisplay.name(p.name)}" data-uf-label>
                         Gói tập
                     </h3>
 
@@ -66,14 +66,13 @@
 
                     <h2 class="fw-bold mt-4"
                         style="color:#ff326b"
-                        th:text="${p.price} + ' VND'">
+                        th:text="${@membershipDisplay.money(p.price)}" data-uf-label>
                         0 VND
                     </h2>
 
                     <p>
                         Thời hạn:
-                        <strong th:text="${p.durationDays}">30</strong>
-                        ngày
+                        <strong th:text="${p.durationDescription}">30 ngày</strong>
                     </p>
 
                     <a class="btn btn-brand w-100 mt-3"

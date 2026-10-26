@@ -10,7 +10,7 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title th:text="${trainer.fullName} + ' | UTEFit Trainer'">
+    <title th:text="${trainer.fullName} + ' | UTEFit Trainer'" data-uf-label>
         Hồ sơ huấn luyện viên | UTEFit
     </title>
 
@@ -38,9 +38,12 @@
     <!-- CSS navbar ngang 1 hàng, sticky và dropdown -->
     <link rel="stylesheet"
           th:href="@{/css/member-dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/utefit-premium.css(v=2)}">
+    <link rel="stylesheet" th:href="@{/css/utefit-interface.css(v=1)}">
+    <script defer th:src="@{/js/utefit-interface.js(v=1)}"></script>
 </head>
 
-<body class="trainer-detail-page">
+<body class="trainer-detail-page uf-theme uf-area-guest uf-page-guest-trainer-detail">
 
 <!-- HEADER -->
 <div th:replace="~{fragments/header :: header}"></div>
@@ -130,11 +133,11 @@
                 <div class="trainer-profile-heading">
 
                     <span class="trainer-profile-eyebrow">
-                        PERSONAL TRAINER
+                        Huấn luyện viên cá nhân
                     </span>
 
                     <div th:replace="~{fragments/favorite :: button('TRAINER',${trainer.id},'/trainers')}"></div>
-                    <h2 th:text="${trainer.fullName}">
+                    <h2 th:text="${trainer.fullName}" data-uf-label>
                         Nguyễn Văn A
                     </h2>
 

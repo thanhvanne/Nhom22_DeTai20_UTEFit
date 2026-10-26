@@ -6,7 +6,7 @@
 <head th:replace="~{fragments/head :: head('Chi nhánh - UTEFit')}">
 </head>
 
-<body>
+<body class="uf-theme uf-area-guest uf-page-guest-branches">
 
 <header th:replace="~{fragments/header :: header}">
 </header>
@@ -56,13 +56,13 @@
 
                 <div th:unless="${b.imageUrl != null and !#strings.isEmpty(b.imageUrl)}"
                      class="ut-empty-image">
-                    UTEFIT FITNESS
+                    Chi nhánh UTEFit
                 </div>
 
                 <div class="ut-card-body">
 
                     <div th:replace="~{fragments/favorite :: button('BRANCH',${b.id},'/branches')}"></div>
-                    <h3 th:text="${b.name}">
+                    <h3 th:text="${b.name}" data-uf-label>
                         Tên chi nhánh
                     </h3>
 

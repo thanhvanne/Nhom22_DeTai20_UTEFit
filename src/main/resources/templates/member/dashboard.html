@@ -5,7 +5,7 @@
 <head th:replace="~{fragments/head :: head('Tổng quan hội viên - UTEFit')}">
 </head>
 
-<body class="ut-member-layout">
+<body class="ut-member-layout uf-theme uf-area-member uf-page-member-dashboard">
 
 <header th:replace="~{fragments/header :: header}"></header>
 
@@ -21,14 +21,14 @@
         <div class="ut-welcome-content">
 
             <p class="ut-kicker">
-                UTEFIT · HỘI VIÊN
+                Hội viên UTEFit
             </p>
 
             <p class="ut-greeting">
                 Chào mừng trở lại,
             </p>
 
-            <h1 th:text="${dashboard.memberName}">
+            <h1 th:text="${dashboard.memberName}" data-uf-label>
                 Hội viên UTEFit
             </h1>
 
@@ -55,7 +55,7 @@
         <div class="ut-hero-decoration"
              aria-hidden="true">
             UTE<span>FIT</span>
-            <small>STRONGER EVERY DAY</small>
+            <small>Mạnh mẽ hơn mỗi ngày</small>
         </div>
 
     </section>
@@ -104,7 +104,7 @@
 
                     <div>
 
-                        <h3 th:text="${n.title}">
+                        <h3 th:text="${n.title}" data-uf-label>
                             Thông báo
                         </h3>
 
@@ -170,23 +170,23 @@
                             Đang hoạt động
                         </span>
 
-                        <h3 th:text="${dashboard.activeMembership.planName}">
+                        <h3 th:text="${@membershipDisplay.name(dashboard.activeMembership.planName)}" data-uf-label>
                             Gói tập
                         </h3>
 
                         <p>
                             ⌖
-                            <span th:text="${dashboard.activeMembership.branchName}">
+                            <span th:text="${@membershipDisplay.name(dashboard.activeMembership.branchName)}">
                                 Chi nhánh
                             </span>
                         </p>
 
                         <p>
                             ◷
-                            <span th:text="${dashboard.activeMembership.startDate}">
+                            <span th:text="${dashboard.activeMembership.startDate}" data-uf-date>
                             </span>
                             —
-                            <span th:text="${dashboard.activeMembership.endDate}">
+                            <span th:text="${dashboard.activeMembership.endDate}" data-uf-date>
                             </span>
                         </p>
 
@@ -226,13 +226,13 @@
 
                 <h3 th:text="${dashboard.pendingMembership}
                     ? 'Có gói tập chờ thanh toán'
-                    : 'Chưa có gói tập đang sử dụng'">
+                    : 'Chưa có gói tập đang sử dụng'" data-uf-label>
                     Chưa có gói tập
                 </h3>
 
                 <p th:text="${dashboard.pendingMembership}
                     ? 'Hoàn tất thanh toán CASH và chờ Admin xác nhận để sử dụng dịch vụ.'
-                    : 'Chọn chi nhánh và gói tập phù hợp để bắt đầu.'">
+                    : 'Chọn chi nhánh và gói tập phù hợp để bắt đầu.'" data-uf-label>
                 </p>
 
                 <a class="btn btn-brand"
@@ -298,7 +298,7 @@
                             Lớp nhóm
                         </span>
 
-                        <h3 th:text="${s.title}">
+                        <h3 th:text="${s.title}" data-uf-label>
                             Buổi tập
                         </h3>
 
@@ -313,7 +313,7 @@
 
                             <span th:if="${s.branchName != null}">
                                 ·
-                                <span th:text="${s.branchName}">
+                                <span th:text="${@membershipDisplay.name(s.branchName)}">
                                 </span>
                             </span>
                         </p>
@@ -421,13 +421,13 @@
                         Giao dịch gần nhất
                     </small>
 
-                    <strong th:text="${dashboard.latestPayment.planName}">
+                    <strong th:text="${@membershipDisplay.name(dashboard.latestPayment.planName)}">
                         Gói tập
                     </strong>
                 </div>
 
                 <span class="ut-pill"
-                      th:text="${dashboard.latestPayment.status}">
+                      th:text="${dashboard.latestPayment.status}" data-uf-label>
                     PENDING
                 </span>
 

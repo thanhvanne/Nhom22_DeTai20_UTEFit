@@ -3,7 +3,7 @@
 
 <head th:replace="~{fragments/head :: head('Lịch sử hội viên - UTEFit')}"></head>
 
-<body>
+<body class="uf-theme uf-area-member uf-page-member-history">
 <header th:replace="~{fragments/header :: header}"></header>
 
 <main class="container ut-page">
@@ -20,7 +20,7 @@
              aria-labelledby="history-memberships">
 
         <h2 class="h4" id="history-memberships">
-            Membership
+            Gói tập
         </h2>
 
         <div class="table-responsive">
@@ -37,11 +37,11 @@
 
                 <tbody>
                 <tr th:each="m : ${history.memberships}">
-                    <td th:text="${m.branchName}"></td>
-                    <td th:text="${m.planName}"></td>
-                    <td th:text="${m.status}"></td>
-                    <td th:text="${m.startDate ?: '-'}"></td>
-                    <td th:text="${m.endDate ?: '-'}"></td>
+                    <td th:text="${@membershipDisplay.name(m.branchName)}"></td>
+                    <td th:text="${@membershipDisplay.name(m.planName)}"></td>
+                    <td th:text="${m.status}" data-uf-label></td>
+                    <td th:text="${m.startDate ?: '-'}" data-uf-date></td>
+                    <td th:text="${m.endDate ?: '-'}" data-uf-date></td>
                 </tr>
                 </tbody>
             </table>
@@ -74,10 +74,10 @@
 
                 <tbody>
                 <tr th:each="p : ${history.payments}">
-                    <td th:text="${p.planName}"></td>
-                    <td th:text="${p.amount}"></td>
-                    <td th:text="${p.method}"></td>
-                    <td th:text="${p.status}"></td>
+                    <td th:text="${@membershipDisplay.name(p.planName)}"></td>
+                    <td th:text="${p.amount}" data-uf-money></td>
+                    <td th:text="${p.method}" data-uf-label></td>
+                    <td th:text="${p.status}" data-uf-label></td>
                     <td th:text="${#temporals.format(
                             p.createdAt,
                             'dd/MM/yyyy HH:mm'
@@ -116,10 +116,10 @@
                 <tbody>
                 <tr th:each="c : ${history.classes}">
                     <td th:text="${c.className}"></td>
-                    <td th:text="${c.branchName}"></td>
+                    <td th:text="${@membershipDisplay.name(c.branchName)}"></td>
                     <td th:text="${c.date}"></td>
                     <td th:text="|${c.startTime} - ${c.endTime}|"></td>
-                    <td th:text="${c.status}"></td>
+                    <td th:text="${c.status}" data-uf-label></td>
                 </tr>
                 </tbody>
             </table>
@@ -151,7 +151,7 @@
 
                 <tbody>
                 <tr th:each="r : ${history.reviews}">
-                    <td th:text="${r.branchName}"></td>
+                    <td th:text="${@membershipDisplay.name(r.branchName)}"></td>
                     <td th:text="${r.trainerName ?: '-'}"></td>
                     <td th:text="|${r.rating}/5|"></td>
                     <td th:text="${r.visible
@@ -170,7 +170,7 @@
     </section>
 
     <section class="ut-panel mt-4">
-        <h2 class="h4">Lịch sử Check-in / Check-out</h2>
+        <h2 class="h4">Lịch sử Vào tập / Ra về</h2>
         <div class="table-responsive"><table class="table table-dark table-striped">
             <thead><tr><th>Chi nhánh</th><th>Vào</th><th>Ra</th></tr></thead>
             <tbody><tr th:each="c : ${history.checkins}">
@@ -184,9 +184,9 @@
         <div class="table-responsive"><table class="table table-dark table-striped">
             <thead><tr><th>PT</th><th>Ngày</th><th>Giờ</th><th>Chi nhánh</th><th>Trạng thái</th></tr></thead>
             <tbody><tr th:each="p : ${history.personalSchedules}">
-                <td th:text="${p.trainerName}"></td><td th:text="${p.scheduleDate}"></td>
+                <td th:text="${p.trainerName}"></td><td th:text="${p.scheduleDate}" data-uf-date></td>
                 <td th:text="|${p.startTime} - ${p.endTime}|"></td>
-                <td th:text="${p.branchName}"></td><td th:text="${p.status}"></td>
+                <td th:text="${@membershipDisplay.name(p.branchName)}"></td><td th:text="${p.status}" data-uf-label></td>
             </tr></tbody></table></div>
     </section>
 </main>

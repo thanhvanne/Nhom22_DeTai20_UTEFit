@@ -6,7 +6,7 @@
 <head th:replace="~{fragments/head :: head('Thông báo - UTEFit')}">
 </head>
 
-<body>
+<body class="uf-theme uf-area-member uf-page-member-notifications">
 
 <!-- HEADER CHUNG CUA THANH VIEN A -->
 <header th:replace="~{fragments/header :: header}">
@@ -117,7 +117,7 @@
 
             <div>
                 <span class="eyebrow">
-                    UTEFIT MEMBER PORTAL
+                    Không gian hội viên
                 </span>
 
                 <h1 class="ut-page-title mt-2">
@@ -163,12 +163,12 @@
              ===================================== -->
         <div th:if="${success}"
              class="alert alert-success"
-             th:text="${success}">
+             th:text="${success}" data-uf-label>
         </div>
 
         <div th:if="${error}"
              class="alert alert-danger"
-             th:text="${error}">
+             th:text="${error}" data-uf-label>
         </div>
 
         <!-- =====================================
@@ -214,7 +214,7 @@
                                 flex-wrap gap-2">
 
                         <h3 class="ut-notification-title"
-                            th:text="${item.title}">
+                            th:text="${item.title}" data-uf-label>
                             Thông báo mới
                         </h3>
 
@@ -299,7 +299,7 @@
 
             <a th:href="@{/member/dashboard}"
                class="btn btn-outline-light">
-                Về trang Member
+                Về trang Hội viên
             </a>
 
             <button type="button"

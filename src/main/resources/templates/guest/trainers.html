@@ -35,9 +35,12 @@
     <!-- CSS navbar ngang 1 hàng, sticky và dropdown -->
     <link rel="stylesheet"
           th:href="@{/css/member-dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/utefit-premium.css(v=2)}">
+    <link rel="stylesheet" th:href="@{/css/utefit-interface.css(v=1)}">
+    <script defer th:src="@{/js/utefit-interface.js(v=1)}"></script>
 </head>
 
-<body class="trainers-page">
+<body class="trainers-page uf-theme uf-area-guest uf-page-guest-trainers">
 
 <!-- HEADER -->
 <div th:replace="~{fragments/header :: header}"></div>
@@ -51,7 +54,7 @@
         <div class="trainers-hero-content">
 
             <span class="trainers-hero-label">
-                ĐỘI NGŨ CHUYÊN GIA
+                Đội ngũ chuyên gia
             </span>
 
             <h1>
@@ -97,7 +100,7 @@
             <div>
 
                 <span class="trainers-section-label">
-                    UTEFIT TRAINERS
+                    Huấn luyện viên UTEFit
                 </span>
 
                 <h2>
@@ -168,7 +171,7 @@
                         <option
                                 th:each="branch : ${branches}"
                                 th:value="${branch.id}"
-                                th:text="${branch.name}"
+                                th:text="${@membershipDisplay.name(branch.name)}"
                                 th:selected="${search.branchId != null and search.branchId == branch.id}">
                         </option>
 
@@ -217,7 +220,7 @@
             </div>
 
             <span class="trainers-results-badge">
-                UTEFit Team
+                Đội ngũ UTEFit
             </span>
 
         </div>
@@ -261,7 +264,7 @@
 
                     <div th:replace="~{fragments/favorite :: button('TRAINER',${trainer.id},'/trainers')}"></div>
                     <h3 class="trainer-card-name"
-                        th:text="${trainer.fullName}">
+                        th:text="${trainer.fullName}" data-uf-label>
 
                         Nguyễn Văn A
 
@@ -310,7 +313,7 @@
                             th:href="@{/trainers/{id}(id=${trainer.id})}"
                             class="trainer-card-button">
 
-                        Xem Profile
+                        Xem hồ sơ
 
                         <span aria-hidden="true">
                             →

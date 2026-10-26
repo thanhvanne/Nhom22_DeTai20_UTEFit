@@ -5,7 +5,7 @@
 <head th:replace="~{fragments/head :: head('Hồ sơ hội viên - UTEFit')}">
 </head>
 
-<body>
+<body class="uf-theme uf-area-member uf-page-member-profile">
 
 <header th:replace="~{fragments/header :: header}">
 </header>
@@ -26,18 +26,18 @@
 
         <a class="btn btn-outline-light"
            th:href="@{/member/dashboard}">
-            Dashboard
+            Tổng quan
         </a>
     </div>
 
     <div th:if="${success}"
          class="alert alert-success"
-         th:text="${success}">
+         th:text="${success}" data-uf-label>
     </div>
 
     <div th:if="${error}"
          class="alert alert-danger"
-         th:text="${error}">
+         th:text="${error}" data-uf-label>
     </div>
 
     <div class="row g-4">
@@ -57,7 +57,7 @@
                 </div>
 
                 <h3 class="mt-3"
-                    th:text="${profile.lastName + ' ' + profile.firstName}">
+                    th:text="${profile.lastName + ' ' + profile.firstName}" data-uf-label>
                     Hội viên
                 </h3>
 
@@ -91,7 +91,7 @@
 
                     <button class="btn btn-brand w-100 mt-3"
                             type="submit">
-                        Cập nhật avatar
+                        Cập nhật ảnh đại diện
                     </button>
                 </form>
 

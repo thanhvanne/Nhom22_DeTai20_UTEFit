@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/layout :: head(${isEdit ? 'Cập nhật Lịch học' : 'Xếp Lịch học mới'})}"></head>
-<body>
+<body class="uf-theme uf-area-admin uf-page-admin-schedules-form">
 <div class="d-flex">
     <div th:replace="~{admin/fragments/layout :: sidebar}"></div>
 
@@ -17,7 +17,7 @@
 
             <div class="surface-card col-lg-8 p-4">
                 <div th:if="${errorMessage}" class="alert alert-danger rounded-3">
-                    <i class="bi bi-exclamation-octagon-fill me-2"></i> <span th:text="${errorMessage}"></span>
+                    <i class="bi bi-exclamation-octagon-fill me-2"></i> <span th:text="${errorMessage}" data-uf-label></span>
                 </div>
 
                 <form th:action="${isEdit ? '/admin/schedules/' + scheduleForm.id + '/edit' : '/admin/schedules/create'}"

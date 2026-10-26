@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/head :: head('Kết quả VNPay - UTEFit')}"></head>
-<body>
+<body class="uf-theme uf-area-member uf-page-member-vnpay-result">
 <header th:replace="~{fragments/header :: header}"></header>
 <main class="container ut-page">
     <div class="ut-panel">
         <h1 class="ut-page-title">Kết quả VNPay Sandbox</h1>
-        <p role="status" th:text="${message}"></p>
+        <p role="status" th:text="${message}" data-uf-label></p>
         <a class="btn btn-brand" th:href="@{/member/payments}">Lịch sử thanh toán</a>
         <a class="btn btn-outline-light" th:href="@{/member/memberships}">Gói tập của tôi</a>
     </div>
