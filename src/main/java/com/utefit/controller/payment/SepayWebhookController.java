@@ -26,6 +26,7 @@ public class SepayWebhookController {
     public ResponseEntity<Map<String, Object>> receive(HttpServletRequest request) {
         try {
             properties.requireConfigured();
+            if (!properties.testMode() && !request.isSecure()) return rejected(400, "HTTPS required");
             String expectedPath = properties.testMode() ? TEST_PATH : LIVE_PATH;
             if (!request.getRequestURI().equals(request.getContextPath() + expectedPath)) return rejected(404, "Wrong environment");
             if (request.getContentLengthLong() > MAX_BYTES) return rejected(413, "Payload too large");

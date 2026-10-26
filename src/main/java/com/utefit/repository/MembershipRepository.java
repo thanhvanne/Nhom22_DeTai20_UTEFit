@@ -19,6 +19,9 @@ import java.util.Optional;
 
 public interface MembershipRepository
         extends JpaRepository<Membership, Long> {
+    @EntityGraph(attributePaths = {"branch", "plan", "branchIds"})
+    @Query("select distinct m from Membership m where m.user.id = :userId and m.status = com.utefit.enums.MembershipStatus.ACTIVE and (exists (select p.id from Payment p where p.membership = m and p.status = com.utefit.enums.PaymentStatus.PAID) or (m.quotedScope is null and not exists (select p.id from Payment p where p.membership = m)))")
+    List<Membership> findPaidAccessByUser(@Param("userId") Long userId);
 
     @EntityGraph(attributePaths = {"branch", "plan"})
     List<Membership> findByUser_IdOrderByCreatedAtDesc(

@@ -66,12 +66,11 @@ public class PersonalTrainingScheduleServiceImpl implements PersonalTrainingSche
             throw new IllegalStateException("Ngày tập phải là hôm nay hoặc trong tương lai.");
         }
 
-        // Khóa PT trước, Member sau: tránh hai lịch 1:1 đồng thời trùng nhau.
-        userRepository.lockByIdForBooking(trainerUserId)
-                .orElseThrow(() -> new EntityNotFoundException("PT không tồn tại."));
         User member = userRepository.lockByIdForBooking(memberUserId)
                 .orElseThrow(() ->
                         new EntityNotFoundException("Không tìm thấy thành viên."));
+        userRepository.lockByIdForBooking(trainerUserId)
+                .orElseThrow(() -> new EntityNotFoundException("PT không tồn tại."));
 
         if (member.getRole() != UserRole.MEMBER || member.getStatus() != UserStatus.ACTIVE
                 || !Boolean.TRUE.equals(member.getEnabled())) {
@@ -99,7 +98,7 @@ public class PersonalTrainingScheduleServiceImpl implements PersonalTrainingSche
                 && endTime.isAfter(trainer.getBranch().getClosingTime())) {
             throw new IllegalStateException("Giờ tập sau giờ đóng cửa chi nhánh.");
         }
-        eligibility.requireAccess(member.getId(), trainer.getBranch().getId(), scheduleDate);
+        eligibility.requirePersonalTraining(member.getId(), trainer.getBranch().getId(), scheduleDate);
         conflicts.assertTrainerFreeForPersonal(trainer.getId(), scheduleDate, startTime, endTime);
         conflicts.assertMemberFree(member.getId(), scheduleDate, startTime, endTime, null);
 

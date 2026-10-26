@@ -36,6 +36,14 @@ public class AdminPaymentService {
         private String transactionCode;
         private LocalDateTime createdAt;
         private LocalDateTime paidAt;
+        private Long membershipId;
+        private String membershipStatus;
+        private LocalDateTime cancellationRequestedAt;
+        private LocalDateTime cancelledAt;
+        private String cancelledBy;
+        private String cancellationReason;
+        private String lateGatewayEvidence;
+        private boolean needsReview;
     }
 
     private PaymentRow toRow(Payment p) {
@@ -51,7 +59,13 @@ public class AdminPaymentService {
                 p.getStatus(),
                 p.getTransactionCode(),
                 p.getCreatedAt(),
-                p.getPaidAt()
+                p.getPaidAt(), p.getMembership() == null ? null : p.getMembership().getId(),
+                p.getMembership() == null ? "-" : p.getMembership().getStatus().name(),
+                p.getCancellationRequestedAt(), p.getCancelledAt(), p.getCancelledBy(), p.getCancellationReason(), p.getLateGatewayEvidence(),
+                p.getLateGatewayEvidence() != null || entityManager.createQuery("select count(w) from SepayWebhookTransaction w where w.payment.id = :id and w.outcome = 'REVIEW'", Long.class)
+                        .setParameter("id", p.getId()).getSingleResult() > 0
+                        || entityManager.createQuery("select count(r) from SepayBankReconciliation r where r.payment.id = :id and r.outcome = 'VERIFIED'", Long.class)
+                        .setParameter("id", p.getId()).getSingleResult() > 0
         );
     }
 

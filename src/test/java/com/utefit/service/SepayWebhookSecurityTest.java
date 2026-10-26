@@ -66,4 +66,18 @@ class SepayWebhookSecurityTest {
         assertThrows(IllegalArgumentException.class, () -> SepayWebhookPayload.parse("{\"id\":1,\"id\":2}".getBytes(StandardCharsets.UTF_8)));
         assertThrows(IllegalArgumentException.class, () -> SepayWebhookPayload.parse("{} {}".getBytes(StandardCharsets.UTF_8)));
     }
+
+    @Test
+    void subAccountIsStrictStringAndChangesFingerprintWithoutBreakingLegacyEmptyFingerprints() {
+        String json = "{\"id\":1,\"gateway\":\"BIDV\",\"accountNumber\":\"8820666613\",\"code\":null,"
+                + "\"content\":\"isolated-unit\",\"transferType\":\"in\",\"transferAmount\":50000,"
+                + "\"referenceCode\":\"UNITREF\",\"transactionDate\":\"2026-10-25 16:00:00\"}";
+        var legacy = SepayWebhookPayload.parse(json.getBytes(StandardCharsets.UTF_8));
+        var blank = SepayWebhookPayload.parse(json.replace("\"code\":null", "\"code\":null,\"subAccount\":\"\"").getBytes(StandardCharsets.UTF_8));
+        var va = SepayWebhookPayload.parse(json.replace("\"code\":null", "\"code\":null,\"subAccount\":\"96247SXBBQ\"").getBytes(StandardCharsets.UTF_8));
+        assertEquals(legacy.fingerprint(), blank.fingerprint());
+        assertNotEquals(blank.fingerprint(), va.fingerprint());
+        assertEquals("8820666613", va.accountNumber()); assertEquals("96247SXBBQ", va.subAccount());
+        assertThrows(IllegalArgumentException.class, () -> SepayWebhookPayload.parse(json.replace("\"code\":null", "\"code\":null,\"subAccount\":123").getBytes(StandardCharsets.UTF_8)));
+    }
 }

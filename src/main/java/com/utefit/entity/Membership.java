@@ -16,6 +16,38 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 public class Membership {
+    @Enumerated(EnumType.STRING) @Column(name = "quoted_duration_unit", length = 10, updatable = false)
+    private com.utefit.enums.MembershipDurationUnit quotedDurationUnit;
+    @Column(name = "quoted_duration_quantity", updatable = false) private Integer quotedDurationQuantity;
+    @Enumerated(EnumType.STRING) @Column(name = "quoted_bonus_unit", length = 10, updatable = false)
+    private com.utefit.enums.MembershipDurationUnit quotedBonusUnit;
+    @Column(name = "quoted_bonus_quantity", updatable = false) private Integer quotedBonusQuantity;
+
+    public com.utefit.util.MembershipTerm term() {
+        return quotedDurationUnit == null ? com.utefit.util.MembershipTerm.legacy(quotedDurationDays != null ? quotedDurationDays : plan.getDurationDays())
+                : new com.utefit.util.MembershipTerm(quotedDurationQuantity == null ? 0 : quotedDurationQuantity,
+                quotedDurationUnit, quotedBonusQuantity == null ? 0 : quotedBonusQuantity, quotedBonusUnit);
+    }
+    @Enumerated(EnumType.STRING) @Column(name = "quoted_benefit", length = 20, updatable = false)
+    private com.utefit.enums.MembershipBenefit quotedBenefit;
+    @Enumerated(EnumType.STRING) @Column(name = "quoted_scope", length = 20, updatable = false)
+    private com.utefit.enums.MembershipScope quotedScope;
+    @ElementCollection @CollectionTable(name = "membership_branch_snapshot", joinColumns = @JoinColumn(name = "membership_id"))
+    @Column(name = "branch_id", nullable = false)
+    @org.hibernate.annotations.BatchSize(size = 50)
+    @Builder.Default private java.util.Set<Long> branchIds = new java.util.HashSet<>();
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "renewal_of_id")
+    private Membership renewalOf;
+
+    public com.utefit.enums.MembershipBenefit effectiveBenefit() { return quotedBenefit == null ? com.utefit.enums.MembershipBenefit.ALL : quotedBenefit; }
+    public com.utefit.enums.MembershipScope effectiveScope() { return quotedScope == null ? com.utefit.enums.MembershipScope.SINGLE_BRANCH : quotedScope; }
+    public String entitlementKey() {
+        return effectiveBenefit() + ":" + switch (effectiveScope()) {
+            case ALL_BRANCHES -> "*";
+            case SINGLE_BRANCH -> java.util.Set.of(branch.getId()).toString();
+            case MULTI_BRANCH -> new java.util.TreeSet<>(branchIds).toString();
+        };
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -10,6 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class ClassCategoryFormDto {
+    private com.utefit.enums.MembershipBenefit requiredBenefit;
 
     private Long id;
 

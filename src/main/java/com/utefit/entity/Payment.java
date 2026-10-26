@@ -59,6 +59,23 @@ public class Payment {
     @Column(name = "paid_at")
     private LocalDateTime paidAt;
 
+    @Column(name = "cancellation_requested_at")
+    private LocalDateTime cancellationRequestedAt;
+
+    @Column(name = "cancelled_at")
+    private LocalDateTime cancelledAt;
+
+    @Column(name = "cancelled_by", length = 100)
+    private String cancelledBy;
+
+    @org.hibernate.annotations.Nationalized
+    @Column(name = "cancellation_reason", length = 500)
+    private String cancellationReason;
+
+    @org.hibernate.annotations.Nationalized
+    @Column(name = "late_gateway_evidence", length = 2000)
+    private String lateGatewayEvidence;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 

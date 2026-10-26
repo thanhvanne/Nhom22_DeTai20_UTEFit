@@ -17,6 +17,7 @@ public class SepayPaymentDetails {
     @Column(name = "bank_code", nullable = false, length = 32, updatable = false) private String bankCode;
     @Column(nullable = false, length = 100, updatable = false) private String gateway;
     @Column(name = "account_number", nullable = false, length = 50, updatable = false) private String accountNumber;
+    @Column(name = "va_number", length = 50, updatable = false) private String vaNumber;
     @Nationalized @Column(name = "account_name", nullable = false, length = 150, updatable = false) private String accountName;
     @Column(name = "expires_at", nullable = false, updatable = false) private LocalDateTime expiresAt;
 }

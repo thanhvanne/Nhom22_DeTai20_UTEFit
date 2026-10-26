@@ -29,6 +29,7 @@ public class MembershipPaymentService {
     private final MembershipRepository memberships;
     private final PaymentRepository payments;
     private final NotificationService notifications;
+    @jakarta.persistence.PersistenceContext private jakarta.persistence.EntityManager entityManager;
 
     public MembershipPaymentService(
             UserRepository users,
@@ -70,7 +71,7 @@ public class MembershipPaymentService {
             );
         }
 
-        MembershipPlan plan = plans.findById(
+        MembershipPlan plan = plans.lockForSnapshot(
                 request.getPlanId()
         ).orElseThrow(() ->
                 new IllegalArgumentException(
@@ -78,6 +79,7 @@ public class MembershipPaymentService {
                 )
         );
 
+        entityManager.refresh(plan);
         if (!Boolean.TRUE.equals(plan.getActive())) {
             throw new IllegalArgumentException(
                     "Gói tập đang ngừng kinh doanh"
@@ -95,25 +97,7 @@ public class MembershipPaymentService {
             );
         }
 
-        if (memberships.existsByUser_IdAndStatus(
-                user.getId(),
-                MembershipStatus.PENDING
-        )) {
-            throw new IllegalArgumentException(
-                    "Bạn đang có gói tập chờ thanh toán"
-            );
-        }
-
-        if (memberships
-                .existsByUser_IdAndStatusAndEndDateGreaterThanEqual(
-                        user.getId(),
-                        MembershipStatus.ACTIVE,
-                        LocalDate.now()
-                )) {
-            throw new IllegalArgumentException(
-                    "Bạn đang có gói tập còn hiệu lực"
-            );
-        }
+        validateBranchScope(plan, branch.getId());
 
         Membership membership = Membership.builder()
                 .user(user)
@@ -122,9 +106,39 @@ public class MembershipPaymentService {
                 .status(MembershipStatus.PENDING)
                 .quotedPrice(plan.getPrice())
                 .quotedDurationDays(plan.getDurationDays())
+                .quotedDurationUnit(plan.term().unit()).quotedDurationQuantity(plan.term().quantity())
+                .quotedBonusUnit(plan.term().bonusUnit()).quotedBonusQuantity(plan.term().bonusQuantity())
+                .quotedBenefit(plan.effectiveBenefit()).quotedScope(plan.effectiveScope())
+                .branchIds(new java.util.HashSet<>(plan.getBranchIds()))
                 .build();
 
+        for (Membership pending : memberships.findByUser_IdOrderByCreatedAtDesc(user.getId())) {
+            if (pending.getStatus() == MembershipStatus.PENDING && pending.getPlan().getId().equals(plan.getId())
+                    && pending.entitlementKey().equals(membership.entitlementKey())) return pending.getId();
+        }
+
         return memberships.save(membership).getId();
+    }
+
+    private void validateBranchScope(MembershipPlan plan, Long branchId) {
+        if (!plan.fixedBranch())
+            throw new IllegalArgumentException("Gói cũ chưa được cấu hình một chi nhánh cố định; liên hệ Admin. Membership đã mua vẫn giữ quyền cũ.");
+        if (!plan.getBranchIds().contains(branchId)) throw new IllegalArgumentException("Gói không thuộc chi nhánh đã chọn.");
+    }
+
+    @Transactional
+    public Long renew(String email, Long membershipId) {
+        User user = lockedMember(email);
+        Membership existing = memberships.findById(membershipId).orElseThrow(() -> new IllegalArgumentException("Không có gói tập."));
+        if (!existing.getUser().getId().equals(user.getId()) || (existing.getStatus() != MembershipStatus.ACTIVE
+                && existing.getStatus() != MembershipStatus.EXPIRED)) throw new IllegalArgumentException("Không thể gia hạn gói này.");
+        var request = new MembershipPurchaseRequest();
+        request.setPlanId(existing.getPlan().getId());
+        request.setBranchId(existing.getBranch().getId());
+        Long id = createMembership(email, request);
+        Membership pending = memberships.findById(id).orElseThrow();
+        pending.setRenewalOf(existing);
+        return id;
     }
 
     // Member tạo yêu cầu thanh toán CASH.
@@ -134,7 +148,7 @@ public class MembershipPaymentService {
             String email,
             Long membershipId
     ) {
-        User member = currentMember(email);
+        User member = lockedMember(email);
 
         Membership membership = memberships
                 .lockById(membershipId)
@@ -158,6 +172,8 @@ public class MembershipPaymentService {
             );
         }
 
+        if (payments.existsByMembership_IdAndStatus(membershipId, PaymentStatus.CANCEL_REQUESTED))
+            throw new IllegalStateException("Đơn đang yêu cầu hủy; không được tạo giao dịch mới.");
         if (payments.existsByMembership_IdAndStatus(
                 membershipId,
                 PaymentStatus.PENDING
@@ -201,10 +217,16 @@ public class MembershipPaymentService {
         if (snapshot.getMembership() == null) {
             throw new IllegalArgumentException("Giao dịch không có thông tin gói tập");
         }
+        User member = users.lockByIdForBooking(snapshot.getUser().getId()).orElseThrow();
+        entityManager.refresh(member);
         Membership membership = memberships.lockById(snapshot.getMembership().getId())
                 .orElseThrow(() -> new IllegalArgumentException("Gói tập không tồn tại"));
         Payment payment = payments.lockById(paymentId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy giao dịch"));
+        entityManager.refresh(membership);
+        entityManager.refresh(payment);
+        if (member.getRole() != UserRole.MEMBER || member.getStatus() != UserStatus.ACTIVE || !Boolean.TRUE.equals(member.getEnabled()))
+            throw new IllegalArgumentException("Tài khoản Member không hoạt động.");
 
         if (payment.getMethod() != PaymentMethod.CASH) {
             throw new IllegalArgumentException(
@@ -270,8 +292,10 @@ public class MembershipPaymentService {
             );
         }
 
+        if (membership.getQuotedPrice() != null && membership.getQuotedPrice().compareTo(payment.getAmount()) != 0)
+            throw new IllegalArgumentException("Số tiền CASH không khớp snapshot gói tập.");
         payment.setStatus(PaymentStatus.PAID);
-        payment.setPaidAt(LocalDateTime.now());
+        payment.setPaidAt(LocalDateTime.now(SepayPaymentService.ZONE));
         payment.setTransactionCode(
                 "CASH-" + payment.getId()
         );
@@ -285,9 +309,12 @@ public class MembershipPaymentService {
         if (duration <= 0 || membership.getStatus() != MembershipStatus.PENDING) {
             throw new IllegalStateException("Gói tập không thể kích hoạt.");
         }
-        LocalDate start = paidAt.toLocalDate();
+        payments.flush();
+        if (!payments.existsByMembership_IdAndStatus(membership.getId(), PaymentStatus.PAID))
+            throw new IllegalStateException("Chỉ cộng thời hạn sau Payment PAID.");
+        LocalDate start = activationStart(membership, paidAt.toLocalDate());
         membership.setStartDate(start);
-        membership.setEndDate(start.plusDays(duration - 1L));
+        membership.setEndDate(membership.term().endDate(start));
         membership.setStatus(MembershipStatus.ACTIVE);
         memberships.save(membership);
         notifications.createNotificationForUser(
@@ -298,36 +325,99 @@ public class MembershipPaymentService {
                 membership.getId());
     }
 
+    LocalDate activationStart(Membership membership, LocalDate paidDate) {
+        return activationStart(membership, paidDate, memberships.findPaidAccessByUser(membership.getUser().getId()));
+    }
+
+    private LocalDate activationStart(Membership membership, LocalDate paidDate, List<Membership> paid) {
+        LocalDate start = paidDate;
+        LocalDate last = paid.stream()
+                .filter(previous -> sharesBranchChain(previous, membership.getBranch().getId()))
+                .map(Membership::getEndDate).filter(java.util.Objects::nonNull).max(LocalDate::compareTo).orElse(null);
+        if (last != null && !last.isBefore(start)) start = last.plusDays(1);
+        return start;
+    }
+
     /** Hủy đơn chưa thanh toán, đóng Payment PENDING nhưng giữ lịch sử. */
     @Transactional
-    public void cancelPendingMembership(String email, Long membershipId) {
+    public boolean cancelPendingMembership(String email, Long membershipId) {
         User member = lockedMember(email);
         Membership membership = memberships.lockById(membershipId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy gói tập."));
+        entityManager.refresh(membership);
         if (!membership.getUser().getId().equals(member.getId())) {
             throw new IllegalArgumentException("Bạn không sở hữu gói này.");
         }
         if (membership.getStatus() != MembershipStatus.PENDING) {
             throw new IllegalStateException("Chỉ hủy được gói đang PENDING.");
         }
-        if (payments.findByMembership_IdAndStatus(membershipId, PaymentStatus.PENDING).stream()
-                .anyMatch(payment -> payment.getMethod() == PaymentMethod.VNPAY || payment.getMethod() == PaymentMethod.SEPAY)) {
-            throw new IllegalStateException("Giao dịch VNPay/SePay đang xử lý; cần chờ kết quả đối soát trước khi hủy gói.");
-        }
-        // Khóa từng payment để tuần tự với thao tác Admin xác nhận CASH.
-        for (Payment payment : payments.findByMembership_IdAndStatus(
-                membershipId, PaymentStatus.PENDING)) {
+        if (payments.existsByMembership_IdAndStatus(membershipId, PaymentStatus.PAID))
+            throw new IllegalStateException("Đơn đã thanh toán; không được hủy bằng luồng chưa thanh toán.");
+        if (payments.existsByMembership_IdAndStatus(membershipId, PaymentStatus.CANCEL_REQUESTED)) return false;
+        boolean needsApproval = payments.findByMembership_IdAndStatus(membershipId, PaymentStatus.PENDING).stream()
+                .anyMatch(payment -> payment.getMethod() != PaymentMethod.CASH);
+        for (Payment payment : payments.findByMembership_IdAndStatus(membershipId, PaymentStatus.PENDING)
+                .stream().sorted(java.util.Comparator.comparing(Payment::getId)).toList()) {
             Payment locked = payments.lockById(payment.getId()).orElseThrow();
+            entityManager.refresh(locked);
             if (locked.getStatus() == PaymentStatus.PENDING) {
-                locked.setStatus(PaymentStatus.FAILED);
+                locked.setCancellationRequestedAt(LocalDateTime.now(SepayPaymentService.ZONE));
+                locked.setStatus(needsApproval ? PaymentStatus.CANCEL_REQUESTED : PaymentStatus.CANCELLED);
+                if (!needsApproval) {
+                    locked.setCancelledAt(LocalDateTime.now(SepayPaymentService.ZONE));
+                    locked.setCancelledBy(member.getEmail());
+                    locked.setCancellationReason("Hội viên hủy yêu cầu tiền mặt chưa được xác nhận thu tiền.");
+                }
             }
         }
+        if (needsApproval) return false;
         membership.setStatus(MembershipStatus.CANCELLED);
+        return true;
+    }
+
+    @Transactional
+    public void approvePendingCancellation(String adminEmail, Long paymentId, String reason, boolean reviewed) {
+        User actor = users.findByEmail(adminEmail).orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("Admin không tồn tại."));
+        entityManager.refresh(actor);
+        if (actor.getRole() != UserRole.ADMIN || actor.getStatus() != UserStatus.ACTIVE || !Boolean.TRUE.equals(actor.getEnabled()))
+            throw new org.springframework.security.access.AccessDeniedException("Chỉ Admin đang hoạt động được xử lý yêu cầu hủy.");
+        if (!reviewed || reason == null || reason.trim().length() < 10 || reason.trim().length() > 500)
+            throw new IllegalArgumentException("Cần kiểm tra lịch sử thu tiền và ghi lý do duyệt hủy (10–500 ký tự).");
+        Payment snapshot = payments.findById(paymentId).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy giao dịch."));
+        if (snapshot.getMembership() == null) throw new IllegalArgumentException("Giao dịch không có Membership.");
+        User member = users.lockByIdForBooking(snapshot.getUser().getId()).orElseThrow();
+        entityManager.refresh(member);
+        Membership membership = memberships.lockById(snapshot.getMembership().getId()).orElseThrow();
+        entityManager.refresh(membership);
+        if (membership.getStatus() != MembershipStatus.PENDING || payments.existsByMembership_IdAndStatus(membership.getId(), PaymentStatus.PAID))
+            throw new IllegalStateException("Gói không còn chờ thanh toán hoặc đã có tiền được xác nhận. Không thể duyệt hủy.");
+        var requests = payments.findByMembership_IdAndStatus(membership.getId(), PaymentStatus.CANCEL_REQUESTED);
+        if (requests.stream().noneMatch(payment -> payment.getId().equals(paymentId)))
+            throw new IllegalStateException("Chưa có yêu cầu hủy đang chờ xử lý cho giao dịch này.");
+        for (Payment request : requests.stream().sorted(java.util.Comparator.comparing(Payment::getId)).toList()) {
+            Payment locked = payments.lockById(request.getId()).orElseThrow();
+            entityManager.refresh(locked);
+            if (locked.getStatus() != PaymentStatus.CANCEL_REQUESTED) throw new IllegalStateException("Trạng thái giao dịch đã thay đổi.");
+            locked.setStatus(PaymentStatus.CANCELLED);
+            locked.setCancelledAt(LocalDateTime.now(SepayPaymentService.ZONE));
+            locked.setCancelledBy(actor.getEmail());
+            locked.setCancellationReason(reason.trim());
+        }
+        membership.setStatus(MembershipStatus.CANCELLED);
+    }
+
+    @Transactional(readOnly = true)
+    public java.util.Set<Long> cancellationMembershipIds(String email) {
+        User member = currentMember(email);
+        return payments.findByUser_IdOrderByCreatedAtDesc(member.getId()).stream()
+                .filter(payment -> payment.getStatus() == PaymentStatus.CANCEL_REQUESTED && payment.getMembership() != null)
+                .map(payment -> payment.getMembership().getId()).collect(java.util.stream.Collectors.toSet());
     }
 
     private User lockedMember(String email) {
         User user = users.lockByEmailForBooking(email)
                 .orElseThrow(() -> new IllegalArgumentException("Tài khoản không tồn tại."));
+        entityManager.refresh(user);
         if (user.getRole() != UserRole.MEMBER || user.getStatus() != UserStatus.ACTIVE
                 || !Boolean.TRUE.equals(user.getEnabled())) {
             throw new IllegalArgumentException("Tài khoản Member không hợp lệ.");
@@ -341,22 +431,83 @@ public class MembershipPaymentService {
     ) {
         User member = currentMember(email);
 
+        List<Membership> paid = memberships.findPaidAccessByUser(member.getId());
+        var memberPayments = payments.findByUser_IdOrderByCreatedAtDesc(member.getId());
+        var confirmed = memberPayments.stream().filter(payment -> payment.getStatus() == PaymentStatus.PAID && payment.getMembership() != null)
+                .map(payment -> payment.getMembership().getId()).collect(java.util.stream.Collectors.toSet());
+        var ordersWithPayment = memberPayments.stream().filter(payment -> payment.getMembership() != null)
+                .map(payment -> payment.getMembership().getId()).collect(java.util.stream.Collectors.toSet());
         return memberships
                 .findByUser_IdOrderByCreatedAtDesc(
                         member.getId()
                 )
                 .stream()
-                .map(m -> new MembershipView(
+                .map(m -> membershipView(m, paid, confirmed.contains(m.getId()) || (m.getQuotedScope() == null && !ordersWithPayment.contains(m.getId()))))
+                .toList();
+    }
+
+    private MembershipView membershipView(Membership m, List<Membership> paid, boolean paymentConfirmed) {
+        LocalDate today = LocalDate.now(SepayPaymentService.ZONE);
+        boolean usable = paid.stream().anyMatch(period -> period.getId().equals(m.getId()));
+        String periodState = m.getStatus().name();
+        if (usable && m.getStartDate() != null && m.getEndDate() != null)
+            periodState = m.getStartDate().isAfter(today) ? "FUTURE" : m.getEndDate().isBefore(today) ? "EXPIRED" : "CURRENT";
+        LocalDate projectedStart = activationStart(m, today, paid);
+        var projectedTerm = m.getStatus() == MembershipStatus.PENDING ? m.term() : m.getPlan().term();
+        return new MembershipView(
                         m.getId(),
                         m.getBranch().getName(),
                         m.getPlan().getName(),
                         m.getQuotedPrice() != null ? m.getQuotedPrice() : m.getPlan().getPrice(),
                         m.getStatus().name(),
                         m.getStartDate(),
-                        m.getEndDate()
-                ))
-                .toList();
+                        m.getEndDate(), m.effectiveBenefit().name(), m.effectiveScope().name(),
+                        java.util.Set.copyOf(m.getBranchIds()),
+                        (m.getStatus() == MembershipStatus.ACTIVE || m.getStatus() == MembershipStatus.EXPIRED)
+                                && Boolean.TRUE.equals(m.getPlan().getActive()) && m.getPlan().fixedBranch()
+                                && m.getPlan().getBranchIds().contains(m.getBranch().getId()),
+                        projectedTerm.daysAt(projectedStart), projectedTerm.endDate(projectedStart),
+                        paidThrough(m, paid), m.getPlan().getPrice(), m.getBranch().getId(), periodState,
+                        "CURRENT".equals(periodState) ? java.time.temporal.ChronoUnit.DAYS.between(today, m.getEndDate()) + 1 : 0,
+                        m.term().description(), projectedStart, projectedTerm.description(), paymentConfirmed
+                );
     }
+
+    @Transactional(readOnly = true)
+    public List<BranchTimeline> branchTimelines(String email) {
+        List<MembershipView> views = myMemberships(email);
+        var grouped = views.stream().collect(java.util.stream.Collectors.groupingBy(MembershipView::branchId, java.util.LinkedHashMap::new, java.util.stream.Collectors.toList()));
+        return grouped.entrySet().stream().map(entry -> {
+            var periods = entry.getValue().stream().sorted(java.util.Comparator
+                    .comparingInt((MembershipView period) -> switch (period.periodState()) { case "CURRENT" -> 0; case "FUTURE" -> 1; case "PENDING" -> 2; default -> 3; })
+                    .thenComparing(MembershipView::startDate, java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder()))) .toList();
+            LocalDate end = periods.stream().filter(MembershipView::paymentConfirmed)
+                    .filter(period -> period.status().equals("ACTIVE") || period.status().equals("EXPIRED"))
+                    .map(MembershipView::endDate).filter(java.util.Objects::nonNull).max(LocalDate::compareTo).orElse(null);
+            LocalDate continuous = periods.get(0).paidThrough();
+            return new BranchTimeline(entry.getKey(), periods.get(0).branchName(), end, continuous,
+                    end != null && !end.isBefore(LocalDate.now(SepayPaymentService.ZONE)) && (continuous == null || end.isAfter(continuous)), periods);
+        }).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PurchaseOption> purchaseOptions(String email) {
+        User member = currentMember(email);
+        var paid = memberships.findPaidAccessByUser(member.getId());
+        var activeBranches = branches.findByActiveTrueOrderByNameAsc().stream().collect(java.util.stream.Collectors.toMap(Branch::getId, branch -> branch));
+        return plans.findByActiveTrueOrderByNameAsc().stream().filter(MembershipPlan::fixedBranch).filter(plan -> activeBranches.containsKey(plan.getBranchIds().iterator().next()))
+                .map(plan -> {
+                    Branch branch = activeBranches.get(plan.getBranchIds().iterator().next());
+                    var proposed = Membership.builder().user(member).branch(branch).build();
+                    LocalDate start = activationStart(proposed, LocalDate.now(SepayPaymentService.ZONE), paid);
+                    return new PurchaseOption(plan.getId(), branch.getId(), branch.getName(), plan.getName(), plan.getPrice(),
+                            plan.effectiveBenefit().name(), plan.term().description(), start, plan.term().endDate(start));
+                }).sorted(java.util.Comparator.comparing(PurchaseOption::branchName).thenComparing(PurchaseOption::planName)).toList();
+    }
+
+    public record PurchaseOption(Long planId, Long branchId, String branchName, String planName, BigDecimal price,
+                                 String benefit, String durationDescription, LocalDate projectedStart, LocalDate projectedEnd) {}
+    public record BranchTimeline(Long branchId, String branchName, LocalDate totalEnd, LocalDate continuousThrough, boolean gap, List<MembershipView> periods) {}
 
     @Transactional(readOnly = true)
     public List<PaymentView> myPayments(String email) {
@@ -429,8 +580,26 @@ public class MembershipPaymentService {
             BigDecimal price,
             String status,
             LocalDate startDate,
-            LocalDate endDate
+            LocalDate endDate, String benefit, String accessScope, java.util.Set<Long> branchIds,
+            boolean renewable, Integer renewalDays, LocalDate projectedEnd, LocalDate paidThrough, BigDecimal renewalPrice,
+            Long branchId, String periodState, long daysRemaining, String durationDescription, LocalDate projectedStart, String renewalDescription, boolean paymentConfirmed
     ) {}
+
+    private LocalDate paidThrough(Membership membership, List<Membership> paid) {
+        LocalDate today = LocalDate.now(SepayPaymentService.ZONE);
+        LocalDate end = today.minusDays(1);
+        for (Membership period : paid.stream().filter(candidate -> sharesBranchChain(candidate, membership.getBranch().getId()))
+                .filter(candidate -> candidate.getStartDate() != null && candidate.getEndDate() != null)
+                .sorted(java.util.Comparator.comparing(Membership::getStartDate)).toList()) {
+            if (!period.getStartDate().isAfter(end.plusDays(1)) && period.getEndDate().isAfter(end)) end = period.getEndDate();
+        }
+        return end.isBefore(today) ? null : end;
+    }
+
+    private boolean sharesBranchChain(Membership previous, Long branchId) {
+        return previous.getBranch().getId().equals(branchId)
+                || (previous.effectiveScope() != MembershipScope.SINGLE_BRANCH && MembershipEligibilityService.allowsBranch(previous, branchId));
+    }
 
     public record PaymentView(
             Long id,

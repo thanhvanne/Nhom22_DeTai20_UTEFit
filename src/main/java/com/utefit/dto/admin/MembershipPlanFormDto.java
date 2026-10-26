@@ -11,6 +11,13 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 public class MembershipPlanFormDto {
+    @NotNull @Builder.Default private com.utefit.enums.MembershipDurationUnit durationUnit = com.utefit.enums.MembershipDurationUnit.DAY;
+    @NotNull @Min(1) @Builder.Default private Integer durationQuantity = 30;
+    @NotNull @Builder.Default private com.utefit.enums.MembershipDurationUnit bonusUnit = com.utefit.enums.MembershipDurationUnit.DAY;
+    @NotNull @Min(0) @Builder.Default private Integer bonusQuantity = 0;
+    @NotNull @Builder.Default private com.utefit.enums.MembershipBenefit benefit = com.utefit.enums.MembershipBenefit.ALL;
+    @NotNull @Builder.Default private com.utefit.enums.MembershipScope accessScope = com.utefit.enums.MembershipScope.SINGLE_BRANCH;
+    @Builder.Default private java.util.Set<Long> branchIds = new java.util.HashSet<>();
 
     private Long id;
 
@@ -21,8 +28,8 @@ public class MembershipPlanFormDto {
     @Size(max = 1500, message = "Mô tả tối đa 1500 ký tự")
     private String description;
 
-    @NotNull(message = "Vui lòng nhập thời hạn gói tập (số ngày)")
     @Min(value = 1, message = "Thời hạn gói tập phải lớn hơn 0 ngày")
+    @Max(value = 36600, message = "Thời hạn gói tối đa 36600 ngày")
     private Integer durationDays;
 
     @NotNull(message = "Vui lòng nhập giá gói tập")

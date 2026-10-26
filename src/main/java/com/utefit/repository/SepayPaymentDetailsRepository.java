@@ -6,6 +6,12 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.Optional;
 
 public interface SepayPaymentDetailsRepository extends JpaRepository<SepayPaymentDetails, Long> {
+    @Override
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"payment", "payment.membership"})
+    Optional<SepayPaymentDetails> findById(Long id);
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"payment", "payment.user", "payment.membership"})
+    @org.springframework.data.jpa.repository.Query("select d from SepayPaymentDetails d where d.environment = 'LIVE' and (d.payment.status = com.utefit.enums.PaymentStatus.PENDING or d.payment.status = com.utefit.enums.PaymentStatus.CANCEL_REQUESTED or exists (select w.id from SepayWebhookTransaction w where w.payment = d.payment and w.outcome = 'REVIEW')) order by d.payment.createdAt, d.id")
+    org.springframework.data.domain.Page<SepayPaymentDetails> findReconciliationCases(org.springframework.data.domain.Pageable pageable);
     interface Target {
         Long getPaymentId();
         Long getMembershipId();

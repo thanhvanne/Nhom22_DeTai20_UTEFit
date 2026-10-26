@@ -18,6 +18,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AdminMembershipPlanController {
 
     private final AdminMembershipPlanService planService;
+    private final com.utefit.repository.BranchRepository branches;
+
+    @ModelAttribute("scopeBranches")
+    public java.util.List<com.utefit.entity.Branch> scopeBranches() { return branches.findByActiveTrueOrderByNameAsc(); }
 
     @GetMapping
     public String listPlans(
@@ -52,6 +56,7 @@ public class AdminMembershipPlanController {
             Model model,
             RedirectAttributes redirectAttributes
     ) {
+        includeSavedBranches(planForm, model);
         if (bindingResult.hasErrors()) {
             model.addAttribute("isEdit", false);
             model.addAttribute("activeMenu", "plans");
@@ -78,6 +83,7 @@ public class AdminMembershipPlanController {
     ) {
         try {
             MembershipPlanFormDto planForm = planService.getPlanFormById(id);
+            includeSavedBranches(planForm, model);
             model.addAttribute("planForm", planForm);
             model.addAttribute("isEdit", true);
             model.addAttribute("activeMenu", "plans");
@@ -97,6 +103,7 @@ public class AdminMembershipPlanController {
             RedirectAttributes redirectAttributes
     ) {
         planForm.setId(id);
+        includeSavedBranches(planForm, model);
         if (bindingResult.hasErrors()) {
             model.addAttribute("isEdit", true);
             model.addAttribute("activeMenu", "plans");
@@ -127,5 +134,15 @@ public class AdminMembershipPlanController {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
         return "redirect:/admin/membership-plans";
+    }
+
+    private void includeSavedBranches(MembershipPlanFormDto form, Model model) {
+        var available = new java.util.ArrayList<>(scopeBranches());
+        if (form.getBranchIds() != null) {
+            var selectedIds = form.getBranchIds().stream().filter(java.util.Objects::nonNull).toList();
+            var activeIds = available.stream().map(com.utefit.entity.Branch::getId).collect(java.util.stream.Collectors.toSet());
+            branches.findAllById(selectedIds).stream().filter(branch -> !activeIds.contains(branch.getId())).forEach(available::add);
+        }
+        model.addAttribute("scopeBranches", available);
     }
 }

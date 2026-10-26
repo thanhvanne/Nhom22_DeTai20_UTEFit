@@ -41,6 +41,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         ClassCategory c = getCategoryById(id);
         return ClassCategoryFormDto.builder()
                 .id(c.getId())
+                .requiredBenefit(c.getRequiredBenefit())
                 .name(c.getName())
                 .description(c.getDescription())
                 .active(c.getActive())
@@ -53,6 +54,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         validateUniqueCategoryName(dto.getName(), null);
 
         ClassCategory category = ClassCategory.builder()
+                .requiredBenefit(dto.getRequiredBenefit())
                 .name(dto.getName().trim())
                 .description(dto.getDescription() != null ? dto.getDescription().trim() : null)
                 .active(dto.getActive() != null ? dto.getActive() : true)
@@ -68,6 +70,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         validateUniqueCategoryName(dto.getName(), id);
 
         category.setName(dto.getName().trim());
+        category.setRequiredBenefit(dto.getRequiredBenefit());
         category.setDescription(dto.getDescription() != null ? dto.getDescription().trim() : null);
         category.setActive(dto.getActive() != null ? dto.getActive() : true);
 

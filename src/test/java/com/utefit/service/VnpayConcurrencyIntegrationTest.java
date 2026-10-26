@@ -36,8 +36,9 @@ class VnpayConcurrencyIntegrationTest {
                 .durationDays(90).price(new BigDecimal("150000")).active(true).build());
         Membership membership = memberships.save(Membership.builder().user(member).branch(branch).plan(plan)
                 .status(MembershipStatus.PENDING).quotedPrice(new BigDecimal("100000")).quotedDurationDays(30).build());
-        service.start(member.getEmail(), membership.getId(), "127.0.0.1");
-        Payment payment = payments.findByMembership_IdAndStatus(membership.getId(), PaymentStatus.PENDING).get(0);
+        Payment payment = payments.saveAndFlush(Payment.builder().user(member).membership(membership)
+                .amount(new BigDecimal("100000")).method(PaymentMethod.VNPAY).status(PaymentStatus.PENDING)
+                .transactionCode("LEGACY" + UUID.randomUUID().toString().replace("-", "")).createdAt(LocalDateTime.now()).build());
         LocalDateTime paidAt = LocalDateTime.now().withNano(0);
         Map<String, String> fields = new TreeMap<>(Map.of("vnp_TmnCode", "CONCURRENCYTEST",
                 "vnp_TxnRef", payment.getTransactionCode(), "vnp_Amount", "10000000", "vnp_ResponseCode", "00",

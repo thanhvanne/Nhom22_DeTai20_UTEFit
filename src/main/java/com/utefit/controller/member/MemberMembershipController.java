@@ -79,7 +79,7 @@ public class MemberMembershipController {
             redirect.addFlashAttribute(
                     "success",
                     "Đã tạo đăng ký gói tập PENDING. "
-                            + "Hãy chọn CASH, VNPay Sandbox hoặc chuyển khoản VietQR (SePay)."
+                            + "Hãy chọn CASH hoặc chuyển khoản VietQR (SePay)."
             );
         } catch (IllegalArgumentException e) {
             redirect.addFlashAttribute(
@@ -88,6 +88,17 @@ public class MemberMembershipController {
             );
         }
 
+        return "redirect:/member/memberships";
+    }
+
+    @PostMapping("/memberships/{id}/renew")
+    public String renew(@PathVariable Long id, Principal principal, RedirectAttributes redirect) {
+        try {
+            Long pending = billing.renew(principal.getName(), id);
+            redirect.addFlashAttribute("success", "Đã tạo đơn gia hạn #" + pending + " PENDING. Chỉ cộng ngày sau khi thanh toán hợp lệ.");
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            redirect.addFlashAttribute("error", ex.getMessage());
+        }
         return "redirect:/member/memberships";
     }
 
@@ -123,8 +134,9 @@ public class MemberMembershipController {
     public String cancelPending(@PathVariable Long id, Principal principal,
                                 RedirectAttributes redirect) {
         try {
-            billing.cancelPendingMembership(principal.getName(), id);
-            redirect.addFlashAttribute("success", "Đã hủy gói đang chờ thanh toán.");
+            boolean cancelled = billing.cancelPendingMembership(principal.getName(), id);
+            redirect.addFlashAttribute("success", cancelled ? "Đã hủy gói đang chờ thanh toán. Bạn có thể mua gói khác."
+                    : "Đã gửi yêu cầu hủy đến Admin. Không chuyển tiền vào mã đơn cũ; đơn đang tạm ngừng xác nhận thanh toán.");
         } catch (IllegalArgumentException | IllegalStateException ex) {
             redirect.addFlashAttribute("error", ex.getMessage());
         }
@@ -148,6 +160,9 @@ public class MemberMembershipController {
             Principal principal,
             Model model
     ) {
+        model.addAttribute("branchTimelines", billing.branchTimelines(principal.getName()));
+        model.addAttribute("cancellationMembershipIds", billing.cancellationMembershipIds(principal.getName()));
+        model.addAttribute("purchaseOptions", billing.purchaseOptions(principal.getName()));
         model.addAttribute(
                 "memberships",
                 billing.myMemberships(principal.getName())

@@ -17,6 +17,12 @@ import java.util.Optional;
 
 public interface ClassRegistrationRepository
         extends JpaRepository<ClassRegistration, Long> {
+    @Query("select distinct r.user.id from ClassRegistration r where r.status = com.utefit.enums.RegistrationStatus.REGISTERED and r.schedule.scheduleDate >= :today order by r.user.id")
+    List<Long> findFutureMemberIds(@Param("today") LocalDate today, org.springframework.data.domain.Pageable pageable);
+
+    @EntityGraph(attributePaths = {"schedule", "schedule.fitnessClass", "schedule.fitnessClass.branch", "schedule.fitnessClass.category"})
+    @Query("select r from ClassRegistration r where r.user.id = :memberId and r.status = com.utefit.enums.RegistrationStatus.REGISTERED and r.schedule.scheduleDate >= :today order by r.schedule.id")
+    List<ClassRegistration> findFutureForMember(@Param("memberId") Long memberId, @Param("today") LocalDate today);
 
     @Query("""
             SELECT r FROM ClassRegistration r

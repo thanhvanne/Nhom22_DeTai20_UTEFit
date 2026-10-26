@@ -14,7 +14,7 @@ import java.time.format.ResolverStyle;
 import java.util.HexFormat;
 import java.util.Locale;
 
-public record SepayWebhookPayload(long id, String gateway, String accountNumber, String code, String content,
+public record SepayWebhookPayload(long id, String gateway, String accountNumber, String subAccount, String code, String content,
                                   String transferType, BigDecimal amount, String referenceCode,
                                   LocalDateTime transactionDate, String fingerprint, String bodyHash) {
     private static final JsonMapper JSON = JsonMapper.builder().enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION)
@@ -25,6 +25,9 @@ public record SepayWebhookPayload(long id, String gateway, String accountNumber,
         try {
             JsonNode root = JSON.readTree(body);
             if (!root.isObject()) throw new IllegalArgumentException("Expected JSON object");
+            if (root.has("currency") && !"VND".equals(text(root, "currency", 3, true))) {
+                throw new IllegalArgumentException("Only VND supported");
+            }
             JsonNode idNode = root.get("id");
             if (idNode == null || !idNode.isIntegralNumber() || !idNode.canConvertToLong() || idNode.longValue() <= 0) {
                 throw new IllegalArgumentException("Invalid transaction id");
@@ -35,7 +38,8 @@ public record SepayWebhookPayload(long id, String gateway, String accountNumber,
             if (amount.signum() <= 0 || amount.compareTo(new BigDecimal("9999999999999")) > 0) throw new IllegalArgumentException("Invalid amount");
             long id = idNode.longValue();
             String gateway = text(root, "gateway", 100, true).toUpperCase(Locale.ROOT);
-            String account = text(root, "accountNumber", 50, true);
+            String account = identifier(root, "accountNumber", 50, true);
+            String subAccount = identifier(root, "subAccount", 50, false);
             String code = text(root, "code", 100, false).toUpperCase(Locale.ROOT);
             String content = text(root, "content", 2000, true);
             String type = text(root, "transferType", 3, true);
@@ -43,13 +47,24 @@ public record SepayWebhookPayload(long id, String gateway, String accountNumber,
             String reference = text(root, "referenceCode", 100, false);
             LocalDateTime date = LocalDateTime.parse(text(root, "transactionDate", 19, true), DATE);
             String fingerprint = hash(Long.toString(id), gateway, account, code, content, type, amount.toBigIntegerExact().toString(), reference, DATE.format(date));
-            return new SepayWebhookPayload(id, gateway, account, code, content, type, amount, reference, date, fingerprint,
+            if (!subAccount.isEmpty()) fingerprint = hash(fingerprint, subAccount);
+            return new SepayWebhookPayload(id, gateway, account, subAccount, code, content, type, amount, reference, date, fingerprint,
                     HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(body)));
         } catch (RuntimeException ex) {
             throw new IllegalArgumentException("Invalid SePay JSON payload", ex);
         } catch (java.security.NoSuchAlgorithmException ex) {
             throw new IllegalStateException(ex);
         }
+    }
+
+    private static String identifier(JsonNode root, String field, int max, boolean required) {
+        String validated = text(root, field, max, required);
+        if (!required && validated.isEmpty()) return "";
+        String value = root.get(field).asString();
+        if (value.length() > max || value.chars().anyMatch(character -> character < 32)) {
+            throw new IllegalArgumentException("Invalid account identifier");
+        }
+        return value;
     }
 
     private static String text(JsonNode root, String field, int max, boolean required) {

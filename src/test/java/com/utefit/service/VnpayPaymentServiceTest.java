@@ -52,6 +52,21 @@ class VnpayPaymentServiceTest {
                 .createdAt(LocalDateTime.now()).build();
     }
 
+    @Test void signedLateCallbackOnCancelledOrderIsAuditedWithoutActivation() {
+        when(payments.findByTransactionCode("UT7test")).thenReturn(Optional.of(payment));
+        when(users.lockByIdForBooking(1L)).thenReturn(Optional.of(member));
+        when(memberships.lockById(2L)).thenReturn(Optional.of(membership));
+        when(payments.lockById(5L)).thenReturn(Optional.of(payment));
+        payment.setStatus(PaymentStatus.CANCELLED); membership.setStatus(MembershipStatus.CANCELLED);
+        assertEquals("00", service.ipn(callback("00", "00")).get("RspCode"));
+        String audit = payment.getLateGatewayEvidence();
+        assertTrue(audit.contains("12345"));
+        assertEquals("00", service.ipn(callback("00", "00")).get("RspCode"));
+        assertEquals(audit, payment.getLateGatewayEvidence());
+        assertEquals(PaymentStatus.CANCELLED, payment.getStatus()); assertNull(payment.getPaidAt());
+        verify(billing, never()).activateMembership(any(), any());
+    }
+
     private Map<String, String> callback(String response, String status) {
         Map<String, String> fields = new TreeMap<>();
         fields.put("vnp_TmnCode", "TESTTMN");
@@ -66,6 +81,7 @@ class VnpayPaymentServiceTest {
     }
 
     private void found() {
+        when(users.lockByIdForBooking(1L)).thenReturn(Optional.of(member));
         when(payments.findByTransactionCode("UT7test")).thenReturn(Optional.of(payment));
         when(memberships.lockById(2L)).thenReturn(Optional.of(membership));
         when(payments.lockById(5L)).thenReturn(Optional.of(payment));
@@ -142,59 +158,40 @@ class VnpayPaymentServiceTest {
     }
 
     @Test
-    void doesNotReactivateCancelledMembershipButPreservesReceivedMoney() {
+    void doesNotReactivateCancelledMembershipAndAuditsMoneyWithoutMarkingPaid() {
         found();
         membership.setStatus(MembershipStatus.CANCELLED);
         service.ipn(callback("00", "00"));
-        assertEquals(PaymentStatus.PAID, payment.getStatus());
+        assertEquals(PaymentStatus.PENDING, payment.getStatus());
+        assertNotNull(payment.getLateGatewayEvidence());
         verifyNoInteractions(billing);
     }
 
     @Test
     void differentOwnerCannotStartPayment() {
-        when(users.findByEmail(member.getEmail())).thenReturn(Optional.of(member));
         membership.setUser(User.builder().id(99L).build());
-        when(memberships.lockById(2L)).thenReturn(Optional.of(membership));
-        assertThrows(org.springframework.security.access.AccessDeniedException.class,
+        assertThrows(IllegalStateException.class,
                 () -> service.start(member.getEmail(), 2L, "127.0.0.1"));
         verifyNoInteractions(payments);
     }
 
     @Test
-    void newPaymentUsesQuotedPriceAndSandbox() {
-        when(users.findByEmail(member.getEmail())).thenReturn(Optional.of(member));
-        when(memberships.lockById(2L)).thenReturn(Optional.of(membership));
-        when(payments.findByMembership_IdAndStatus(2L, PaymentStatus.PENDING)).thenReturn(List.of());
-        when(payments.saveAndFlush(any())).thenAnswer(invocation -> {
-            Payment saved = invocation.getArgument(0);
-            saved.setId(5L);
-            assertEquals(new BigDecimal("100000"), saved.getAmount());
-            assertEquals(PaymentStatus.PENDING, saved.getStatus());
-            return saved;
-        });
-        String url = service.start(member.getEmail(), 2L, "127.0.0.1");
-        assertTrue(url.startsWith("https://sandbox.vnpayment.vn/"));
-        assertTrue(url.contains("vnp_Amount=10000000"));
-        assertTrue(url.contains("vnp_SecureHash="));
-        verifyNoInteractions(billing);
+    void newPaymentAlwaysDisabledEvenWhenLegacyGatewayConfigured() {
+        var error = assertThrows(IllegalStateException.class, () -> service.start(member.getEmail(), 2L, "127.0.0.1"));
+        assertTrue(error.getMessage().contains("SePay/VietQR"));
+        verifyNoInteractions(payments, memberships, users, billing);
     }
 
     @Test
-    void repeatedStartReusesPendingPayment() {
-        when(users.findByEmail(member.getEmail())).thenReturn(Optional.of(member));
-        when(memberships.lockById(2L)).thenReturn(Optional.of(membership));
-        when(payments.findByMembership_IdAndStatus(2L, PaymentStatus.PENDING)).thenReturn(List.of(payment));
-        assertEquals(service.start(member.getEmail(), 2L, "127.0.0.1"),
-                service.start(member.getEmail(), 2L, "127.0.0.1"));
+    void repeatedStartCannotReopenLegacyPendingPayment() {
+        assertThrows(IllegalStateException.class, () -> service.start(member.getEmail(), 2L, "127.0.0.1"));
+        assertThrows(IllegalStateException.class, () -> service.start(member.getEmail(), 2L, "127.0.0.1"));
         verify(payments, never()).saveAndFlush(any());
     }
 
     @Test
     void pendingCashCannotBeBypassed() {
         payment.setMethod(PaymentMethod.CASH);
-        when(users.findByEmail(member.getEmail())).thenReturn(Optional.of(member));
-        when(memberships.lockById(2L)).thenReturn(Optional.of(membership));
-        when(payments.findByMembership_IdAndStatus(2L, PaymentStatus.PENDING)).thenReturn(List.of(payment));
         assertThrows(IllegalStateException.class, () -> service.start(member.getEmail(), 2L, "127.0.0.1"));
         verify(payments, never()).saveAndFlush(any());
     }

@@ -19,15 +19,18 @@ public class Branch {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @org.hibernate.annotations.Nationalized
     @Column(nullable = false, length = 150)
     private String name;
 
+    @org.hibernate.annotations.Nationalized
     @Column(nullable = false, length = 255)
     private String address;
 
     @Column(length = 20)
     private String phone;
 
+    @org.hibernate.annotations.Nationalized
     @Column(length = 1000)
     private String description;
 

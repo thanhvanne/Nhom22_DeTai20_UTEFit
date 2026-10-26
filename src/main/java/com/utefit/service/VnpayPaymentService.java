@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -31,36 +30,7 @@ public class VnpayPaymentService {
 
     @Transactional
     public String start(String email, Long membershipId, String ipAddress) {
-        properties.requireConfigured();
-        User member = users.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("Tài khoản không tồn tại."));
-        if (member.getRole() != UserRole.MEMBER || member.getStatus() != UserStatus.ACTIVE
-                || !Boolean.TRUE.equals(member.getEnabled())) throw new IllegalArgumentException("Tài khoản không hợp lệ.");
-        Membership membership = memberships.lockById(membershipId)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy gói đăng ký."));
-        if (!membership.getUser().getId().equals(member.getId())) {
-            throw new org.springframework.security.access.AccessDeniedException("Không sở hữu gói đăng ký.");
-        }
-        if (membership.getStatus() != MembershipStatus.PENDING
-                || !Boolean.TRUE.equals(membership.getBranch().getActive())
-                || !Boolean.TRUE.equals(membership.getPlan().getActive())) {
-            throw new IllegalStateException("Gói đăng ký không còn chờ thanh toán hoặc đã ngừng hoạt động.");
-        }
-        var pending = payments.findByMembership_IdAndStatus(membershipId, PaymentStatus.PENDING);
-        if (!pending.isEmpty()) {
-            Payment existing = pending.get(0);
-            if (pending.size() != 1 || existing.getMethod() != PaymentMethod.VNPAY) {
-                throw new IllegalStateException("Đã có yêu cầu thanh toán đang xử lý. Vui lòng hoàn tất tại quầy.");
-            }
-            return gateway.paymentUrl(existing, ipAddress);
-        }
-        Payment payment = Payment.builder().user(member).membership(membership)
-                .amount(membership.getQuotedPrice() != null ? membership.getQuotedPrice() : membership.getPlan().getPrice())
-                .method(PaymentMethod.VNPAY).status(PaymentStatus.PENDING)
-                .transactionCode("UT7" + UUID.randomUUID().toString().replace("-", ""))
-                .createdAt(LocalDateTime.now()).build();
-        VnpayGateway.minorUnits(payment.getAmount());
-        payments.saveAndFlush(payment);
-        return gateway.paymentUrl(payment, ipAddress);
+        throw new IllegalStateException("VNPay đã ngừng nhận đơn mới. Vui lòng chọn SePay/VietQR hoặc CASH; đơn cũ cần đối soát riêng.");
     }
 
     @Transactional
@@ -70,6 +40,8 @@ public class VnpayPaymentService {
         if (snapshot == null || snapshot.getMethod() != PaymentMethod.VNPAY || snapshot.getMembership() == null) {
             return response("01", "Order not found");
         }
+        User member = users.lockByIdForBooking(snapshot.getUser().getId()).orElseThrow();
+        entityManager.refresh(member);
         Membership membership = memberships.lockById(snapshot.getMembership().getId()).orElseThrow();
         entityManager.refresh(membership);
         Payment payment = payments.lockById(snapshot.getId()).orElseThrow();
@@ -78,7 +50,6 @@ public class VnpayPaymentService {
             return response("99", "Order owner mismatch");
         }
         if (!matchesAmount(payment, fields.get("vnp_Amount"))) return response("04", "Invalid amount");
-        if (payment.getStatus() != PaymentStatus.PENDING) return response("02", "Order already confirmed");
         String code = fields.get("vnp_ResponseCode");
         String status = fields.get("vnp_TransactionStatus");
         String gatewayId = fields.get("vnp_TransactionNo");
@@ -96,6 +67,20 @@ public class VnpayPaymentService {
                 return response("99", "Invalid membership duration");
             }
         }
+        if (payment.getStatus() == PaymentStatus.CANCELLED || payment.getStatus() == PaymentStatus.CANCEL_REQUESTED
+                || membership.getStatus() == MembershipStatus.CANCELLED) {
+            if (paid) {
+                String entry = "\n" + gatewayId + "|" + paidAt + "|" + payment.getAmount() + "|VERIFIED_LATE_REVIEW";
+                String existing = payment.getLateGatewayEvidence() == null ? "" : payment.getLateGatewayEvidence();
+                if (!existing.contains(entry)) {
+                    if (existing.length() + entry.length() > 2000) throw new IllegalStateException("Late callback audit full; operator review required.");
+                    payment.setLateGatewayEvidence(existing + entry);
+                }
+            }
+            return response("00", "Recorded for review; membership not activated");
+        }
+        if (payment.getStatus() != PaymentStatus.PENDING) return response("02", "Order already confirmed");
+        if (paid && membership.getStatus() != MembershipStatus.PENDING) return response("99", "Membership not pending");
         payment.setGatewayResponseCode(code);
         payment.setGatewayTransactionNo(gatewayId);
         payment.setStatus(paid ? PaymentStatus.PAID : PaymentStatus.FAILED);
@@ -118,6 +103,8 @@ public class VnpayPaymentService {
                     ? "Thanh toán đã được xác nhận. Gói tập đã kích hoạt."
                     : "Đã ghi nhận thanh toán. Vui lòng liên hệ quầy để đối soát trạng thái gói tập.";
         }
+        if (payment.getStatus() == PaymentStatus.CANCELLED || payment.getStatus() == PaymentStatus.CANCEL_REQUESTED)
+            return "Đơn đã hủy hoặc đang yêu cầu hủy. Không chuyển thêm tiền; nếu đã trả tiền cần Admin đối soát.";
         if (payment.getStatus() == PaymentStatus.FAILED) return "Thanh toán không thành công hoặc đã bị hủy. Gói tập chưa kích hoạt.";
         return "Đang chờ xác nhận thanh toán từ VNPay. Vui lòng kiểm tra lại lịch sử sau ít phút.";
     }

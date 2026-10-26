@@ -11,6 +11,12 @@ import java.util.List;
 
 public interface PersonalTrainingScheduleRepository
         extends JpaRepository<PersonalTrainingSchedule, Long> {
+    @Query("select distinct p.member.id from PersonalTrainingSchedule p where p.active = true and (p.status is null or p.status = com.utefit.enums.PersonalTrainingStatus.SCHEDULED) and p.scheduleDate >= :today order by p.member.id")
+    List<Long> findFutureMemberIds(@Param("today") LocalDate today, org.springframework.data.domain.Pageable pageable);
+
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"trainer", "trainer.branch", "trainer.user", "branch"})
+    @Query("select p from PersonalTrainingSchedule p where p.member.id = :memberId and p.active = true and (p.status is null or p.status = com.utefit.enums.PersonalTrainingStatus.SCHEDULED) and p.scheduleDate >= :today order by p.id")
+    List<PersonalTrainingSchedule> findFutureForMember(@Param("memberId") Long memberId, @Param("today") LocalDate today);
 
     @Query("""
             SELECT p FROM PersonalTrainingSchedule p

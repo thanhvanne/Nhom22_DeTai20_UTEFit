@@ -22,9 +22,9 @@ public class AdminCheckinService {
 
     private final UserRepository userRepository;
     private final BranchRepository branchRepository;
-    private final MembershipRepository membershipRepository;
     private final CheckinRepository checkinRepository;
     private final EntityManager entityManager;
+    private final MembershipEligibilityService eligibility;
 
     @Transactional
     public void checkIn(String email, Long branchId) {
@@ -69,18 +69,7 @@ public class AdminCheckinService {
 
         LocalDate today = LocalDate.now();
 
-        List<Membership> memberships =
-                membershipRepository
-                        .findByUser_IdOrderByCreatedAtDesc(user.getId());
-
-        boolean eligible = memberships.stream().anyMatch(m ->
-                m.getStatus() == MembershipStatus.ACTIVE
-                        && m.getStartDate() != null
-                        && m.getEndDate() != null
-                        && !m.getStartDate().isAfter(today)
-                        && !m.getEndDate().isBefore(today)
-                        && m.getBranch().getId().equals(branchId)
-        );
+        boolean eligible = eligibility.canUseBranch(user.getId(), branchId, today);
 
         if (!eligible) {
             throw new IllegalArgumentException(

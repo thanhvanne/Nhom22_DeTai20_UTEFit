@@ -75,7 +75,7 @@ public class MemberClassBookingService {
         LocalDateTime now = now();
 
         List<Membership> myMemberships = memberships
-                .findByUser_IdOrderByCreatedAtDesc(
+                .findPaidAccessByUser(
                         member.getId()
                 );
 
@@ -121,8 +121,7 @@ public class MemberClassBookingService {
             boolean membershipOK = hasMembership(
                     myMemberships,
                     fc.getBranch().getId(),
-                    now.toLocalDate(),
-                    schedule.getScheduleDate()
+                    schedule.getScheduleDate(), fc.getCategory().getRequiredBenefit()
             );
 
             boolean available =
@@ -146,7 +145,7 @@ public class MemberClassBookingService {
                             : !future
                             ? "Lịch đã bắt đầu"
                             : !membershipOK
-                            ? "Cần gói ACTIVE còn hạn tại chi nhánh này"
+                            ? MembershipEligibilityService.accessDenial(myMemberships, fc.getBranch().getId(), schedule.getScheduleDate(), fc.getCategory().getRequiredBenefit())
                             : fc.getStatus() != ClassStatus.OPEN
                             ? "Lớp không mở đăng ký"
                             : booked >= fc.getCapacity()
@@ -205,22 +204,13 @@ public class MemberClassBookingService {
 
         FitnessClass fc = schedule.getFitnessClass();
 
-        // Phải có Membership ACTIVE.
-        // Membership phải thuộc chi nhánh của lớp,
-        // hợp lệ hôm nay và kéo dài tới ngày học.
+        List<Membership> paid = memberships.findPaidAccessByUser(member.getId());
         if (!hasMembership(
-                memberships
-                        .findByUser_IdOrderByCreatedAtDesc(
-                                member.getId()
-                        ),
+                paid,
                 fc.getBranch().getId(),
-                now.toLocalDate(),
-                schedule.getScheduleDate()
+                schedule.getScheduleDate(), fc.getCategory().getRequiredBenefit()
         )) {
-            throw new IllegalArgumentException(
-                    "Cần Membership ACTIVE còn hạn "
-                            + "tại đúng chi nhánh và ngày học."
-            );
+            throw new IllegalArgumentException(MembershipEligibilityService.accessDenial(paid, fc.getBranch().getId(), schedule.getScheduleDate(), fc.getCategory().getRequiredBenefit()));
         }
 
         // Kiểm tra đăng ký trùng.
@@ -445,23 +435,9 @@ public class MemberClassBookingService {
     private boolean hasMembership(
             List<Membership> all,
             Long branchId,
-            LocalDate today,
-            LocalDate classDate
+            LocalDate classDate, com.utefit.enums.MembershipBenefit benefit
     ) {
-        return all.stream().anyMatch(m ->
-                m.getStatus() == MembershipStatus.ACTIVE
-
-                        && m.getBranch().getId().equals(branchId)
-
-                        && m.getStartDate() != null
-                        && m.getEndDate() != null
-
-                        && !m.getStartDate().isAfter(today)
-                        && !m.getEndDate().isBefore(today)
-
-                        // Gói phải còn hạn tới ngày diễn ra lớp.
-                        && !m.getEndDate().isBefore(classDate)
-        );
+        return all.stream().anyMatch(m -> MembershipEligibilityService.covers(m, branchId, classDate, benefit));
     }
 
     // ==============================

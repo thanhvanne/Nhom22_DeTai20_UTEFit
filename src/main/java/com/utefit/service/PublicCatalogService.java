@@ -70,9 +70,8 @@ public class PublicCatalogService {
     public Page<PlanView> searchPlans(
             String keyword, int page
     ) {
-        return plans.searchPlans(
+        return plans.searchFixedPlans(
                 normalize(keyword),
-                true,
                 pageable(page)
         ).map(this::toPlanView);
     }
@@ -118,8 +117,10 @@ public class PublicCatalogService {
 
     @Transactional(readOnly = true)
     public List<PlanView> activePlanOptions() {
+        var activeIds = branches.findByActiveTrueOrderByNameAsc().stream().map(Branch::getId).collect(java.util.stream.Collectors.toSet());
         return plans.findByActiveTrueOrderByNameAsc()
-                .stream().map(this::toPlanView).toList();
+                .stream().filter(MembershipPlan::fixedBranch).filter(plan -> activeIds.contains(plan.getBranchIds().iterator().next()))
+                .map(this::toPlanView).toList();
     }
 
     @Transactional(readOnly = true)
@@ -174,7 +175,7 @@ public class PublicCatalogService {
                 p.getName(),
                 p.getDescription(),
                 p.getDurationDays(),
-                p.getPrice()
+                p.getPrice(), p.effectiveBenefit().name(), p.effectiveScope().name(), java.util.Set.copyOf(p.getBranchIds()), p.term().description()
         );
     }
 
@@ -216,7 +217,7 @@ public class PublicCatalogService {
             String name,
             String description,
             Integer durationDays,
-            BigDecimal price
+            BigDecimal price, String benefit, String accessScope, java.util.Set<Long> branchIds, String durationDescription
     ) {}
 
     public record ClassView(

@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class ClassCategory {
+    @Enumerated(EnumType.STRING) @Column(name = "required_benefit", length = 20)
+    private com.utefit.enums.MembershipBenefit requiredBenefit;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

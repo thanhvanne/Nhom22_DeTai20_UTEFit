@@ -29,6 +29,7 @@ public class SepayWebhookService {
     private final EntityManager entityManager;
     private final Clock clock;
     private final SepayDatabaseGuard databaseGuard;
+    private final SepayBankReconciliationRepository bankClaims;
 
     @Transactional(timeout = 15)
     public void accept(SepayWebhookPayload payload) {
@@ -37,7 +38,8 @@ public class SepayWebhookService {
         LocalDateTime now = LocalDateTime.ofInstant(clock.instant(), SepayPaymentService.ZONE);
         SepayWebhookTransaction receipt = transactions.saveAndFlush(SepayWebhookTransaction.builder()
                 .environment(properties.mode()).transactionId(payload.id()).gateway(payload.gateway())
-                .accountNumber(payload.accountNumber()).paymentReference(payload.code()).bankReference(blankToNull(payload.referenceCode()))
+                .accountNumber(payload.accountNumber()).subAccount(blankToNull(payload.subAccount()))
+                .paymentReference(payload.code()).bankReference(blankToNull(payload.referenceCode()))
                 .content(payload.content()).transferType(payload.transferType()).amount(payload.amount())
                 .transactionDate(payload.transactionDate()).receivedAt(now).fingerprint(payload.fingerprint()).bodyHash(payload.bodyHash())
                 .outcome("REVIEW").reason("UNMATCHED").build());
@@ -67,6 +69,30 @@ public class SepayWebhookService {
         entityManager.refresh(payment);
         SepayPaymentDetails order = details.findById(payment.getId()).orElseThrow();
         receipt.setPayment(payment);
+        if (bankClaims.findByPayment_IdOrderByIdDesc(payment.getId()).stream()
+                .anyMatch(claim -> SepayManualReconciliationService.METHOD.equals(claim.getMethod()))) {
+            receipt.setReason("MANUALLY_RECONCILED_ORDER_REQUIRES_REVIEW");
+            return;
+        }
+        if (!payload.referenceCode().isBlank()) {
+            var claim = bankClaims.findByEnvironmentAndGatewayAndAccountNumberAndBankReference(properties.mode(),
+                    payload.gateway().toUpperCase(Locale.ROOT), payload.accountNumber(), payload.referenceCode().toUpperCase(Locale.ROOT));
+            if (claim.isPresent()) {
+                receipt.setReason(claim.get().getPayment().getId().equals(payment.getId())
+                        ? "BANK_TRANSFER_ALREADY_RECONCILED" : "BANK_TRANSFER_CLAIMED_BY_OTHER_ORDER");
+                return;
+            }
+        }
+        String snapshotVa = order.getVaNumber() == null ? "" : order.getVaNumber();
+        String configuredVa = properties.getVaNumber() == null ? "" : properties.getVaNumber();
+        if (!snapshotVa.equals(configuredVa)) {
+            receipt.setReason("VA_SNAPSHOT_CONFIGURATION_MISMATCH");
+            return;
+        }
+        if (!snapshotVa.isEmpty() && !snapshotVa.equals(payload.subAccount())) {
+            receipt.setReason("WRONG_VIRTUAL_ACCOUNT");
+            return;
+        }
         if (payment.getMethod() != PaymentMethod.SEPAY || !order.getEnvironment().equals(properties.mode())
                 || !order.getPaymentReference().equals(payload.code()) || !payload.code().equals(payment.getTransactionCode())
                 || !order.getAccountNumber().equals(payload.accountNumber()) || !order.getGateway().equalsIgnoreCase(payload.gateway())
@@ -79,8 +105,13 @@ public class SepayWebhookService {
             receipt.setReason("AMOUNT_MISMATCH");
             return;
         }
+        if (transactions.existsByPayment_IdAndOutcomeAndIdNot(payment.getId(), "REVIEW", receipt.getId())) {
+            receipt.setReason("PRIOR_UNRESOLVED_TRANSFER");
+            return;
+        }
         if (payment.getStatus() != PaymentStatus.PENDING || membership.getStatus() != MembershipStatus.PENDING) {
-            receipt.setReason("PAYMENT_OR_MEMBERSHIP_NOT_PENDING");
+            receipt.setReason(payment.getStatus() == PaymentStatus.CANCELLED ? "CANCELLED_ORDER_REQUIRES_REFUND_REVIEW"
+                    : payment.getStatus() == PaymentStatus.CANCEL_REQUESTED ? "CANCELLATION_REQUESTED_REVIEW" : "PAYMENT_OR_MEMBERSHIP_NOT_PENDING");
             return;
         }
         if (!now.isBefore(order.getExpiresAt()) || payload.transactionDate().isAfter(order.getExpiresAt())
@@ -96,9 +127,12 @@ public class SepayWebhookService {
             receipt.setReason("MEMBER_OR_MEMBERSHIP_NOT_ELIGIBLE");
             return;
         }
-        if (memberships.existsByUser_IdAndStatusAndEndDateGreaterThanEqual(member.getId(), MembershipStatus.ACTIVE, now.toLocalDate())) {
-            receipt.setReason("ANOTHER_ACTIVE_MEMBERSHIP");
-            return;
+        if (!payload.referenceCode().isBlank()) {
+            bankClaims.saveAndFlush(SepayBankReconciliation.builder().payment(payment).environment(properties.mode())
+                    .gateway(payload.gateway().toUpperCase(Locale.ROOT)).accountNumber(payload.accountNumber())
+                    .subAccount(blankToNull(payload.subAccount())).bankReference(payload.referenceCode().toUpperCase(Locale.ROOT))
+                    .amount(payload.amount()).bankDate(payload.transactionDate()).method("AUTHENTICATED_WEBHOOK")
+                    .outcome("WEBHOOK").verifiedAt(now).build());
         }
         payment.setStatus(PaymentStatus.PAID);
         payment.setPaidAt(payload.transactionDate());

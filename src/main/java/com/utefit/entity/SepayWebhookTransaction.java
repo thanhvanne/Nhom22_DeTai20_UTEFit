@@ -16,6 +16,7 @@ public class SepayWebhookTransaction {
     @Column(name = "transaction_id", nullable = false) private Long transactionId;
     @Column(nullable = false, length = 100) private String gateway;
     @Column(name = "account_number", nullable = false, length = 50) private String accountNumber;
+    @Column(name = "sub_account", length = 50) private String subAccount;
     @Column(name = "payment_reference", length = 100) private String paymentReference;
     @Column(name = "bank_reference", length = 100) private String bankReference;
     @Nationalized @Column(length = 2000) private String content;
