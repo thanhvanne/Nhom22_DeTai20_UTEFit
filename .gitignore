@@ -34,3 +34,25 @@ build/
 
 /.env.sepay
 /.env.sepay.local
+
+### Local credentials, generated data and AI artifacts ###
+.local/
+.ai/
+.playwright-mcp/
+.env
+.env.*
+!.env*.example
+*.log
+*.bak
+*.bacpac
+*.mdf
+*.ldf
+*.jks
+*.p12
+*.pfx
+*.key
+*.pem
+*.cer
+*.crt
+Thumbs.db
+Desktop.ini
