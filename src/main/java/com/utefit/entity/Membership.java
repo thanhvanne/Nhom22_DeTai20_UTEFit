@@ -16,6 +16,12 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 public class Membership {
+    @Column(name = "promotion_code", length = 50, updatable = false)
+    private String promotionCode;
+    @Column(name = "original_price", precision = 15, scale = 2, updatable = false)
+    private BigDecimal originalPrice;
+    @Column(name = "discount_percent", precision = 5, scale = 2, updatable = false)
+    private BigDecimal discountPercent;
     @Enumerated(EnumType.STRING) @Column(name = "quoted_duration_unit", length = 10, updatable = false)
     private com.utefit.enums.MembershipDurationUnit quotedDurationUnit;
     @Column(name = "quoted_duration_quantity", updatable = false) private Integer quotedDurationQuantity;

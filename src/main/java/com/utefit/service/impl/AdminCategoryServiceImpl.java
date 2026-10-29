@@ -17,11 +17,16 @@ import org.springframework.transaction.annotation.Transactional;
 public class AdminCategoryServiceImpl implements AdminCategoryService {
 
     private final ClassCategoryRepository categoryRepository;
+    @jakarta.persistence.PersistenceContext private jakarta.persistence.EntityManager auditEntityManager;
+    private void requireUnused(Long id) {
+        if (auditEntityManager.createQuery("select count(c) from FitnessClass c where c.category.id = :id", Long.class).setParameter("id", id).getSingleResult() > 0)
+            throw new IllegalStateException("Danh mục đã có lớp; tạo danh mục mới khi đổi quyền lợi hoặc trạng thái để giữ cam kết và lịch sử.");
+    }
 
     @Override
     @Transactional(readOnly = true)
     public Page<ClassCategory> getCategories(String keyword, Boolean active, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Pageable pageable = PageRequest.of(Math.max(0, page), Math.max(1, Math.min(100, size)), Sort.by(Sort.Direction.DESC, "createdAt"));
         String searchPattern = (keyword != null && !keyword.trim().isEmpty())
                 ? "%" + keyword.trim().toLowerCase() + "%"
                 : null;
@@ -68,6 +73,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
     public void updateCategory(Long id, ClassCategoryFormDto dto) {
         ClassCategory category = getCategoryById(id);
         validateUniqueCategoryName(dto.getName(), id);
+        if (category.getRequiredBenefit() != dto.getRequiredBenefit() || !java.util.Objects.equals(category.getActive(), dto.getActive())) requireUnused(id);
 
         category.setName(dto.getName().trim());
         category.setRequiredBenefit(dto.getRequiredBenefit());
@@ -81,6 +87,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
     @Transactional
     public void toggleActive(Long id) {
         ClassCategory category = getCategoryById(id);
+        requireUnused(id);
         category.setActive(!Boolean.TRUE.equals(category.getActive()));
         categoryRepository.save(category);
     }

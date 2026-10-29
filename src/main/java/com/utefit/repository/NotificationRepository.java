@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
+    org.springframework.data.domain.Page<Notification> findByUser_IdOrderByCreatedAtDescIdDesc(Long id, org.springframework.data.domain.Pageable page);
 
     boolean existsByUser_IdAndTypeAndRelatedIdAndTitle(Long userId, NotificationType type,
                                                        Long relatedId, String title);

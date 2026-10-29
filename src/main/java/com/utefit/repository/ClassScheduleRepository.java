@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Long> {
+    List<ClassSchedule> findByFitnessClass_Id(Long id);
 
     @EntityGraph(attributePaths = {
             "fitnessClass",

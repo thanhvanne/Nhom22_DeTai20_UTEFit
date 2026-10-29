@@ -74,7 +74,7 @@ public class AdminClassController {
             adminClassService.createClass(classForm);
             redirectAttributes.addFlashAttribute("successMessage", "Tạo lớp tập mới thành công!");
             return "redirect:/admin/classes";
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             model.addAttribute("errorMessage", ex.getMessage());
             populateFormOptions(model, false);
             return "admin/classes/form";
@@ -92,7 +92,7 @@ public class AdminClassController {
             model.addAttribute("classForm", classForm);
             populateFormOptions(model, true);
             return "admin/classes/form";
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
             return "redirect:/admin/classes";
         }
@@ -116,7 +116,7 @@ public class AdminClassController {
             adminClassService.updateClass(id, classForm);
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật thông tin lớp tập thành công!");
             return "redirect:/admin/classes";
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             model.addAttribute("errorMessage", ex.getMessage());
             populateFormOptions(model, true);
             return "admin/classes/form";
@@ -134,7 +134,7 @@ public class AdminClassController {
                     "successMessage",
                     "Đã chuyển lớp tập sang trạng thái HỦY (CANCELLED) và đóng các lịch học liên quan!"
             );
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
         return "redirect:/admin/classes";

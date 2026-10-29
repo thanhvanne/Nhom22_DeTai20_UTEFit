@@ -35,12 +35,12 @@ public class MemberHistoryService {
                 billing.myMemberships(email),
                 billing.myPayments(email),
                 booking.mySchedule(email),
-                reviews.myReviews(email, 0).getContent(),
+                reviews.allHistory(email),
                 checkins.findByUser_IdOrderByCheckInAtDesc(accounts.requireMemberId(email)).stream()
                         .map(c -> new CheckinHistory(c.getBranch().getName(), c.getCheckInAt(), c.getCheckOutAt()))
                         .toList(),
                 personalSchedules.getSchedulesForMember(accounts.requireMemberId(email),
-                        java.time.LocalDate.now().minusYears(3), java.time.LocalDate.now().plusYears(1))
+                        java.time.LocalDate.of(1900, 1, 1), java.time.LocalDate.of(9999, 12, 31))
         );
     }
 }

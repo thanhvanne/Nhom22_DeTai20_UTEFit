@@ -17,7 +17,7 @@ import java.time.LocalDate;
 public class SepayReconciliationLookup {
     private final SepayProperties properties;
     private final SepayDatabaseGuard databaseGuard;
-    private final HttpClient client;
+    private volatile HttpClient client;
     @Value("${SEPAY_LIVE_API_LOOKUP_ENABLED:false}") private boolean enabled;
     @Value("${SEPAY_LIVE_API_TOKEN:}") private String token;
     @Value("${SEPAY_LIVE_BANK_ACCOUNT_ID:}") private String bankAccountId;
@@ -25,8 +25,7 @@ public class SepayReconciliationLookup {
     public SepayReconciliationLookup(SepayProperties properties, SepayDatabaseGuard databaseGuard) {
         this.properties = properties;
         this.databaseGuard = databaseGuard;
-        this.client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5))
-                .followRedirects(HttpClient.Redirect.NEVER).build();
+
     }
 
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
@@ -49,6 +48,11 @@ public class SepayReconciliationLookup {
                 .timeout(Duration.ofSeconds(10)).header("Authorization", "Bearer " + token)
                 .header("Accept", "application/json").GET().build();
         try {
+            if (client == null) {
+                synchronized (this) {
+                    if (client == null) client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).followRedirects(HttpClient.Redirect.NEVER).build();
+                }
+            }
             var response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
             try (var stream = response.body()) {
                 byte[] body = stream.readNBytes(262145);

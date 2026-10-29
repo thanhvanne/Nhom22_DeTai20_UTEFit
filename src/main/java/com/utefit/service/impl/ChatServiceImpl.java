@@ -87,7 +87,9 @@ public class ChatServiceImpl implements ChatService {
         List<Message> unreadForUser =
                 messageRepository.findUnreadMessagesForUserInConversation(conversationId, userId);
         LocalDateTime now = LocalDateTime.now();
+        var returnedIds = messages.stream().map(Message::getId).collect(java.util.stream.Collectors.toSet());
         for (Message m : unreadForUser) {
+            if (!returnedIds.contains(m.getId())) continue;
             m.setReadAt(now);
         }
 
@@ -128,6 +130,8 @@ public class ChatServiceImpl implements ChatService {
         User sender = userRepository.findById(senderUserId)
                 .orElseThrow(() ->
                         new EntityNotFoundException("Không tìm thấy người gửi."));
+        if (sender.getStatus() != com.utefit.enums.UserStatus.ACTIVE || !Boolean.TRUE.equals(sender.getEnabled()))
+            throw new org.springframework.security.access.AccessDeniedException("Tài khoản không hoạt động.");
         User receiver = resolveReceiver(conversation, senderUserId);
 
         Message message = Message.builder()

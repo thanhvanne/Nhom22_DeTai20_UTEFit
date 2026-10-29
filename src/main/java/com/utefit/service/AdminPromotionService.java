@@ -16,6 +16,7 @@ import java.util.Locale;
 public class AdminPromotionService {
 
     private final PromotionRepository repository;
+    @jakarta.persistence.PersistenceContext private jakarta.persistence.EntityManager entityManager;
 
     @Transactional(readOnly = true)
     public List<Promotion> findAll() {
@@ -35,8 +36,9 @@ public class AdminPromotionService {
 
         Promotion promotion = id == null
                 ? new Promotion()
-                : findById(id);
+                : repository.lockById(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy mã khuyến mãi."));
 
+        if (id != null && !promotion.getCode().equalsIgnoreCase(form.getCode().trim()) && entityManager.createQuery("select count(m) from Membership m where m.promotionCode = :code", Long.class).setParameter("code", promotion.getCode()).getSingleResult() > 0) throw new IllegalArgumentException("Mã đã dùng trong đơn hàng; tạo mã mới thay vì đổi mã cũ.");
         promotion.setCode(
                 form.getCode().trim().toUpperCase(Locale.ROOT));
         promotion.setDiscountPercent(form.getDiscountPercent());
@@ -51,7 +53,7 @@ public class AdminPromotionService {
 
     @Transactional
     public void toggle(Long id) {
-        Promotion promotion = findById(id);
+        Promotion promotion = repository.lockById(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy mã khuyến mãi."));
         promotion.setActive(!Boolean.TRUE.equals(promotion.getActive()));
         repository.save(promotion);
     }
@@ -77,10 +79,10 @@ public class AdminPromotionService {
         BigDecimal percent = form.getDiscountPercent();
         if (percent == null
                 || percent.compareTo(BigDecimal.ZERO) <= 0
-                || percent.compareTo(new BigDecimal("100")) > 0
+                || percent.compareTo(new BigDecimal("100")) >= 0
                 || percent.scale() > 2) {
             throw new IllegalArgumentException(
-                    "Mức giảm phải lớn hơn 0, tối đa 100%, "
+                    "Mức giảm phải lớn hơn 0, nhỏ hơn 100%, "
                             + "và không quá 2 chữ số thập phân.");
         }
 

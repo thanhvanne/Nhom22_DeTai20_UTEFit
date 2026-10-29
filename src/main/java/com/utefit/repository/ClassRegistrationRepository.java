@@ -17,6 +17,9 @@ import java.util.Optional;
 
 public interface ClassRegistrationRepository
         extends JpaRepository<ClassRegistration, Long> {
+    long countBySchedule_IdAndStatusNot(Long id, RegistrationStatus status);
+    @EntityGraph(attributePaths = {"user"})
+    List<ClassRegistration> findBySchedule_IdAndStatusNotOrderByRegisteredAtAsc(Long scheduleId, RegistrationStatus excluded);
     @Query("select distinct r.user.id from ClassRegistration r where r.status = com.utefit.enums.RegistrationStatus.REGISTERED and r.schedule.scheduleDate >= :today order by r.user.id")
     List<Long> findFutureMemberIds(@Param("today") LocalDate today, org.springframework.data.domain.Pageable pageable);
 
@@ -79,8 +82,8 @@ public interface ClassRegistrationRepository
                                        @Param("target") RegistrationStatus target);
 
     @Modifying
-    @Query("UPDATE ClassRegistration r SET r.status = :target WHERE r.id IN (SELECT x.id FROM ClassRegistration x WHERE x.schedule.fitnessClass.id = :classId AND x.status = :current)")
-    int cancelRegistrationsForClass(@Param("classId") Long classId,
+    @Query("UPDATE ClassRegistration r SET r.status = :target WHERE r.id IN (SELECT x.id FROM ClassRegistration x WHERE x.schedule.fitnessClass.id = :classId AND x.status = :current AND (x.schedule.scheduleDate > :day OR (x.schedule.scheduleDate = :day AND x.schedule.startTime > :time)))")
+    int cancelRegistrationsForClass(@Param("classId") Long classId, @Param("day") java.time.LocalDate day, @Param("time") java.time.LocalTime time,
                                     @Param("current") RegistrationStatus current,
                                     @Param("target") RegistrationStatus target);
 

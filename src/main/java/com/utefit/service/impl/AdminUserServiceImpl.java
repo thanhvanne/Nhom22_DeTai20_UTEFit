@@ -24,7 +24,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Transactional(readOnly = true)
     public Page<AdminUserResponse> getUsers(String keyword, UserRole role, UserStatus status, int page, int size) {
         // Sắp xếp theo ID tăng dần để danh sách thẳng thớm, đúng thứ tự #1, #2, #3...
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id"));
+        Pageable pageable = PageRequest.of(Math.max(0, page), Math.max(1, Math.min(100, size)), Sort.by(Sort.Direction.ASC, "id"));
 
         String searchPattern = (keyword != null && !keyword.trim().isEmpty())
                 ? "%" + keyword.trim().toLowerCase() + "%"

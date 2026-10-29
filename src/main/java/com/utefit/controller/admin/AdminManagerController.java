@@ -28,7 +28,7 @@ public class AdminManagerController {
         try {
             access.createManager(principal.getName(), email, name, password);
             redirect.addFlashAttribute("success", "Đã tạo Manager mới; hãy phân công chi nhánh.");
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             redirect.addFlashAttribute("error", ex.getMessage());
         }
         return "redirect:/admin/managers";
@@ -39,7 +39,7 @@ public class AdminManagerController {
         try {
             access.grant(principal.getName(), id, branchId);
             redirect.addFlashAttribute("success", "Đã phân công chi nhánh.");
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             redirect.addFlashAttribute("error", ex.getMessage());
         }
         return "redirect:/admin/managers";

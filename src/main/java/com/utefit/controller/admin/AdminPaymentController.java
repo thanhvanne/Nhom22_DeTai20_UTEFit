@@ -60,7 +60,7 @@ public class AdminPaymentController {
             model.addAttribute("activeMenu", "payments");
             model.addAttribute("payment", service.detail(id));
             return "admin/payments/detail";
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             ra.addFlashAttribute("error", ex.getMessage());
             return "redirect:/admin/payments";
         }

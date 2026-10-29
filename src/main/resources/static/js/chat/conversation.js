@@ -51,7 +51,10 @@
         });
   }
 
-  function render(items) {
+  const historyCache = new Map();
+        function render(items) {
+            for (const m of items) historyCache.set(Number(m.id), m);
+            items = [...historyCache.values()].sort((a,b) => Number(a.id)-Number(b.id));
     const snapshot = JSON.stringify(items.map(m => [m.id, m.content, m.readAt, m.mine]));
     if (snapshot === lastSnapshot) return;
     lastSnapshot = snapshot;
@@ -93,6 +96,20 @@
     firstRender = false;
   }
 
+        const olderButton = document.createElement('button');
+        olderButton.type = 'button'; olderButton.className = 'btn btn-outline-secondary btn-sm';
+        olderButton.textContent = 'Tải tin nhắn cũ'; list.before(olderButton);
+        olderButton.addEventListener('click', async () => {
+            if (!historyCache.size) return;
+            olderButton.disabled = true;
+            try {
+                const before = Math.min(...historyCache.keys());
+                const response = await fetch((messagesUrl).replace(/\/messages$/, '/older') + '?beforeId=' + before, {credentials:'same-origin'});
+                if (!response.ok) throw new Error('Không tải được tin cũ.');
+                const data = await response.json(); render(data);
+                olderButton.hidden = data.length < 50;
+            } catch (e) { showError(e.message); } finally { olderButton.disabled = false; }
+        });
   async function refresh() {
     if (fetching || document.hidden) return;
     fetching = true;

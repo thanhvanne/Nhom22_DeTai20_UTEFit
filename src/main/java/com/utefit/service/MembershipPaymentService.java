@@ -22,6 +22,9 @@ import java.util.List;
 
 @Service
 public class MembershipPaymentService {
+    @org.springframework.beans.factory.annotation.Autowired private PromotionReservationService promotionReservations;
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.utefit.repository.PromotionRepository promotions;
 
     private final UserRepository users;
     private final BranchRepository branches;
@@ -114,9 +117,31 @@ public class MembershipPaymentService {
 
         for (Membership pending : memberships.findByUser_IdOrderByCreatedAtDesc(user.getId())) {
             if (pending.getStatus() == MembershipStatus.PENDING && pending.getPlan().getId().equals(plan.getId())
-                    && pending.entitlementKey().equals(membership.entitlementKey())) return pending.getId();
+                    && pending.entitlementKey().equals(membership.entitlementKey())) {
+                String requestedCode = request.getPromotionCode() == null || request.getPromotionCode().isBlank() ? null : request.getPromotionCode().trim().toUpperCase(java.util.Locale.ROOT);
+                if (!java.util.Objects.equals(requestedCode, pending.getPromotionCode() == null ? null : pending.getPromotionCode().toUpperCase(java.util.Locale.ROOT))) throw new IllegalArgumentException("Đã có đơn chờ cho gói này với ưu đãi khác. Xử lý đơn cũ trước khi tạo đơn mới.");
+                return pending.getId();
+            }
         }
 
+        String code = request.getPromotionCode();
+        if (code != null && !code.isBlank()) {
+            if (code.trim().length() > 50) throw new IllegalArgumentException("Mã khuyến mãi không hợp lệ.");
+            Promotion promotion = promotions.lockByCode(code.trim())
+                    .orElseThrow(() -> new IllegalArgumentException("Mã khuyến mãi không tồn tại."));
+            LocalDate today = LocalDate.now(SepayPaymentService.ZONE);
+            if (!Boolean.TRUE.equals(promotion.getActive()) || promotion.getStartDate().isAfter(today)
+                    || promotion.getEndDate().isBefore(today) || promotion.getQuantity() <= 0)
+                throw new IllegalArgumentException("Mã khuyến mãi chưa có hiệu lực, đã hết hạn hoặc hết lượt.");
+            BigDecimal discounted = membership.getQuotedPrice().multiply(BigDecimal.valueOf(100).subtract(promotion.getDiscountPercent()))
+                    .divide(BigDecimal.valueOf(100), 0, java.math.RoundingMode.HALF_UP);
+            if (discounted.signum() <= 0) throw new IllegalArgumentException("Ưu đãi miễn phí chưa hỗ trợ thanh toán; chọn mã khác.");
+            membership.setOriginalPrice(membership.getQuotedPrice());
+            membership.setPromotionCode(promotion.getCode().toUpperCase(java.util.Locale.ROOT));
+            membership.setDiscountPercent(promotion.getDiscountPercent());
+            membership.setQuotedPrice(discounted);
+            promotion.setQuantity(promotion.getQuantity() - 1);
+        }
         return memberships.save(membership).getId();
     }
 
@@ -371,6 +396,7 @@ public class MembershipPaymentService {
             }
         }
         if (needsApproval) return false;
+        if (membership.getPromotionCode() != null) promotionReservations.release(membership);
         membership.setStatus(MembershipStatus.CANCELLED);
         return true;
     }
@@ -403,6 +429,7 @@ public class MembershipPaymentService {
             locked.setCancelledBy(actor.getEmail());
             locked.setCancellationReason(reason.trim());
         }
+        if (membership.getPromotionCode() != null) promotionReservations.release(membership);
         membership.setStatus(MembershipStatus.CANCELLED);
     }
 
@@ -469,7 +496,7 @@ public class MembershipPaymentService {
                         projectedTerm.daysAt(projectedStart), projectedTerm.endDate(projectedStart),
                         paidThrough(m, paid), m.getPlan().getPrice(), m.getBranch().getId(), periodState,
                         "CURRENT".equals(periodState) ? java.time.temporal.ChronoUnit.DAYS.between(today, m.getEndDate()) + 1 : 0,
-                        m.term().description(), projectedStart, projectedTerm.description(), paymentConfirmed
+                        m.term().description(), projectedStart, projectedTerm.description(), paymentConfirmed, m.getPromotionCode(), m.getOriginalPrice(), m.getDiscountPercent()
                 );
     }
 
@@ -582,7 +609,7 @@ public class MembershipPaymentService {
             LocalDate startDate,
             LocalDate endDate, String benefit, String accessScope, java.util.Set<Long> branchIds,
             boolean renewable, Integer renewalDays, LocalDate projectedEnd, LocalDate paidThrough, BigDecimal renewalPrice,
-            Long branchId, String periodState, long daysRemaining, String durationDescription, LocalDate projectedStart, String renewalDescription, boolean paymentConfirmed
+            Long branchId, String periodState, long daysRemaining, String durationDescription, LocalDate projectedStart, String renewalDescription, boolean paymentConfirmed, String promotionCode, BigDecimal originalPrice, BigDecimal discountPercent
     ) {}
 
     private LocalDate paidThrough(Membership membership, List<Membership> paid) {

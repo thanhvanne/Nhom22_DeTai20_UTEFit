@@ -24,7 +24,7 @@ public class AdminMembershipPlanServiceImpl implements AdminMembershipPlanServic
     @Override
     @Transactional(readOnly = true)
     public Page<MembershipPlan> getPlans(String keyword, Boolean active, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "durationDays"));
+        Pageable pageable = PageRequest.of(Math.max(0, page), Math.max(1, Math.min(100, size)), Sort.by(Sort.Direction.ASC, "durationDays"));
         String searchPattern = (keyword != null && !keyword.trim().isEmpty())
                 ? "%" + keyword.trim().toLowerCase() + "%"
                 : null;
@@ -122,7 +122,7 @@ public class AdminMembershipPlanServiceImpl implements AdminMembershipPlanServic
             if (selected.size() != dto.getBranchIds().size() || selected.stream().anyMatch(branch -> !Boolean.TRUE.equals(branch.getActive())))
                 throw new IllegalArgumentException("Phạm vi có chi nhánh không tồn tại hoặc ngừng hoạt động.");
         }
-        if (dto.getPrice() == null || dto.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+        if (dto.getPrice() == null || dto.getPrice().compareTo(BigDecimal.ZERO) <= 0 || dto.getPrice().stripTrailingZeros().scale() > 0 || dto.getPrice().compareTo(new BigDecimal("9999999999999")) > 0) {
             throw new IllegalArgumentException("Giá gói tập phải lớn hơn 0!");
         }
         term(dto);

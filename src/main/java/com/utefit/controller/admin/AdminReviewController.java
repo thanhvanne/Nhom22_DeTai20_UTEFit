@@ -40,7 +40,7 @@ public class AdminReviewController {
             service.toggleVisibility(id);
             ra.addFlashAttribute("success",
                     "Đã cập nhật trạng thái hiển thị đánh giá.");
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             ra.addFlashAttribute("error", ex.getMessage());
         }
         return "redirect:/admin/reviews";

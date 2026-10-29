@@ -68,12 +68,12 @@ public class PtClassServiceImpl implements PtClassService {
         }
 
         long registeredCount = classRegistrationRepository
-                .countBySchedule_IdAndStatus(scheduleId, RegistrationStatus.REGISTERED);
+                .countBySchedule_IdAndStatusNot(scheduleId, RegistrationStatus.CANCELLED);
 
         List<ClassRegistration> registrations = classRegistrationRepository
-                .findBySchedule_IdAndStatusOrderByRegisteredAtAsc(
+                .findBySchedule_IdAndStatusNotOrderByRegisteredAtAsc(
                         scheduleId,
-                        RegistrationStatus.REGISTERED
+                        RegistrationStatus.CANCELLED
                 );
 
         List<PtClassMemberRegistrationResponse> registrationDtos = registrations.stream()
@@ -100,7 +100,7 @@ public class PtClassServiceImpl implements PtClassService {
         FitnessClass fitnessClass = schedule.getFitnessClass();
 
         long registeredCount = classRegistrationRepository
-                .countBySchedule_IdAndStatus(schedule.getId(), RegistrationStatus.REGISTERED);
+                .countBySchedule_IdAndStatusNot(schedule.getId(), RegistrationStatus.CANCELLED);
 
         return PtClassScheduleSummaryResponse.builder()
                 .scheduleId(schedule.getId())
@@ -124,6 +124,7 @@ public class PtClassServiceImpl implements PtClassService {
                 .memberId(user.getId())
                 .memberName(user.getFullName())
                 .memberEmail(user.getEmail())
+                .status(registration.getStatus().name())
                 .registeredAt(registration.getRegisteredAt())
                 .build();
     }

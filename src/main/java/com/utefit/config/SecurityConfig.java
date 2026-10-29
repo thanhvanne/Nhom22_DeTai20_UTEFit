@@ -101,6 +101,7 @@ public class SecurityConfig {
                                 // Guest
                                 "/branches",
                                 "/branches/**",
+                                "/promotions",
                                 "/membership-plans",
                                 "/membership-plans/**",
                                 "/classes",

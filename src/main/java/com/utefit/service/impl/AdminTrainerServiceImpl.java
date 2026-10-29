@@ -32,7 +32,7 @@ public class AdminTrainerServiceImpl implements AdminTrainerService {
     @Override
     @Transactional(readOnly = true)
     public Page<Trainer> getTrainers(String keyword, Long branchId, Boolean active, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id"));
+        Pageable pageable = PageRequest.of(Math.max(0, page), Math.max(1, Math.min(100, size)), Sort.by(Sort.Direction.ASC, "id"));
         String searchPattern = (keyword != null && !keyword.trim().isEmpty())
                 ? "%" + keyword.trim().toLowerCase() + "%"
                 : null;
@@ -98,6 +98,7 @@ public class AdminTrainerServiceImpl implements AdminTrainerService {
                 || !Boolean.TRUE.equals(trainer.getUser().getEnabled()))) {
             throw new IllegalStateException("Chỉ kích hoạt PT khi tài khoản hợp lệ và ACTIVE.");
         }
+        if (next && trainer.getBranch() == null) throw new IllegalStateException("Cần gán chi nhánh trước khi kích hoạt PT.");
         if (next && trainer.getBranch() != null
                 && !Boolean.TRUE.equals(trainer.getBranch().getActive())) {
             throw new IllegalStateException("Không kích hoạt PT ở chi nhánh ngừng hoạt động.");

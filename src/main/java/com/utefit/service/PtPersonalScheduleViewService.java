@@ -11,6 +11,14 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PtPersonalScheduleViewService {
     private final UserRepository users;
+    @org.springframework.beans.factory.annotation.Autowired private com.utefit.repository.TrainerRepository trainers;
+    @org.springframework.beans.factory.annotation.Autowired private com.utefit.repository.TrainerRequestRepository requests;
+    public User memberForTrainer(String email, Long id) {
+        var trainer = trainers.findByUserId(trainerUserId(email)).orElseThrow();
+        if (!requests.existsByMember_IdAndTrainer_IdAndStatus(id, trainer.getId(), com.utefit.enums.TrainerRequestStatus.ACCEPTED))
+            throw new org.springframework.security.access.AccessDeniedException("Hội viên không thuộc phạm vi huấn luyện của bạn.");
+        return member(id);
+    }
 
     @Transactional(readOnly = true)
     public Long trainerUserId(String email) {

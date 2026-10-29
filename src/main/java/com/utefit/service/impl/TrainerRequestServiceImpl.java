@@ -56,7 +56,7 @@ public class TrainerRequestServiceImpl implements TrainerRequestService {
         boolean trainerActive = Boolean.TRUE.equals(trainer.getActive());
         boolean trainerUserEnabled = Boolean.TRUE.equals(trainerUser.getEnabled());
 
-        if (!trainerActive
+        if (trainer.getBranch() == null || !Boolean.TRUE.equals(trainer.getBranch().getActive()) || !trainerActive
                 || !trainerUserEnabled
                 || trainerUser.getStatus() != UserStatus.ACTIVE
                 || trainerUser.getRole() != UserRole.PT) {
@@ -223,6 +223,6 @@ public class TrainerRequestServiceImpl implements TrainerRequestService {
     private String buildFullName(String lastName, String firstName) {
         String ln = lastName != null ? lastName.trim() : "";
         String fn = firstName != null ? firstName.trim() : "";
-        return (ln + " " + fn).trim();
+        return (fn + " " + ln).trim();
     }
 }

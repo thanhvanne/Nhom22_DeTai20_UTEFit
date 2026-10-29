@@ -46,7 +46,7 @@ public class AdminTrainerController {
         try {
             adminTrainerService.assignBranch(id, branchId);
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật chi nhánh làm việc cho PT thành công!");
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
         return "redirect:/admin/trainers";
@@ -60,7 +60,7 @@ public class AdminTrainerController {
         try {
             adminTrainerService.toggleActive(id);
             redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật trạng thái hoạt động của PT!");
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
         return "redirect:/admin/trainers";

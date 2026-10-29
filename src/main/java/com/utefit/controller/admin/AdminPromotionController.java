@@ -39,7 +39,7 @@ public class AdminPromotionController {
             service.save(id, form);
             ra.addFlashAttribute("success",
                     "Đã lưu khuyến mãi thành công.");
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             ra.addFlashAttribute("error", ex.getMessage());
             if (id != null) {
                 return "redirect:/admin/promotions?editId=" + id;
@@ -57,7 +57,7 @@ public class AdminPromotionController {
             service.toggle(id);
             ra.addFlashAttribute("success",
                     "Đã cập nhật trạng thái khuyến mãi.");
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             ra.addFlashAttribute("error", ex.getMessage());
         }
         return "redirect:/admin/promotions";

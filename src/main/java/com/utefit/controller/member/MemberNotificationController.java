@@ -20,8 +20,10 @@ public class MemberNotificationController {
     private final MemberNotificationService notifications;
 
     @GetMapping
-    public String list(Principal principal, Model model) {
-        model.addAttribute("notifications", notifications.getMyNotifications(principal.getName()));
+    public String list(Principal principal, Model model, @RequestParam(defaultValue="0") int page) {
+        var result = notifications.page(principal.getName(), page);
+        model.addAttribute("notificationPage", result);
+        model.addAttribute("notifications", result.getContent());
         model.addAttribute("unreadCount", notifications.countUnread(principal.getName()));
         return "member/notifications";
     }

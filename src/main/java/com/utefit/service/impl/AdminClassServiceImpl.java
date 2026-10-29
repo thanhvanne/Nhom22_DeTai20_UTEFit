@@ -48,7 +48,7 @@ public class AdminClassServiceImpl implements AdminClassService {
             int size
     ) {
         Pageable pageable = PageRequest.of(
-                page, size,
+                Math.max(0, page), Math.max(1, Math.min(100, size)),
                 Sort.by(Sort.Direction.ASC, "id")
         );
 
@@ -144,6 +144,11 @@ public class AdminClassServiceImpl implements AdminClassService {
                 category
         );
 
+        boolean structural = !fitnessClass.getBranch().getId().equals(branch.getId())
+                || !fitnessClass.getCategory().getId().equals(category.getId())
+                || !java.util.Objects.equals(fitnessClass.getTrainer() == null ? null : fitnessClass.getTrainer().getId(), trainer == null ? null : trainer.getId());
+        if (structural && !classScheduleRepository.findByFitnessClass_Id(id).isEmpty())
+            throw new IllegalStateException("Lớp đã có lịch; tạo lớp mới khi đổi PT, chi nhánh hoặc danh mục để giữ lịch sử.");
         // GD5-C: Luu trang thai truoc khi cap nhat.
         ClassStatus previousStatus = fitnessClass.getStatus();
 
@@ -237,7 +242,7 @@ public class AdminClassServiceImpl implements AdminClassService {
                         + "Vui lòng xem lại lịch tập của bạn.";
 
         // Đồng bộ trạng thái đăng ký trong cùng transaction.
-        classRegistrationRepository.cancelRegistrationsForClass(fitnessClass.getId(),
+        classRegistrationRepository.cancelRegistrationsForClass(fitnessClass.getId(), java.time.LocalDate.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh")), java.time.LocalTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh")),
                 RegistrationStatus.REGISTERED, RegistrationStatus.CANCELLED);
         // Gửi sau commit thông qua NotificationService.
         for (Long memberId : memberIds) {
@@ -259,7 +264,7 @@ public class AdminClassServiceImpl implements AdminClassService {
                         .findByFitnessClassIdAndActiveTrue(classId);
 
         for (ClassSchedule schedule : activeSchedules) {
-            schedule.setActive(false);
+            if (schedule.getScheduleDate().atTime(schedule.getStartTime()).isAfter(java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh")))) schedule.setActive(false);
         }
 
         if (!activeSchedules.isEmpty()) {
@@ -404,30 +409,7 @@ public class AdminClassServiceImpl implements AdminClassService {
             );
         }
 
-        String spec = trainer.getSpecialization() != null
-                ? trainer.getSpecialization()
-                .trim().toLowerCase()
-                : "";
-
-        String catName = category.getName() != null
-                ? category.getName().trim().toLowerCase()
-                : "";
-
-        if (!spec.isEmpty()
-                && !spec.contains("general")
-                && !spec.contains("đa năng")
-                && !spec.contains(catName)
-                && !catName.contains(spec)) {
-
-            throw new IllegalArgumentException(
-                    "Chuyên môn của PT ("
-                            + trainer.getSpecialization()
-                            + ") không phù hợp để dạy loại lớp '"
-                            + category.getName()
-                            + "'!"
-            );
-        }
-
+        // Phân công bởi Admin là bước duyệt chuyên môn; không suy quyền từ tiểu sử tự khai.
         return trainer;
     }
 }

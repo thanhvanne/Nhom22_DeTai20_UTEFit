@@ -259,7 +259,7 @@ class QrCheckinIntegrationTest {
         qr.consume(issued.value(), branch.getId());
         checkins.checkOut(states.status(member.getEmail(), issued.id()).checkinId());
         mvc.perform(get("/member/qr-checkin").with(user(member.getEmail()).roles("MEMBER")))
-                .andExpect(status().isOk()).andExpect(content().string(containsString("Đã checkout")))
+                .andExpect(status().isOk()).andExpect(content().string(containsString("Ra về thành công")))
                 .andExpect(content().string(containsString("id=\"member-qr-create\"")))
                 .andExpect(content().string(containsString("data-can-issue=\"true\"")))
                 .andExpect(content().string(containsString("id=\"member-qr-retry\"")))

@@ -84,7 +84,7 @@ public class AuthController {
             return "redirect:/verify-otp?email="
                     + q(email);
 
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | MailException ex) {
 
             errors.reject(
                     "register",
@@ -142,7 +142,7 @@ public class AuthController {
 
             return "redirect:/login";
 
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | MailException ex) {
 
             errors.reject(
                     "otp",
@@ -170,7 +170,7 @@ public class AuthController {
                     "Nếu tài khoản đang chờ xác thực, OTP mới đã gửi."
             );
 
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | MailException ex) {
 
             redirect.addFlashAttribute(
                     "error",
@@ -324,7 +324,7 @@ public class AuthController {
             return "redirect:/reset-password?email="
                     + q(form.getEmail());
 
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | MailException ex) {
 
             errors.reject(
                     "forgot",
@@ -333,14 +333,6 @@ public class AuthController {
 
             return "auth/forgot-password";
 
-        } catch (MailException ex) {
-
-            errors.reject(
-                    "mail",
-                    "Không gửi được email OTP. Vui lòng thử lại sau."
-            );
-
-            return "auth/forgot-password";
         }
     }
 
@@ -392,7 +384,7 @@ public class AuthController {
 
             return "redirect:/login";
 
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | MailException ex) {
 
             errors.reject(
                     "reset",

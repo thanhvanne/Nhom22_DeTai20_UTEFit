@@ -81,7 +81,7 @@ public class MemberClassBookingController {
 
             return "redirect:/member/schedule";
 
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
 
             redirect.addFlashAttribute(
                     "error",
@@ -111,7 +111,7 @@ public class MemberClassBookingController {
                     "Đã hủy đăng ký lịch lớp."
             );
 
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
 
             redirect.addFlashAttribute(
                     "error",

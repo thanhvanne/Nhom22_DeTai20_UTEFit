@@ -67,7 +67,7 @@ public class AdminMembershipPlanController {
             planService.createPlan(planForm);
             redirectAttributes.addFlashAttribute("successMessage", "Tạo gói tập mới thành công!");
             return "redirect:/admin/membership-plans";
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             model.addAttribute("errorMessage", ex.getMessage());
             model.addAttribute("isEdit", false);
             model.addAttribute("activeMenu", "plans");
@@ -88,7 +88,7 @@ public class AdminMembershipPlanController {
             model.addAttribute("isEdit", true);
             model.addAttribute("activeMenu", "plans");
             return "admin/plans/form";
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
             return "redirect:/admin/membership-plans";
         }
@@ -114,7 +114,7 @@ public class AdminMembershipPlanController {
             planService.updatePlan(id, planForm);
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật gói tập thành công!");
             return "redirect:/admin/membership-plans";
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             model.addAttribute("errorMessage", ex.getMessage());
             model.addAttribute("isEdit", true);
             model.addAttribute("activeMenu", "plans");
@@ -130,7 +130,7 @@ public class AdminMembershipPlanController {
         try {
             planService.toggleActive(id);
             redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật trạng thái gói tập!");
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
         return "redirect:/admin/membership-plans";

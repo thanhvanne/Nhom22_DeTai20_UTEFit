@@ -79,7 +79,7 @@ public class PtPersonalScheduleController {
                                  Model model) {
 
         // Lấy thông tin Member để hiển thị trên form
-        User member = viewService.member(memberId);
+        User member = viewService.memberForTrainer(principal.getName(), memberId);
 
         model.addAttribute("member", member);
 
@@ -127,7 +127,7 @@ public class PtPersonalScheduleController {
         }
 
         // Load lại thông tin member cho view
-        User member = viewService.member(memberId);
+        User member = viewService.memberForTrainer(principal.getName(), memberId);
         model.addAttribute("member", member);
 
         return "pt/personal-schedules/create";

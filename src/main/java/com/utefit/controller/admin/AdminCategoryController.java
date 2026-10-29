@@ -62,7 +62,7 @@ public class AdminCategoryController {
             categoryService.createCategory(categoryForm);
             redirectAttributes.addFlashAttribute("successMessage", "Tạo loại lớp tập mới thành công!");
             return "redirect:/admin/categories";
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             model.addAttribute("errorMessage", ex.getMessage());
             model.addAttribute("isEdit", false);
             model.addAttribute("activeMenu", "categories");
@@ -82,7 +82,7 @@ public class AdminCategoryController {
             model.addAttribute("isEdit", true);
             model.addAttribute("activeMenu", "categories");
             return "admin/categories/form";
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
             return "redirect:/admin/categories";
         }
@@ -107,7 +107,7 @@ public class AdminCategoryController {
             categoryService.updateCategory(id, categoryForm);
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật loại lớp tập thành công!");
             return "redirect:/admin/categories";
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             model.addAttribute("errorMessage", ex.getMessage());
             model.addAttribute("isEdit", true);
             model.addAttribute("activeMenu", "categories");
@@ -123,7 +123,7 @@ public class AdminCategoryController {
         try {
             categoryService.toggleActive(id);
             redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật trạng thái loại lớp tập!");
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
         return "redirect:/admin/categories";

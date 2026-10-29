@@ -29,11 +29,12 @@ public class AdminBranchServiceImpl implements AdminBranchService {
     private final CloudinaryService cloudinaryService;
     private final MembershipRepository memberships;
     private final ClassScheduleRepository schedules;
+    @jakarta.persistence.PersistenceContext private jakarta.persistence.EntityManager auditEntityManager;
 
     @Override
     @Transactional(readOnly = true)
     public Page<Branch> getBranches(String keyword, Boolean active, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Pageable pageable = PageRequest.of(Math.max(0, page), Math.max(1, Math.min(100, size)), Sort.by(Sort.Direction.DESC, "createdAt"));
         String searchPattern = (keyword != null && !keyword.trim().isEmpty())
                 ? "%" + keyword.trim().toLowerCase() + "%"
                 : null;
@@ -76,6 +77,11 @@ public class AdminBranchServiceImpl implements AdminBranchService {
         // Nếu người dùng có chọn file ảnh tải lên thì gọi CloudinaryService của B
         if (dto.getImageFile() != null && !dto.getImageFile().isEmpty()) {
             MediaUploadResult uploadResult = cloudinaryService.uploadImage(dto.getImageFile(), "utefit/branches");
+            org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(new org.springframework.transaction.support.TransactionSynchronization() {
+                @Override public void afterCompletion(int status) {
+                    if (status != STATUS_COMMITTED) try { cloudinaryService.delete(uploadResult.publicId()); } catch (RuntimeException ex) { org.slf4j.LoggerFactory.getLogger(AdminBranchServiceImpl.class).warn("Không dọn được ảnh chi nhánh", ex); }
+                }
+            });
             imageUrl = uploadResult.url();
             imagePublicId = uploadResult.publicId();
         }
@@ -105,6 +111,14 @@ public class AdminBranchServiceImpl implements AdminBranchService {
         branch.setAddress(dto.getAddress().trim());
         branch.setPhone(dto.getPhone() != null ? dto.getPhone().trim() : null);
         branch.setDescription(dto.getDescription());
+        if (!java.util.Objects.equals(branch.getOpeningTime(), dto.getOpeningTime()) || !java.util.Objects.equals(branch.getClosingTime(), dto.getClosingTime())) {
+            var today = LocalDate.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh"));
+            long groups = auditEntityManager.createQuery("select count(s) from ClassSchedule s where s.active = true and s.fitnessClass.branch.id = :id and s.scheduleDate >= :day and ((:opening is not null and s.startTime < :opening) or (:closing is not null and s.endTime > :closing))", Long.class)
+                .setParameter("id", id).setParameter("day", today).setParameter("opening", dto.getOpeningTime()).setParameter("closing", dto.getClosingTime()).getSingleResult();
+            long sessions = auditEntityManager.createQuery("select count(s) from PersonalTrainingSchedule s where s.active = true and s.branch.id = :id and s.scheduleDate >= :day and ((:opening is not null and s.startTime < :opening) or (:closing is not null and s.endTime > :closing))", Long.class)
+                .setParameter("id", id).setParameter("day", today).setParameter("opening", dto.getOpeningTime()).setParameter("closing", dto.getClosingTime()).getSingleResult();
+            if (groups > 0 || sessions > 0) throw new IllegalStateException("Giờ mới xung đột với lịch đã xếp; xử lý lịch trước khi đổi giờ mở cửa.");
+        }
         branch.setOpeningTime(dto.getOpeningTime());
         branch.setClosingTime(dto.getClosingTime());
         boolean nextActive = dto.getActive() != null ? dto.getActive() : true;
@@ -142,7 +156,11 @@ public class AdminBranchServiceImpl implements AdminBranchService {
     }
 
     private void checkCanDeactivate(Long branchId) {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh"));
+        long commitments = auditEntityManager.createQuery("select count(m) from Membership m where m.status = com.utefit.enums.MembershipStatus.ACTIVE and m.endDate >= :today and (m.branch.id = :id or m.quotedScope = com.utefit.enums.MembershipScope.ALL_BRANCHES or :id member of m.branchIds)", Long.class).setParameter("today", today).setParameter("id", branchId).getSingleResult();
+        long personal = auditEntityManager.createQuery("select count(p) from PersonalTrainingSchedule p where p.active = true and p.branch.id = :id and p.scheduleDate >= :today", Long.class).setParameter("id", branchId).setParameter("today", today).getSingleResult();
+        long open = auditEntityManager.createQuery("select count(c) from Checkin c where c.branch.id = :id and c.checkOutAt is null", Long.class).setParameter("id", branchId).getSingleResult();
+        if (commitments > 0 || personal > 0 || open > 0) throw new IllegalStateException("Chi nhánh còn quyền lợi đã bán, lịch PT hoặc hội viên đang tập.");
         if (memberships.hasActiveMembersForBranch(branchId, MembershipStatus.ACTIVE, today)) {
             throw new IllegalStateException("Chi nhánh còn Member đã thanh toán có gói hiệu lực.");
         }

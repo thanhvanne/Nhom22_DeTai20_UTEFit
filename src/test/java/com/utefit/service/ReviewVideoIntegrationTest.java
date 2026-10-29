@@ -75,7 +75,7 @@ class ReviewVideoIntegrationTest {
                         .accept(org.springframework.http.MediaType.TEXT_HTML))
                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().is(413))
                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(
-                        org.hamcrest.Matchers.containsString("Video Review tối đa 50 MiB")));
+                        org.hamcrest.Matchers.containsString("Video đánh giá tối đa 50 MiB")));
     }
 
     @Test

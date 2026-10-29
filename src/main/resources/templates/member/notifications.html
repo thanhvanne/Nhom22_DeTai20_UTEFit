@@ -312,7 +312,10 @@
 
     </div>
 
-</main>
+<nav class="d-flex gap-3 my-3" th:if="${notificationPage != null}">
+<a th:if="${notificationPage.hasPrevious()}" th:href="@{/member/notifications(page=${notificationPage.number - 1})}">Trang trước</a>
+<span th:text="|Trang ${notificationPage.number + 1}/${notificationPage.totalPages == 0 ? 1 : notificationPage.totalPages}|"></span>
+<a th:if="${notificationPage.hasNext()}" th:href="@{/member/notifications(page=${notificationPage.number + 1})}">Trang sau</a></nav></main>
 
 <!-- FOOTER CHUNG CUA THANH VIEN A -->
 <footer th:replace="~{fragments/footer :: footer}">

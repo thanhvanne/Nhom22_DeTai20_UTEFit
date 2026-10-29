@@ -58,8 +58,8 @@ public class AdminScheduleServiceImpl
             int size
     ) {
         Pageable pageable = PageRequest.of(
-                page,
-                size,
+                Math.max(0, page),
+                Math.max(1, Math.min(100, size)),
                 Sort.by(Sort.Direction.ASC, "scheduleDate")
                         .and(Sort.by(
                                 Sort.Direction.ASC, "startTime"))
@@ -125,6 +125,8 @@ public class AdminScheduleServiceImpl
     @Transactional
     public void updateSchedule(Long id, ClassScheduleFormDto dto) {
         ClassSchedule schedule = getScheduleById(id);
+        if (!schedule.getScheduleDate().atTime(schedule.getStartTime()).isAfter(java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh"))))
+            throw new IllegalStateException("Không thay đổi buổi học đã bắt đầu; cần giữ lịch sử.");
 
         // GD5-C: Kiem tra Admin co tat lich hay khong.
         boolean cancelledByEdit =
@@ -192,6 +194,8 @@ public class AdminScheduleServiceImpl
     @Transactional
     public void toggleActive(Long id) {
         ClassSchedule schedule = getScheduleById(id);
+        if (!schedule.getScheduleDate().atTime(schedule.getStartTime()).isAfter(java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh"))))
+            throw new IllegalStateException("Không thay đổi buổi học đã bắt đầu; cần giữ lịch sử.");
 
         boolean nextActive =
                 !Boolean.TRUE.equals(schedule.getActive());
@@ -321,6 +325,8 @@ public class AdminScheduleServiceImpl
             );
         }
 
+        if (dto.getScheduleDate() == null || !dto.getScheduleDate().atTime(dto.getStartTime()).isAfter(java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh"))))
+            throw new IllegalArgumentException("Chỉ xếp lịch trong tương lai.");
         // 2. Kiem tra trang thai FitnessClass.
         FitnessClass fitnessClass =
                 fitnessClassRepository
@@ -349,6 +355,9 @@ public class AdminScheduleServiceImpl
             );
         }
 
+        if ((fitnessClass.getBranch().getOpeningTime() != null && dto.getStartTime().isBefore(fitnessClass.getBranch().getOpeningTime()))
+                || (fitnessClass.getBranch().getClosingTime() != null && dto.getEndTime().isAfter(fitnessClass.getBranch().getClosingTime())))
+            throw new IllegalArgumentException("Lịch phải nằm trong giờ mở cửa chi nhánh.");
         boolean isActiveSchedule =
                 dto.getActive() == null
                         || Boolean.TRUE.equals(dto.getActive());

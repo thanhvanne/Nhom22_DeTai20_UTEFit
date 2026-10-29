@@ -185,8 +185,7 @@ public class PublicCatalogService {
         if (c.getTrainer() != null
                 && c.getTrainer().getUser() != null) {
             var user = c.getTrainer().getUser();
-            trainerName = user.getLastName()
-                    + " " + user.getFirstName();
+            trainerName = user.getFullName();
         }
 
         return new ClassView(

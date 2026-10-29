@@ -29,7 +29,7 @@ public interface TrainerRepository extends JpaRepository<Trainer, Long> {
               AND u.enabled = true
               AND u.status = :status
               AND u.role = :role
-              AND (b IS NULL OR b.active = true)
+              AND (b IS NOT NULL AND b.active = true)
             """)
     Optional<Trainer> findPublicTrainerById(
             @Param("id") Long id,
@@ -47,7 +47,7 @@ public interface TrainerRepository extends JpaRepository<Trainer, Long> {
                       AND u.enabled = true
                       AND u.status = :status
                       AND u.role = :role
-                      AND (b IS NULL OR b.active = true)
+                      AND (b IS NOT NULL AND b.active = true)
                       AND (
                           :keyword IS NULL
                           OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :keyword, '%'))
@@ -67,7 +67,7 @@ public interface TrainerRepository extends JpaRepository<Trainer, Long> {
                       AND u.enabled = true
                       AND u.status = :status
                       AND u.role = :role
-                      AND (b IS NULL OR b.active = true)
+                      AND (b IS NOT NULL AND b.active = true)
                       AND (
                           :keyword IS NULL
                           OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :keyword, '%'))

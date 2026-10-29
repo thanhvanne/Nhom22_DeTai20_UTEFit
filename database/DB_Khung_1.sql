@@ -26,7 +26,7 @@ create table class_schedules (active bit not null, end_time time not null, sched
 create table conversations (created_at datetime2(7) not null, id bigint identity not null, member_id bigint not null, trainer_id bigint not null, updated_at datetime2(7), primary key (id));
 create table fitness_classes (capacity int not null, branch_id bigint not null, category_id bigint not null, created_at datetime2(7) not null, id bigint identity not null, trainer_id bigint, updated_at datetime2(7), status varchar(20) not null check ((status in (''OPEN'',''FULL'',''CANCELLED'',''COMPLETED''))), name varchar(150) not null, description varchar(1500), primary key (id));
 create table membership_plans (active bit not null, duration_days int not null, price numeric(15,2) not null, created_at datetime2(7) not null, id bigint identity not null, updated_at datetime2(7), name nvarchar(100) not null, description nvarchar(1500), primary key (id));
-create table memberships (end_date date, quoted_duration_days int, quoted_price numeric(15,2), start_date date, branch_id bigint not null, created_at datetime2(7) not null, id bigint identity not null, plan_id bigint not null, updated_at datetime2(7), user_id bigint not null, status varchar(20) not null check ((status in (''PENDING'',''ACTIVE'',''EXPIRED'',''CANCELLED''))), primary key (id));
+create table memberships (promotion_code varchar(50), original_price numeric(15,2), discount_percent numeric(5,2), end_date date, quoted_duration_days int, quoted_price numeric(15,2), start_date date, branch_id bigint not null, created_at datetime2(7) not null, id bigint identity not null, plan_id bigint not null, updated_at datetime2(7), user_id bigint not null, status varchar(20) not null check ((status in (''PENDING'',''ACTIVE'',''EXPIRED'',''CANCELLED''))), primary key (id));
 create table messages (conversation_id bigint not null, id bigint identity not null, read_at datetime2(7), sender_id bigint not null, sent_at datetime2(7) not null, content nvarchar(2000) not null, primary key (id));
 create table notifications (is_read bit not null, created_at datetime2(7) not null, id bigint identity not null, read_at datetime2(7), related_id bigint, user_id bigint not null, type varchar(50) not null check ((type in (''TRAINER_REQUEST_SENT'',''TRAINER_REQUEST_ACCEPTED'',''TRAINER_REQUEST_REJECTED'',''PERSONAL_SCHEDULE_CREATED'',''CLASS_SCHEDULE_CANCELLED'',''MESSAGE_RECEIVED'',''MEMBERSHIP_ACTIVATED'',''PERSONAL_SCHEDULE_CANCELLED'',''SCHEDULE_REMINDER''))), title varchar(200) not null, content varchar(2000), primary key (id));
 create table otp_codes (attempt_count int, used bit not null, created_at datetime2(7) not null, expired_at datetime2(7) not null, id bigint identity not null, used_at datetime2(7), user_id bigint not null, type varchar(30) not null check ((type in (''REGISTER'',''FORGOT_PASSWORD''))), code varchar(100) not null, primary key (id));
@@ -531,6 +531,20 @@ BEGIN CATCH
  THROW;
 END CATCH;';
     -- END EMBEDDED V714__pending_payment_cancellation.sql
+    -- BEGIN EMBEDDED V715__membership_promotion_snapshot.sql
+    EXEC sys.sp_executesql N'USE [UTEFitDB];
+-- Apply once to the intended existing database before starting the updated app.
+-- Additive migration: does not reset or change existing financial records.
+SET XACT_ABORT ON;
+BEGIN TRANSACTION;
+IF COL_LENGTH(''dbo.memberships'', ''promotion_code'') IS NULL
+    ALTER TABLE dbo.memberships ADD promotion_code varchar(50) NULL;
+IF COL_LENGTH(''dbo.memberships'', ''original_price'') IS NULL
+    ALTER TABLE dbo.memberships ADD original_price numeric(15,2) NULL;
+IF COL_LENGTH(''dbo.memberships'', ''discount_percent'') IS NULL
+    ALTER TABLE dbo.memberships ADD discount_percent numeric(5,2) NULL;
+COMMIT TRANSACTION;';
+    -- END EMBEDDED V715__membership_promotion_snapshot.sql
     EXEC sys.sp_executesql N'USE [UTEFitDB];
 ALTER TABLE dbo.reviews ADD CONSTRAINT ck_demo_review_rating CHECK(rating BETWEEN 1 AND 5);
 ALTER TABLE dbo.fitness_classes ADD CONSTRAINT ck_demo_class_capacity CHECK(capacity > 0);

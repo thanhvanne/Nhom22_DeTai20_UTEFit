@@ -31,7 +31,7 @@ public class CashPaymentAdminController {
             billing.confirmCashPayment(id);
             ra.addFlashAttribute("success",
                     "Đã xác nhận thu tiền. Membership chuyển sang ACTIVE.");
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             ra.addFlashAttribute("error", ex.getMessage());
         }
         return "redirect:/admin/payments/cash-pending";

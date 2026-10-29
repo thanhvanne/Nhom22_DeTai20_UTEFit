@@ -83,6 +83,11 @@ public class MemberReviewService {
     }
 
     @Transactional(readOnly = true)
+    public List<ReviewView> allHistory(String email) {
+        return reviews.findByUser_IdOrderByCreatedAtDescIdDesc(accounts.requireMemberId(email), org.springframework.data.domain.Pageable.unpaged()).stream().map(this::toView).toList();
+    }
+
+    @Transactional(readOnly = true)
     public EditView editForm(String email, Long id) {
         Review r = ownReview(
                 accounts.requireMemberId(email), id

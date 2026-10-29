@@ -1,5 +1,11 @@
 # UTEFit — hướng dẫn bàn giao cho nhóm
 
+> **Bản sửa logic và khuyến mãi 29/10/2026:** database hiện có phải áp dụng
+> `database/migrations/V715__membership_promotion_snapshot.sql` trước khi chạy bản mới.
+> Không reset/seed lại database đang có dữ liệu. Xem
+> [luồng ưu đãi và đối chiếu 25 mục sửa](docs/UTEFit_SuaLogic_VaKhuyenMai_2026-10-29.md).
+> Guest/Member xem ưu đãi tại `/promotions`; Member nhập mã ngay trên thẻ mua gói.
+
 Java 17 · Spring Boot 4.1.1 · SQL Server · Thymeleaf · Bootstrap · Spring Security/JWT · WebSocket.
 Database **phát triển dùng chung về cấu trúc: UTEFitDB**. Mỗi thành viên dựng database
 local riêng; không đồng bộ tiền thật hoặc dùng database Live/QA của tác giả.

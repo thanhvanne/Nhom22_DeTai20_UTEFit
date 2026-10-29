@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 public class PtClassMemberRegistrationResponse {
 
     private Long registrationId;
+    private String status;
     private Long memberId;
     private String memberName;
     private String memberEmail;

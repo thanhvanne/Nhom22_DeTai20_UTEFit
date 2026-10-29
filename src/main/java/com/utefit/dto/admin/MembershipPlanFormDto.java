@@ -34,6 +34,7 @@ public class MembershipPlanFormDto {
 
     @NotNull(message = "Vui lòng nhập giá gói tập")
     @DecimalMin(value = "0.01", inclusive = true, message = "Giá gói tập phải lớn hơn 0")
+    @Digits(integer = 13, fraction = 0, message = "Giá VND phải là số nguyên, tối đa 13 chữ số")
     private BigDecimal price;
 
     @Builder.Default

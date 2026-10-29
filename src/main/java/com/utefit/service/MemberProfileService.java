@@ -148,6 +148,13 @@ public class MemberProfileService {
                         "utefit/member-avatars"
                 );
 
+        String oldId = user.getAvatarPublicId();
+        org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(new org.springframework.transaction.support.TransactionSynchronization() {
+            @Override public void afterCompletion(int status) {
+                String id = status == STATUS_COMMITTED ? oldId : uploaded.publicId();
+                if (id != null && !id.isBlank()) try { cloudinaryService.delete(id); } catch (RuntimeException ex) { org.slf4j.LoggerFactory.getLogger(MemberProfileService.class).warn("Không dọn được avatar {}", id, ex); }
+            }
+        });
         user.setAvatarUrl(uploaded.url());
         user.setAvatarPublicId(uploaded.publicId());
 

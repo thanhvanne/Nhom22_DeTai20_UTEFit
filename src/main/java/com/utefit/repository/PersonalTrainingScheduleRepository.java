@@ -11,6 +11,7 @@ import java.util.List;
 
 public interface PersonalTrainingScheduleRepository
         extends JpaRepository<PersonalTrainingSchedule, Long> {
+    List<PersonalTrainingSchedule> findByTrainer_User_IdAndScheduleDateBetweenOrderByScheduleDateAscStartTimeAsc(Long userId, LocalDate from, LocalDate to);
     @Query("select distinct p.member.id from PersonalTrainingSchedule p where p.active = true and (p.status is null or p.status = com.utefit.enums.PersonalTrainingStatus.SCHEDULED) and p.scheduleDate >= :today order by p.member.id")
     List<Long> findFutureMemberIds(@Param("today") LocalDate today, org.springframework.data.domain.Pageable pageable);
 

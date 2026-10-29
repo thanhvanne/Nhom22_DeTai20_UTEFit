@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Khuyến mãi - UTEFit')}"></head>
+<body class="uf-theme">
+<header th:replace="~{fragments/header :: header}"></header>
+<main class="container py-5">
+<h1>Khuyến mãi gói tập</h1>
+<p>Nhập mã khi tạo đơn mua gói. Giá sau giảm được giữ trên đơn; mỗi đơn dùng một mã. Lượt ưu đãi được giữ khi tạo đơn thành công.</p>
+<p th:if="${#lists.isEmpty(promotions)}">Hiện chưa có ưu đãi đang áp dụng.</p>
+<div class="row g-3"><article class="col-md-4" th:each="p : ${promotions}"><div class="card p-4 h-100">
+<h2 th:text="${p.code}"></h2><p>Giảm <strong th:text="${p.discountPercent}"></strong>%</p>
+<p>Đến ngày <span th:text="${p.endDate}"></span> · Còn <span th:text="${p.quantity}"></span> lượt</p>
+<a class="btn btn-primary" th:href="@{/member/memberships}">Chọn gói và áp mã</a>
+</div></article></div>
+</main><footer th:replace="~{fragments/footer :: footer}"></footer>
+<div th:replace="~{fragments/scripts :: scripts}"></div>
+</body></html>

@@ -260,7 +260,7 @@ public class PersonalTrainingScheduleServiceImpl implements PersonalTrainingSche
 
         List<PersonalTrainingSchedule> schedules =
                 personalTrainingScheduleRepository
-                        .findByTrainer_User_IdAndScheduleDateBetweenAndActiveTrueOrderByScheduleDateAscStartTimeAsc(
+                        .findByTrainer_User_IdAndScheduleDateBetweenOrderByScheduleDateAscStartTimeAsc(
                                 trainerUserId,
                                 fromDate,
                                 toDate

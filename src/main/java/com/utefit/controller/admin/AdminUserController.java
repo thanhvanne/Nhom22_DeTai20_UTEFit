@@ -48,7 +48,7 @@ public class AdminUserController {
             model.addAttribute("activeMenu", "users");
             model.addAttribute("user", user);
             return "admin/users/detail";
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
             return "redirect:/admin/users";
         }

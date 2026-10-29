@@ -7,6 +7,7 @@
 <a class="uf-skip-link" href="#membership-content">Đến nội dung chính</a>
 <header th:replace="~{fragments/header :: header}"></header>
 <main id="membership-content" class="uf-shell memberships-main" tabindex="-1">
+<div class="container py-3"><a class="btn btn-outline-primary" th:href="@{/promotions}">Khuyến mãi gói tập</a></div>
     <nav class="membership-breadcrumb" aria-label="Đường dẫn">
         <a th:href="@{/member/dashboard}">Tổng quan</a><span aria-hidden="true">/</span><span aria-current="page">Gói tập của tôi</span>
     </nav>
@@ -81,6 +82,7 @@
                     <div th:if="${period.status == 'PENDING' and !cancellationMembershipIds.contains(period.id)}" class="membership-pass-actions">
                         <p class="uf-muted" th:text="|Dự kiến sau thanh toán thành công: ${#temporals.format(period.projectedStart, 'dd/MM/yyyy')} → ${#temporals.format(period.projectedEnd, 'dd/MM/yyyy')}. Chưa có quyền sử dụng.|"></p>
                         <div class="membership-payment-actions">
+                            <p th:if="${period.promotionCode != null}" th:text="|Ưu đãi ${period.promotionCode}: giảm ${period.discountPercent}% từ ${@membershipDisplay.money(period.originalPrice)}|"></p>
                             <form th:action="@{/member/memberships/{id}/sepay(id=${period.id})}" method="post"><button type="submit" class="uf-button uf-button-primary">Chuyển khoản VietQR</button></form>
                             <form th:action="@{/member/memberships/{id}/cash(id=${period.id})}" method="post"><button type="submit" class="uf-button uf-button-secondary">Thanh toán tiền mặt</button></form>
                             <form th:action="@{/member/memberships/{id}/cancel(id=${period.id})}" method="post"><button type="submit" class="uf-button uf-button-danger">Hủy gói chờ</button></form>
@@ -134,6 +136,8 @@
                         <form th:action="@{/member/memberships}" method="post">
                         <input type="hidden" name="branchId" th:value="${option.branchId}">
                         <input type="hidden" name="planId" th:value="${option.planId}">
+<label>Mã khuyến mãi <input class="form-control" name="promotionCode" maxlength="50" placeholder="Nhập mã ưu đãi"></label>
+<a th:href="@{/promotions}">Xem khuyến mãi đang có</a>
                             <button type="submit" class="uf-button uf-button-primary">Mua gói tại chi nhánh này</button>
                         </form>
                     </article>

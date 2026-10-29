@@ -60,7 +60,7 @@ public class AdminBranchController {
             adminBranchService.createBranch(branchForm);
             ra.addFlashAttribute("successMessage", "Thêm chi nhánh mới thành công!");
             return "redirect:/admin/branches";
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             model.addAttribute("activeMenu", "branches");
             model.addAttribute("isEdit", false);
             model.addAttribute("errorMessage", ex.getMessage());
@@ -76,7 +76,7 @@ public class AdminBranchController {
             model.addAttribute("branchForm", form);
             model.addAttribute("isEdit", true);
             return "admin/branches/form";
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
             return "redirect:/admin/branches";
         }
@@ -99,7 +99,7 @@ public class AdminBranchController {
             adminBranchService.updateBranch(id, branchForm);
             ra.addFlashAttribute("successMessage", "Cập nhật chi nhánh thành công!");
             return "redirect:/admin/branches";
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             model.addAttribute("activeMenu", "branches");
             model.addAttribute("isEdit", true);
             model.addAttribute("errorMessage", ex.getMessage());
@@ -112,7 +112,7 @@ public class AdminBranchController {
         try {
             adminBranchService.toggleActive(id);
             ra.addFlashAttribute("successMessage", "Đã đổi trạng thái hoạt động của chi nhánh!");
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             ra.addFlashAttribute("errorMessage", ex.getMessage());
         }
         return "redirect:/admin/branches";

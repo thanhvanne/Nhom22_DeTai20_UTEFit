@@ -65,7 +65,7 @@ public class AdminCheckinController {
             service.checkIn(email, branchId);
             ra.addFlashAttribute("success",
                     "Check-in cho Member thành công.");
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             ra.addFlashAttribute("error", ex.getMessage());
         }
         return "redirect:/admin/checkins";
@@ -80,7 +80,7 @@ public class AdminCheckinController {
             service.checkOut(id);
             ra.addFlashAttribute("success",
                     "Checkout thành công.");
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             ra.addFlashAttribute("error", ex.getMessage());
         }
         return "redirect:/admin/checkins";

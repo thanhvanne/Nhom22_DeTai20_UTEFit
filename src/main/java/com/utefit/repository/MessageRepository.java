@@ -9,6 +9,8 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface MessageRepository extends JpaRepository<Message, Long> {
+    @EntityGraph(attributePaths = {"sender"})
+    List<Message> findByConversation_IdAndIdLessThanOrderByIdDesc(Long id, Long beforeId, org.springframework.data.domain.Pageable page);
 
     @EntityGraph(attributePaths = {"sender"})
     List<Message> findTop50ByConversation_IdOrderBySentAtDesc(Long conversationId);

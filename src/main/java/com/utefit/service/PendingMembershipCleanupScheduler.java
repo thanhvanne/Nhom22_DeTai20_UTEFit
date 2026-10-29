@@ -18,8 +18,10 @@ import java.time.ZoneId;
 @Service
 @RequiredArgsConstructor
 public class PendingMembershipCleanupScheduler {
+    @org.springframework.beans.factory.annotation.Autowired private PromotionReservationService promotionReservations;
     private static final ZoneId ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
     private final MembershipRepository memberships;
+    @jakarta.persistence.PersistenceContext private jakarta.persistence.EntityManager entityManager;
     private final PaymentRepository payments;
 
     @Scheduled(cron="0 15 * * * *",zone="Asia/Ho_Chi_Minh")
@@ -29,9 +31,13 @@ public class PendingMembershipCleanupScheduler {
         for (Membership old : memberships.findByStatusAndCreatedAtBefore(MembershipStatus.PENDING,deadline)) {
             // Khóa để không đua với xác nhận CASH.
             Membership m=memberships.lockById(old.getId()).orElse(null);
-            if (m==null || m.getStatus()!=MembershipStatus.PENDING) continue;
-            if (payments.existsByMembership_IdAndStatus(m.getId(),PaymentStatus.PENDING)
+            if (m==null) continue;
+            entityManager.refresh(m);
+            if (m.getStatus()!=MembershipStatus.PENDING) continue;
+            if (payments.existsByMembership_IdAndStatus(m.getId(),PaymentStatus.CANCEL_REQUESTED)
+                    || payments.existsByMembership_IdAndStatus(m.getId(),PaymentStatus.PENDING)
                     || payments.existsByMembership_IdAndStatus(m.getId(),PaymentStatus.PAID)) continue;
+            if (m.getPromotionCode() != null) promotionReservations.release(m);
             m.setStatus(MembershipStatus.CANCELLED);
         }
     }

@@ -81,7 +81,7 @@ public class AdminScheduleController {
             adminScheduleService.createSchedule(scheduleForm);
             redirectAttributes.addFlashAttribute("successMessage", "Xếp lịch học mới thành công!");
             return "redirect:/admin/schedules";
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             model.addAttribute("errorMessage", ex.getMessage());
             populateFormOptions(model, false);
             return "admin/schedules/form";
@@ -99,7 +99,7 @@ public class AdminScheduleController {
             model.addAttribute("scheduleForm", scheduleForm);
             populateFormOptions(model, true);
             return "admin/schedules/form";
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
             return "redirect:/admin/schedules";
         }
@@ -123,7 +123,7 @@ public class AdminScheduleController {
             adminScheduleService.updateSchedule(id, scheduleForm);
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật lịch học thành công!");
             return "redirect:/admin/schedules";
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             model.addAttribute("errorMessage", ex.getMessage());
             populateFormOptions(model, true);
             return "admin/schedules/form";
@@ -138,7 +138,7 @@ public class AdminScheduleController {
         try {
             adminScheduleService.toggleActive(id);
             redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật trạng thái buổi học!");
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
         return "redirect:/admin/schedules";
