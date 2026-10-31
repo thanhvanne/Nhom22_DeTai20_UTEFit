@@ -2,113 +2,54 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/layout :: head('Thống kê hệ thống')}"></head>
-<body class="uf-theme uf-area-admin uf-page-admin-statistics-index">
-<div class="d-flex">
+<body class="uf-theme uf-area-admin uf-page-admin-statistics-index uf-admin">
+<div class="admin-shell">
     <aside th:replace="~{admin/fragments/layout :: sidebar}"></aside>
-    <div class="flex-grow-1 min-vh-100" style="min-width:0">
+    <div class="admin-workspace">
         <nav th:replace="~{admin/fragments/layout :: topbar('Thống kê hệ thống')}"></nav>
 
-        <main class="container-fluid px-4 pb-5">
-            <div class="admin-hero-banner mb-4">
+        <main class="admin-main" id="utefit-content" tabindex="-1">
+            <div class="admin-page-heading mb-4">
                 <h2 class="fw-bold">Báo cáo & Thống kê</h2>
-                <p class="mb-0 text-white-50">
+                <p class="mb-0 text-muted">
                     Phân tích hội viên, doanh thu và hoạt động phòng tập.
                 </p>
             </div>
 
-            <div class="row g-3 mb-4">
-                <div class="col-sm-6 col-xl-3">
-                    <div class="kpi-card h-100">
-                        <div class="text-secondary small">Tổng Hội viên</div>
-                        <div class="display-6 fw-bold"
-                             th:text="${totalMembers}">0</div>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-xl-3">
-                    <div class="kpi-card h-100">
-                        <div class="text-secondary small">PT</div>
-                        <div class="display-6 fw-bold"
-                             th:text="${totalTrainers}">0</div>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-xl-3">
-                    <div class="kpi-card h-100">
-                        <div class="text-secondary small">Chi nhánh</div>
-                        <div class="display-6 fw-bold"
-                             th:text="${totalBranches}">0</div>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-xl-3">
-                    <div class="kpi-card h-100">
-                        <div class="text-secondary small">Lớp tập</div>
-                        <div class="display-6 fw-bold"
-                             th:text="${totalClasses}">0</div>
-                    </div>
-                </div>
-
-                <div class="col-sm-6 col-xl-3">
-                    <div class="kpi-card h-100">
-                        <div class="text-secondary small">
-                            Gói tập còn hiệu lực
-                        </div>
-                        <div class="display-6 fw-bold text-success"
-                             th:text="${activeMemberships}">0</div>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-xl-3">
-                    <div class="kpi-card h-100">
-                        <div class="text-secondary small">
-                            Vào tập tháng này
-                        </div>
-                        <div class="display-6 fw-bold"
-                             th:text="${checkinsThisMonth}">0</div>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-xl-3">
-                    <div class="kpi-card h-100">
-                        <div class="text-secondary small">
-                            Hội viên mới tháng này
-                        </div>
-                        <div class="display-6 fw-bold"
-                             th:text="${newMembersThisMonth}">0</div>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-xl-3">
-                    <div class="kpi-card h-100">
-                        <div class="text-secondary small">
-                            Tổng doanh thu đã thu
-                        </div>
-                        <div class="fs-3 fw-bold text-success"
-                             th:text="|${#numbers.formatDecimal(revenueTotal,1,0)} đ|" data-uf-money>
-                            0 đ
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <section class="admin-statistics-metrics" aria-label="Chỉ số hệ thống">
+                <div><div class="text-secondary small">Tổng hội viên</div><div class="admin-stat-value" th:text="${totalMembers}">0</div></div>
+                <div><div class="text-secondary small">Huấn luyện viên</div><div class="admin-stat-value" th:text="${totalTrainers}">0</div></div>
+                <div><div class="text-secondary small">Chi nhánh</div><div class="admin-stat-value" th:text="${totalBranches}">0</div></div>
+                <div><div class="text-secondary small">Lớp tập</div><div class="admin-stat-value" th:text="${totalClasses}">0</div></div>
+                <div><div class="text-secondary small">Gói tập còn hiệu lực</div><div class="admin-stat-value" th:text="${activeMemberships}">0</div></div>
+                <div><div class="text-secondary small">Vào tập tháng này</div><div class="admin-stat-value" th:text="${checkinsThisMonth}">0</div></div>
+                <div><div class="text-secondary small">Hội viên mới tháng này</div><div class="admin-stat-value" th:text="${newMembersThisMonth}">0</div></div>
+                <div><div class="text-secondary small">Tổng doanh thu đã thu</div><div class="admin-stat-value admin-stat-money" th:text="|${#numbers.formatDecimal(revenueTotal,1,0)} đ|" data-uf-money>0 đ</div></div>
+            </section>
 
             <div class="surface-card p-4 mb-4">
-                <h5 class="fw-bold mb-3">
+                <h2 class="fw-bold mb-3">
                     Doanh thu theo tháng (6 tháng gần nhất)
-                </h5>
-                <div style="height:320px;position:relative">
-                    <canvas id="revenueChart"></canvas>
+                </h2>
+                <div class="admin-statistics-chart">
+                    <canvas id="revenueChart" role="img" aria-label="Doanh thu theo tháng, đơn vị đồng Việt Nam"></canvas>
                 </div>
             </div>
 
-            <div class="row g-4">
-                <div class="col-lg-6">
-                    <div class="surface-card p-4 h-100">
-                        <h5 class="fw-bold">Top 5 gói tập</h5>
-                        <div style="height:300px;position:relative">
-                            <canvas id="planChart"></canvas>
+            <div class="admin-ranking-charts">
+                <div class="admin-ranking-panel">
+                    <div class="surface-card admin-panel">
+                        <h2 class="fw-bold">Top 5 gói tập</h2>
+                        <div class="admin-statistics-chart">
+                            <canvas id="planChart" role="img" aria-label="Doanh thu 5 gói tập cao nhất"></canvas>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-6">
-                    <div class="surface-card p-4 h-100">
-                        <h5 class="fw-bold">Top 5 chi nhánh</h5>
-                        <div style="height:300px;position:relative">
-                            <canvas id="branchChart"></canvas>
+                <div class="admin-ranking-panel">
+                    <div class="surface-card admin-panel">
+                        <h2 class="fw-bold">Top 5 chi nhánh</h2>
+                        <div class="admin-statistics-chart">
+                            <canvas id="branchChart" role="img" aria-label="Doanh thu 5 chi nhánh cao nhất"></canvas>
                         </div>
                     </div>
                 </div>
@@ -137,10 +78,16 @@
             maximumFractionDigits: 0
         }).format(value);
 
+    Chart.defaults.font.family = "'Be Vietnam Pro', sans-serif";
+    Chart.defaults.color = '#616975';
+    const chartFont = { family: "'Be Vietnam Pro', sans-serif", size: 11 };
+    const compactMoney = value => new Intl.NumberFormat('vi-VN', { notation: 'compact', maximumFractionDigits: 1 }).format(value) + ' đ';
     const moneyOptions = {
         responsive: true,
         maintainAspectRatio: false,
+        animation: false,
         plugins: {
+            legend: { display: false },
             tooltip: {
                 callbacks: {
                     label: context => formatMoney(context.parsed.y ?? 0)
@@ -148,10 +95,13 @@
             }
         },
         scales: {
+            x: { grid: { display: false }, border: { display: false }, ticks: { font: chartFont, maxTicksLimit: 6, maxRotation: 0 } },
             y: {
                 beginAtZero: true,
+                border: { display: false },
+                grid: { color: '#eef0f3' },
                 ticks: {
-                    callback: value => formatMoney(value)
+                    font: chartFont, maxTicksLimit: 4, callback: value => compactMoney(value)
                 }
             }
         }
@@ -164,8 +114,8 @@
             datasets: [{
                 label: 'Doanh thu VND',
                 data: revenue,
-                backgroundColor: '#10b981',
-                borderRadius: 7
+                backgroundColor: '#d92332',
+                borderRadius: 2
             }]
         },
         options: moneyOptions
@@ -180,21 +130,24 @@
                     label: 'Doanh thu VND',
                     data: values,
                     backgroundColor: color,
-                    borderRadius: 6
+                    borderRadius: 2
                 }]
             },
             options: {
                 ...moneyOptions,
                 indexAxis: 'y',
                 scales: {
+                    y: { grid: { display: false }, border: { display: false }, ticks: { font: chartFont, callback: function(value) { const name = this.getLabelForValue(value); return name.length > 24 ? name.match(/.{1,24}/g) : name; } } },
                     x: {
+                        border: { display: false }, grid: { color: '#eef0f3' },
                         beginAtZero: true,
                         ticks: {
-                            callback: value => formatMoney(value)
+                            font: chartFont, maxTicksLimit: 4, callback: value => compactMoney(value)
                         }
                     }
                 },
                 plugins: {
+                    legend: { display: false },
                     tooltip: {
                         callbacks: {
                             label: context =>
@@ -207,10 +160,10 @@
     }
 
     horizontalChart(
-        'planChart', planNames, planRevenue, '#3b82f6');
+        'planChart', planNames, planRevenue, '#d92332');
 
     horizontalChart(
-        'branchChart', branchNames, branchRevenue, '#8b5cf6');
+        'branchChart', branchNames, branchRevenue, '#747d8b');
 </script>
 </body>
 </html>

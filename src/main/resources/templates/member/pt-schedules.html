@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head('Lịch tập PT 1:1 - UTEFit')}"></head>
-<body class="uf-theme uf-area-member uf-page-member-pt-schedules">
-<header th:replace="~{fragments/header :: header}"></header>
+<head th:replace="~{member/fragments/layout :: head('Lịch tập PT 1:1 - UTEFit')}"></head>
+<body class="uf-theme uf-area-member uf-page-member-pt-schedules uf-member">
+<header th:replace="~{member/fragments/layout :: header}"></header>
 <main class="container ut-page">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
@@ -45,7 +45,7 @@
         <a th:href="@{/trainers}" class="btn btn-brand">Tìm huấn luyện viên</a>
     </div>
 </main>
-<footer th:replace="~{fragments/footer :: footer}"></footer>
-<div th:replace="~{fragments/scripts :: scripts}"></div>
+<footer th:replace="~{member/fragments/layout :: footer}"></footer>
+<div th:replace="~{member/fragments/layout :: scripts}"></div>
 </body>
 </html>

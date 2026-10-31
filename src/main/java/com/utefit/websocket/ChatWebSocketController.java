@@ -23,10 +23,11 @@ public class ChatWebSocketController {
      * payload: { conversationId, content }
      */
     @MessageMapping("/chat.send")
-    public void handleSend(ChatMessageSendRequest request, Principal principal) {
+    public void handleSend(@jakarta.validation.Valid ChatMessageSendRequest request, Principal principal) {
         if (principal == null) {
             return; // chưa đăng nhập -> bỏ qua
         }
+        com.utefit.validation.FormChecks.validate(request);
 
         String email = principal.getName();
         User user = userRepository.findByEmail(email)

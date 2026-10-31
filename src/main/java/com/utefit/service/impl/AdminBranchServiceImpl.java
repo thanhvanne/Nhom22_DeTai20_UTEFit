@@ -69,6 +69,7 @@ public class AdminBranchServiceImpl implements AdminBranchService {
     @Override
     @Transactional
     public void createBranch(BranchFormDto dto) {
+        com.utefit.validation.FormChecks.validate(dto);
         validateBranchBusinessRules(dto, null);
 
         String imageUrl = dto.getImageUrl();
@@ -104,6 +105,7 @@ public class AdminBranchServiceImpl implements AdminBranchService {
     @Override
     @Transactional
     public void updateBranch(Long id, BranchFormDto dto) {
+        com.utefit.validation.FormChecks.validate(dto);
         Branch branch = getBranchById(id);
         validateBranchBusinessRules(dto, id);
 

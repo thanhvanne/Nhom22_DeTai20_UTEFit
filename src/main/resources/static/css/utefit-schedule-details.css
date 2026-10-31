@@ -1,0 +1,54 @@
+.ut-session-dialog {
+    --session-ground: var(--member-surface, var(--pt-surface, #1c2729));
+    --session-inset: var(--member-inset, var(--pt-inset, #152123));
+    --session-ink: var(--member-ink, var(--pt-ink, #f1f5f0));
+    --session-muted: var(--member-muted, var(--pt-muted, #b4c2b8));
+    --session-line: var(--member-line, var(--pt-line, #3b5150));
+    --session-accent: var(--member-action-hover, var(--pt-accent, #81e6b5));
+    width: min(560px, calc(100% - 32px));
+    max-height: calc(100dvh - 40px);
+    margin: auto;
+    padding: 0;
+    overflow: auto;
+    border: 1px solid var(--session-line);
+    border-radius: 24px;
+    background: var(--session-ground);
+    color: var(--session-ink);
+    box-shadow: 0 28px 100px #0007;
+    font: inherit;
+    text-align: left;
+    overflow-wrap: anywhere;
+}
+.ut-session-dialog::backdrop { background: #050a15b8; backdrop-filter: blur(4px); }
+body.ut-session-viewing { overflow: hidden; }
+.ut-session-dialog .ut-session-content { padding: clamp(22px, 4vw, 32px); }
+.ut-session-dialog .ut-session-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 26px; }
+.ut-session-dialog .ut-session-kicker { margin: 0 0 12px; color: var(--session-accent); font-size: 11px; font-weight: 600; letter-spacing: .08em; }
+.ut-session-dialog .ut-session-heading h2 { margin: 0; color: var(--session-ink); font-size: clamp(22px, 4vw, 28px); font-weight: 600; line-height: 1.35; }
+.ut-week-actions .ut-session-dialog button { min-height: 44px; padding: 10px 18px; border: 1px solid var(--session-line); border-radius: 12px; background: var(--session-inset); color: var(--session-ink); font: inherit; cursor: pointer; transition: background-color .18s, border-color .18s; }
+.ut-week-actions .ut-session-dialog button:hover { background: var(--session-ground); border-color: var(--session-accent); }
+.ut-week-actions .ut-session-dialog .ut-session-close { display: grid; place-items: center; flex: none; width: 44px; padding: 0; font-size: 26px; line-height: 1; }
+.ut-session-dialog .ut-session-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 24px; margin: 0; padding: 24px; border-radius: 16px; background: var(--session-inset); }
+.ut-session-dialog .ut-session-facts > div { min-width: 0; }
+.ut-session-dialog .ut-session-facts dt { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; color: var(--session-muted); font-size: 12px; font-weight: 400; }
+.ut-session-dialog .ut-session-facts dd { margin: 0; color: var(--session-ink); font-size: 14px; font-weight: 500; line-height: 1.7; }
+.ut-session-dialog .ut-session-facts svg { width: 17px; height: 17px; fill: none; stroke: var(--session-accent); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.ut-session-dialog .ut-session-status { display: inline-block; color: var(--session-accent); }
+.ut-session-dialog .ut-session-note { grid-column: 1 / -1; white-space: pre-wrap; }
+.ut-session-dialog .ut-session-footer { display: flex; justify-content: flex-end; margin-top: 24px; }
+.ut-session-dialog :focus-visible { outline: 3px solid var(--session-accent); outline-offset: 3px; }
+.uf-member .ut-week-actions .ut-session-trigger { color: var(--member-link); }
+.uf-area-pt .ut-week-actions .ut-session-trigger { color: var(--pt-accent); border-color: var(--pt-line); }
+@media (max-width: 479.98px) {
+    .ut-session-dialog .ut-session-facts { grid-template-columns: minmax(0, 1fr); padding: 20px; gap: 18px; }
+    .ut-session-dialog .ut-session-footer button { width: 100%; }
+}
+@media (prefers-reduced-motion: no-preference) {
+    .ut-session-dialog[open] { animation: ut-session-arrive .2s ease-out; }
+    .ut-session-dialog[open]::backdrop { animation: ut-session-overlay .2s ease-out; }
+    @keyframes ut-session-arrive { from { opacity: 0; transform: translateY(8px) scale(.97); } to { opacity: 1; transform: none; } }
+    @keyframes ut-session-overlay { from { opacity: 0; } to { opacity: 1; } }
+}
+@media (prefers-reduced-motion: reduce) {
+    .ut-week-actions .ut-session-dialog button { transition: none; }
+}

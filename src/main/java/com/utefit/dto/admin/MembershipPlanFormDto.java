@@ -12,9 +12,11 @@ import java.math.BigDecimal;
 @Builder
 public class MembershipPlanFormDto {
     @NotNull @Builder.Default private com.utefit.enums.MembershipDurationUnit durationUnit = com.utefit.enums.MembershipDurationUnit.DAY;
-    @NotNull @Min(1) @Builder.Default private Integer durationQuantity = 30;
+    @NotNull @Min(1) @Builder.Default @com.utefit.validation.ValidInput("durationQuantity")
+    private Integer durationQuantity = 30;
     @NotNull @Builder.Default private com.utefit.enums.MembershipDurationUnit bonusUnit = com.utefit.enums.MembershipDurationUnit.DAY;
-    @NotNull @Min(0) @Builder.Default private Integer bonusQuantity = 0;
+    @NotNull @Min(0) @Builder.Default @com.utefit.validation.ValidInput("bonusQuantity")
+    private Integer bonusQuantity = 0;
     @NotNull @Builder.Default private com.utefit.enums.MembershipBenefit benefit = com.utefit.enums.MembershipBenefit.ALL;
     @NotNull @Builder.Default private com.utefit.enums.MembershipScope accessScope = com.utefit.enums.MembershipScope.SINGLE_BRANCH;
     @Builder.Default private java.util.Set<Long> branchIds = new java.util.HashSet<>();
@@ -35,6 +37,7 @@ public class MembershipPlanFormDto {
     @NotNull(message = "Vui lòng nhập giá gói tập")
     @DecimalMin(value = "0.01", inclusive = true, message = "Giá gói tập phải lớn hơn 0")
     @Digits(integer = 13, fraction = 0, message = "Giá VND phải là số nguyên, tối đa 13 chữ số")
+    @com.utefit.validation.ValidInput("price")
     private BigDecimal price;
 
     @Builder.Default

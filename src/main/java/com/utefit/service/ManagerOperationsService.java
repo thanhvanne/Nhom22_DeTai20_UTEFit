@@ -70,6 +70,7 @@ public class ManagerOperationsService {
 
     @Transactional
     public void saveSchedule(String email, Long branchId, Long id, ClassScheduleFormDto form) {
+        com.utefit.validation.FormChecks.validate(form);
         access.requireBranch(email, branchId, true);
         if (id != null) {
             requireSameBranch(branchId, lockedScheduleBranch(id));

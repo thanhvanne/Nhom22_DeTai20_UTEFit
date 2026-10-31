@@ -374,7 +374,9 @@ public class MemberClassBookingService {
                             s.getStartTime(),
                             s.getEndTime(),
                             r.getStatus().name(),
-                            canCancel
+                            canCancel,
+                            fc.getTrainer() != null && fc.getTrainer().getUser() != null
+                                    ? fc.getTrainer().getUser().getFullName() : null
                     );
                 })
                 .toList();
@@ -565,6 +567,7 @@ public class MemberClassBookingService {
             LocalTime startTime,
             LocalTime endTime,
             String status,
-            boolean canCancel
+            boolean canCancel,
+            String trainerName
     ) {}
 }

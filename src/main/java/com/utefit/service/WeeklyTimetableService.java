@@ -23,7 +23,8 @@ public class WeeklyTimetableService {
 
     public record Slot(String kind, String title, String detail,
                        LocalTime start, LocalTime end, String status,
-                       String detailUrl, String cancelUrl, String completeUrl) {}
+                       String detailUrl, String cancelUrl, String completeUrl,
+                       String branchName, String room, String trainerName, String memberName, String note) {}
     public record Day(LocalDate date, String label, List<Slot> slots) {}
     public record Week(LocalDate start, LocalDate end, LocalDate today,
                        List<Day> days, boolean hasEntries) {
@@ -64,12 +65,14 @@ public class WeeklyTimetableService {
             if (b.date()==null || b.date().isBefore(begin) || b.date().isAfter(end)) continue;
             add(data,b.date(),new Slot("CLASS",b.className(), b.branchName() + " · " + (b.room()==null?"Chưa có phòng":b.room()),
                     b.startTime(),b.endTime(),b.status(),"/member/schedule",
-                    b.canCancel()?"/member/classes/"+b.scheduleId()+"/cancel":null,null));
+                    b.canCancel()?"/member/classes/"+b.scheduleId()+"/cancel":null,null,
+                    b.branchName(),b.room(),b.trainerName(),null,null));
         }
         for (PersonalTrainingScheduleResponse s: memberPt.getMySchedules(email,begin,end)) {
             add(data,s.getScheduleDate(),new Slot("PT",s.getTitle()==null?"Buổi PT 1:1":s.getTitle(),
                     "PT: "+s.getTrainerName()+" · "+s.getBranchName(),s.getStartTime(),s.getEndTime(),s.getStatus(),
-                    "/member/pt-schedules",null,null));
+                    "/member/pt-schedules",null,null,
+                    s.getBranchName(),null,s.getTrainerName(),null,s.getNote()));
         }
         return week(begin,data);
     }
@@ -95,7 +98,8 @@ public class WeeklyTimetableService {
             if (s.getScheduleDate().isAfter(end)) continue;
             add(data,s.getScheduleDate(),new Slot("CLASS",s.getClassName(),
                     s.getBranchName()+" · "+s.getRoom(),s.getStartTime(),s.getEndTime(),"Được phân công",
-                    "/pt/classes/"+s.getScheduleId(),null,null));
+                    "/pt/classes/"+s.getScheduleId(),null,null,
+                    s.getBranchName(),s.getRoom(),null,null,null));
         }
         LocalDateTime now=LocalDateTime.now(ZONE);
         for (PersonalTrainingScheduleResponse s:ptSessions.getSchedulesForTrainer(id,begin,end)) {
@@ -107,7 +111,8 @@ public class WeeklyTimetableService {
                     "Member: "+s.getMemberName(),s.getStartTime(),s.getEndTime(),s.getStatus(),
                     "/pt/personal-schedules",
                     scheduled&&begins.isAfter(now)?base+"/cancel":null,
-                    scheduled&&!finishes.isAfter(now)?base+"/complete":null));
+                    scheduled&&!finishes.isAfter(now)?base+"/complete":null,
+                    s.getBranchName(),null,s.getTrainerName(),s.getMemberName(),s.getNote()));
         }
         return week(begin,data);
     }

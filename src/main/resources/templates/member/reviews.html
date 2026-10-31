@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments/head :: head('Đánh giá của tôi - UTEFit')}"></head>
+<head th:replace="~{member/fragments/layout :: head('Đánh giá của tôi - UTEFit')}"></head>
 
-<body class="uf-theme uf-area-member uf-page-member-reviews">
-<header th:replace="~{fragments/header :: header}"></header>
+<body class="uf-theme uf-area-member uf-page-member-reviews uf-member">
+<header th:replace="~{member/fragments/layout :: header}"></header>
 
 <main class="container ut-page">
 
@@ -134,8 +134,8 @@
 
 </main>
 
-<footer th:replace="~{fragments/footer :: footer}"></footer>
-<div th:replace="~{fragments/scripts :: scripts}"></div>
+<footer th:replace="~{member/fragments/layout :: footer}"></footer>
+<div th:replace="~{member/fragments/layout :: scripts}"></div>
 
 </body>
 </html>

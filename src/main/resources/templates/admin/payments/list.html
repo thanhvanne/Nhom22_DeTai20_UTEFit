@@ -2,16 +2,16 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/layout :: head('Quản lý thanh toán')}"></head>
-<body class="uf-theme uf-area-admin uf-page-admin-payments-list">
-<div class="d-flex">
+<body class="uf-theme uf-area-admin uf-page-admin-payments-list uf-admin">
+<div class="admin-shell">
     <aside th:replace="~{admin/fragments/layout :: sidebar}"></aside>
-    <div class="flex-grow-1 min-vh-100" style="min-width:0">
+    <div class="admin-workspace">
         <nav th:replace="~{admin/fragments/layout :: topbar('Quản lý thanh toán')}"></nav>
-        <main class="container-fluid px-4 pb-5">
+        <main class="admin-main" id="utefit-content" tabindex="-1">
 
-            <div class="admin-hero-banner mb-4">
+            <div class="admin-page-heading mb-4">
                 <h2 class="fw-bold">Lịch sử giao dịch</h2>
-                <p class="mb-0 text-white-50">
+                <p class="mb-0 text-muted">
                     Tra cứu và đối soát thanh toán của toàn hệ thống.
                 </p>
             </div>
@@ -22,9 +22,8 @@
                  th:text="${error}" data-uf-label></div>
 
             <div class="surface-card p-4">
-                <div class="d-flex justify-content-between
-                            align-items-center mb-3 flex-wrap gap-2">
-                    <h5 class="fw-bold mb-0">Danh sách thanh toán</h5>
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <h2 class="fw-bold mb-0">Danh sách thanh toán</h2>
                     <a class="btn btn-outline-primary" th:href="@{/admin/payments/sepay-reconciliation}">Đối soát SePay</a>
                     <a class="btn btn-success"
                        th:href="@{/admin/payments/cash-pending}">
@@ -33,14 +32,14 @@
                 </div>
 
                 <form th:action="@{/admin/payments}" method="get"
-                      class="row g-2 mb-4">
+                      class="admin-query admin-history-filter">
                     <div class="col-md-5">
                         <input class="form-control" name="keyword"
                                placeholder="Tìm theo email Hội viên"
-                               th:value="${keyword}">
+                               th:value="${keyword}" aria-label="Từ khóa tìm kiếm">
                     </div>
                     <div class="col-md-3">
-                        <select name="method" class="form-select">
+                        <select name="method" class="form-select" aria-label="Phương thức thanh toán">
                             <option value="">Tất cả phương thức</option>
                             <option th:each="m : ${methods}"
                                     th:value="${m}"
@@ -49,7 +48,7 @@
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <select name="status" class="form-select">
+                        <select name="status" class="form-select" aria-label="Trạng thái">
                             <option value="">Tất cả trạng thái</option>
                             <option th:each="s : ${statuses}"
                                     th:value="${s}"
@@ -58,13 +57,13 @@
                         </select>
                     </div>
                     <div class="col-md-1">
-                        <button class="btn btn-primary w-100">Lọc</button>
+                        <button class="btn btn-primary">Lọc</button>
                     </div>
                 </form>
 
                 <div class="d-flex gap-2 flex-wrap mb-3"><a class="btn btn-outline-warning" th:href="@{/admin/payments(status='PENDING')}">Đơn chờ thanh toán</a><a class="btn btn-outline-danger" th:href="@{/admin/payments(status='CANCEL_REQUESTED')}">Yêu cầu hủy của hội viên</a></div>
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle">
+                    <table class="table table-hover align-middle admin-data-table">
                         <thead>
                         <tr>
                             <th>ID</th><th>Hội viên</th><th>Gói tập</th>
@@ -74,22 +73,22 @@
                         </thead>
                         <tbody>
                         <tr th:each="p : ${paymentPage.content}">
-                            <td th:text="${p.id}"></td>
-                            <td th:text="${p.memberEmail}"></td>
-                            <td><span th:text="${@membershipDisplay.name(p.planName)}"></span><small class="d-block" th:if="${p.membershipId != null}" th:text="|Membership #${p.membershipId}: ${p.membershipStatus}|"></small><small th:if="${p.needsReview}" class="text-danger">Cần đối soát tiền</small></td>
-                            <td class="fw-bold"
-                                th:text="${@membershipDisplay.money(p.amount)}">
+                            <td th:text="${p.id}" data-label="ID"></td>
+                            <td th:text="${p.memberEmail}" data-label="Hội viên" class="admin-record-primary"></td>
+                            <td data-label="Gói tập"><span th:text="${@membershipDisplay.name(p.planName)}"></span><small class="d-block" th:if="${p.membershipId != null}" th:text="|Membership #${p.membershipId}: ${p.membershipStatus}|"></small><small th:if="${p.needsReview}" class="text-danger">Cần đối soát tiền</small></td>
+                            <td class="fw-bold admin-number"
+                                th:text="${@membershipDisplay.money(p.amount)}" data-label="Số tiền">
                             </td>
-                            <td th:text="${p.method}" data-uf-label></td>
-                            <td>
+                            <td th:text="${p.method}" data-uf-label data-label="Phương thức"></td>
+                            <td data-label="Trạng thái">
                                 <span class="badge"
                                       th:classappend="${p.status.name() == 'PAID' ?
-                                          'text-bg-success' :
+                                          'admin-badge-success' :
                                           (p.status.name() == 'PENDING' ?
-                                          'text-bg-warning' : 'text-bg-secondary')}"
+                                          'admin-badge-warning' : 'admin-badge-neutral')}"
                                       th:text="${p.status.label}" data-uf-label></span>
                             </td>
-                            <td>
+                            <td data-label="Chi tiết" class="admin-record-actions">
                                 <a class="btn btn-outline-primary btn-sm"
                                    th:href="@{/admin/payments/{id}(id=${p.id})}">
                                     Xem
@@ -97,7 +96,7 @@
                             </td>
                         </tr>
                         <tr th:if="${paymentPage.empty}">
-                            <td colspan="7" class="text-center text-muted">
+                            <td colspan="7" class="text-center text-muted admin-empty">
                                 Không có giao dịch phù hợp.
                             </td>
                         </tr>

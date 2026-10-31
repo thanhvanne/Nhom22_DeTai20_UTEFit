@@ -1,104 +1,23 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-
 <head th:replace="~{fragments/head :: head('Hồ sơ PT - UTEFit')}"></head>
-
-<body class="bg-dark uf-theme uf-area-pt uf-page-pt-profile-detail">
+<body class="uf-theme uf-area-pt uf-page-pt-profile-detail">
 <header th:replace="~{fragments/header :: header}"></header>
-
-<main class="py-5">
-    <style>
-        .uf-page-pt-profile-detail .pt-page-bg{
-            background: var(--uf-canvas);
-            min-height: calc(100vh - 140px);
-        }
-        .uf-page-pt-profile-detail .pt-title{ color:#fff; }
-        .uf-page-pt-profile-detail .pt-muted{ color: var(--uf-muted) !important; }
-
-        .uf-page-pt-profile-detail .pt-surface{
-            background: var(--uf-surface);
-            border: 1px solid var(--uf-border);
-            border-radius: 18px;
-            box-shadow: 0 12px 30px rgba(0,0,0,.35);
-        }
-        .uf-page-pt-profile-detail .pt-hr{
-            border-color: var(--uf-border) !important;
-        }
-        .uf-page-pt-profile-detail .pt-bio{
-            background: var(--uf-surface-raised);
-            border: 1px solid var(--uf-border);
-            color: rgba(255,255,255,0.88);
-            border-radius: 14px;
-        }
-    </style>
-
-    <div class="pt-page-bg py-4">
-        <div class="container">
-
-            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-                <h1 class="fw-bold mb-0 pt-title">Hồ sơ huấn luyện viên</h1>
-
-                <a th:href="@{/pt/profile/edit}" class="btn btn-success px-4">
-                    Chỉnh sửa hồ sơ
-                </a>
-            </div>
-
-            <div class="pt-surface overflow-hidden">
-                <div class="p-4 text-center">
-                    <!-- Avatar -->
-                    <div class="mb-3">
-                        <img th:if="${trainer.user != null and trainer.user.avatarUrl != null}"
-                             th:src="${trainer.user.avatarUrl}"
-                             alt="Ảnh huấn luyện viên"
-                             class="rounded-circle img-thumbnail shadow-sm"
-                             style="width: 130px; height: 130px; object-fit: cover; background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15);">
-
-                        <div th:if="${trainer.user == null or trainer.user.avatarUrl == null}"
-                             class="rounded-circle mx-auto d-flex align-items-center justify-content-center"
-                             style="width:130px;height:130px;
-                                    background: rgba(255,255,255,0.06);
-                                    border: 1px solid rgba(255,255,255,0.12);
-                                    color: rgba(255,255,255,0.65);">
-                            Không có ảnh
-                        </div>
-                    </div>
-
-                    <h3 class="text-white"
-                        th:text="${trainer.user != null ? (trainer.user.firstName + ' ' + trainer.user.lastName) : 'Huấn luyện viên'}" data-uf-label>
-                        Huấn luyện viên
-                    </h3>
-
-                    <p class="pt-muted mb-0" th:text="${trainer.user != null ? trainer.user.email : ''}"></p>
-
-                    <hr class="pt-hr my-4">
-                </div>
-
-                <div class="px-4 pb-4 text-white">
-                    <p class="mb-2">
-                        <strong>Chuyên môn:</strong>
-                        <span th:text="${trainer.specialization != null ? trainer.specialization : '—'}"></span>
-                    </p>
-
-                    <p class="mb-2">
-                        <strong>Kinh nghiệm:</strong>
-                        <span th:text="${trainer.yearsExperience != null ? trainer.yearsExperience : 0}"></span> năm
-                    </p>
-
-                    <p class="mb-3">
-                        <strong>Chi nhánh:</strong>
-                        <span th:text="${trainer.branch != null ? trainer.branch.name : 'Chưa cập nhật chi nhánh'}"></span>
-                    </p>
-
-                    <p class="mb-2"><strong>Giới thiệu bản thân:</strong></p>
-                    <p class="p-3 pt-bio mb-0" th:text="${trainer.bio != null ? trainer.bio : '—'}" style="white-space: pre-line;"></p>
-                </div>
-            </div>
-
-        </div>
+<main class="staff-profile" id="utefit-content" tabindex="-1">
+    <div class="staff-page-heading"><div><p class="staff-kicker">UTEFIT / COACH IDENTITY</p><h1>Hồ sơ huấn luyện viên</h1><p>Dấu ấn chuyên môn. Phong cách dẫn dắt.</p></div><a class="btn btn-outline-light" th:href="@{/pt/dashboard}">Về tổng quan ↗</a></div>
+    <div class="alert alert-success" th:if="${successMessage}" th:text="${successMessage}" data-staff-server-success role="status"></div>
+    <div class="alert alert-danger" th:if="${errorMessage}" th:text="${errorMessage}" data-staff-server-error role="alert"></div>
+    <section class="staff-profile-hero" data-staff-reveal aria-labelledby="coach-name">
+        <div class="staff-profile-portrait"><th:block th:replace="~{pt/fragments/layout :: avatar(${trainer.user != null ? trainer.user.avatarUrl : null})}"></th:block></div>
+        <div class="staff-profile-identity"><p class="staff-kicker">PERSONAL TRAINER / COACH</p><h2 id="coach-name" th:text="${trainer.user != null ? trainer.user.fullName : 'Chưa cập nhật họ tên'}"></h2><p class="staff-profile-email" th:text="${trainer.user != null ? trainer.user.email : ''}"></p><a class="btn btn-primary" th:href="@{/pt/profile/edit}">Chỉnh sửa hồ sơ <span aria-hidden="true">↗</span></a></div>
+        <div class="staff-profile-assignment"><span>CHI NHÁNH PHỤ TRÁCH</span><strong th:text="${trainer.branch != null ? @membershipDisplay.name(trainer.branch.name) : 'Chưa phân công'}"></strong><span class="staff-status" th:text="${trainer.active ? 'PT đang hoạt động' : 'PT chưa kích hoạt'}"></span></div>
+    </section>
+    <div class="staff-profile-grid">
+        <section class="staff-profile-panel" data-staff-reveal><p class="staff-kicker">CHUYÊN MÔN</p><h2>Thế mạnh huấn luyện</h2><p class="staff-specialization" th:text="${!#strings.isEmpty(trainer.specialization) ? trainer.specialization : 'Chưa cập nhật chuyên môn.'}"></p><dl class="staff-detail-list"><div><dt>Kinh nghiệm</dt><dd th:text="${trainer.yearsExperience != null ? trainer.yearsExperience + ' năm' : 'Chưa cập nhật'}"></dd></div><div><dt>Chi nhánh</dt><dd th:text="${trainer.branch != null ? @membershipDisplay.name(trainer.branch.name) : 'Chưa phân công'}"></dd></div></dl></section>
+        <section class="staff-profile-panel staff-profile-bio" data-staff-reveal><p class="staff-kicker">PHONG CÁCH CỦA BẠN</p><h2>Giới thiệu bản thân</h2><p th:text="${!#strings.isEmpty(trainer.bio) ? trainer.bio : 'Chưa có thông tin giới thiệu.'}"></p><a th:href="@{/pt/profile/edit}">Cập nhật giới thiệu <span aria-hidden="true">→</span></a></section>
     </div>
 </main>
-
+<dialog th:replace="~{pt/fragments/layout :: lightbox}"></dialog>
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 <div th:replace="~{fragments/scripts :: scripts}"></div>
-</body>
-</html>
+</body></html>

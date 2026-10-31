@@ -3,11 +3,11 @@
 <head th:replace="~{fragments/head :: head('Lịch lớp chi nhánh - UTEFit')}"></head>
 <body class="uf-theme uf-area-manager uf-page-manager-schedule-form">
 <header th:replace="~{fragments/header :: header}"></header>
-<main class="container ut-page">
+<main class="container ut-page manager-schedule-editor" id="utefit-content" tabindex="-1">
     <a th:href="@{/manager(branchId=${branchId})}">← Chi nhánh của tôi</a>
-    <h1 class="h3 mt-3" th:text="${editId == null ? 'Tạo lịch lớp' : 'Sửa lịch lớp'}" data-uf-label></h1>
+    <p class="staff-kicker mt-4">UTEFIT / BRANCH SCHEDULING</p><h1 class="h3 mt-3" th:text="${editId == null ? 'Tạo lịch lớp' : 'Sửa lịch lớp'}" data-uf-label></h1><p class="staff-help">Sắp xếp lớp học trong phạm vi chi nhánh được giao. Kiểm tra ngày, giờ và phòng trước khi lưu.</p>
     <div class="alert alert-danger" th:if="${error}" th:text="${error}" data-uf-label></div>
-    <form class="ut-panel" method="post" th:object="${scheduleForm}" th:action="${editId == null} ? @{/manager/schedules/new} : @{/manager/schedules/{id}/edit(id=${editId})}">
+    <form class="ut-panel manager-schedule-fields" method="post" th:object="${scheduleForm}" data-staff-submit th:action="${editId == null} ? @{/manager/schedules/new} : @{/manager/schedules/{id}/edit(id=${editId})}">
         <input type="hidden" name="branchId" th:value="${branchId}">
         <div class="alert alert-danger" th:if="${#fields.hasAnyErrors()}"><p th:each="error : ${#fields.allErrors()}" th:text="${error}" data-uf-label></p></div>
         <label for="fitnessClassId">Lớp thuộc chi nhánh</label>
@@ -17,7 +17,7 @@
         <label for="endTime">Giờ kết thúc</label><input class="form-control mb-3" type="time" th:field="*{endTime}" required>
         <label for="room">Phòng</label><input class="form-control mb-3" maxlength="100" th:field="*{room}">
         <label class="d-block mb-3"><input type="checkbox" th:field="*{active}"> Lịch hoạt động</label>
-        <button class="btn btn-brand" type="submit">Lưu lịch</button>
+        <div class="staff-form-actions"><button class="btn btn-brand" type="submit">Lưu lịch</button><a class="btn btn-outline-secondary" th:href="@{/manager(branchId=${branchId})}">Hủy thay đổi</a></div>
     </form>
 </main>
 <footer th:replace="~{fragments/footer :: footer}"></footer>

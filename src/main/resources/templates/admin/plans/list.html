@@ -1,58 +1,60 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/layout :: head('Quản lý Gói tập')}"></head>
-<body class="uf-theme uf-area-admin uf-page-admin-plans-list">
-<div class="d-flex">
+<body class="uf-theme uf-area-admin uf-page-admin-plans-list uf-admin">
+<div class="admin-shell">
     <div th:replace="~{admin/fragments/layout :: sidebar}"></div>
 
-    <div class="flex-grow-1">
-        <div th:replace="~{admin/fragments/layout :: topbar('Quản lý Gói tập (Membership Plans)')}"></div>
+    <div class="admin-workspace">
+        <div th:replace="~{admin/fragments/layout :: topbar('Gói tập')}"></div>
 
-        <main class="container-fluid px-4 pb-5">
-            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm rounded-4 border-0">
+        <main class="admin-main" id="utefit-content" tabindex="-1">
+            <div class="admin-page-heading"><p>Giá bán, thời hạn và quyền lợi tại từng chi nhánh.</p></div>
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show">
                 <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}" data-uf-label></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng thông báo"></button>
             </div>
-            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm rounded-4 border-0">
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show">
                 <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${errorMessage}" data-uf-label></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng thông báo"></button>
             </div>
 
             <!-- Thanh công cụ tìm kiếm & lọc -->
-            <div class="surface-card p-4 mb-4">
-                <form method="get" th:action="@{/admin/membership-plans}" class="row g-3 align-items-end">
-                    <div class="col-md-5">
-                        <label class="form-label small fw-bold text-secondary text-uppercase">Tìm kiếm gói tập</label>
+            <div class="surface-card admin-filter-panel">
+                <form method="get" th:action="@{/admin/membership-plans}" class="admin-query">
+                    <div class="admin-query-field">
+                        <label class="form-label small fw-bold text-secondary" for="admin-plans-list-html-active">Tìm kiếm gói tập</label>
                         <div class="input-group">
                             <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
                             <input type="text" name="keyword" class="form-control border-start-0"
-                                   placeholder="Nhập tên gói tập hoặc quyền lợi..." th:value="${keyword}">
+                                   placeholder="Nhập tên gói tập hoặc quyền lợi..." th:value="${keyword}" aria-label="Từ khóa tìm kiếm">
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label small fw-bold text-secondary text-uppercase">Trạng thái</label>
-                        <select name="active" class="form-select">
+                    <div class="admin-query-field">
+                        <label class="form-label small fw-bold text-secondary">Trạng thái</label>
+                        <select name="active" class="form-select" id="admin-plans-list-html-active">
                             <option value="">-- Tất cả trạng thái --</option>
                             <option value="true" th:selected="${selectedActive != null and selectedActive}">Đang mở bán</option>
                             <option value="false" th:selected="${selectedActive != null and !selectedActive}">Ngừng kinh doanh</option>
                         </select>
                     </div>
-                    <div class="col-md-2 d-flex gap-2">
-                        <button type="submit" class="btn btn-utefit w-100"><i class="bi bi-funnel-fill me-1"></i> Lọc</button>
-                        <a th:href="@{/admin/membership-plans}" class="btn btn-outline-secondary" title="Đặt lại"><i class="bi bi-arrow-counterclockwise"></i></a>
+                    <div class="admin-query-field">
+                        <button type="submit" class="btn btn-outline-secondary w-100"><i class="bi bi-funnel-fill me-1"></i> Lọc</button>
+                        <a th:href="@{/admin/membership-plans}" class="btn btn-outline-secondary" title="Đặt lại" aria-label="Đặt lại bộ lọc"><i class="bi bi-arrow-counterclockwise"></i></a>
                     </div>
-                    <div class="col-md-2 text-end">
-                        <a th:href="@{/admin/membership-plans/create}" class="btn btn-dark w-100 fw-semibold">
-                            <i class="bi bi-plus-lg text-success me-1"></i> Thêm gói tập
+                    <div class="admin-query-field">
+                        <a th:href="@{/admin/membership-plans/create}" class="btn btn-primary w-100 fw-semibold">
+                            <i class="bi bi-plus-lg me-1"></i> Thêm gói tập
                         </a>
                     </div>
                 </form>
             </div>
 
             <!-- Bảng dữ liệu Gói tập -->
-            <div class="surface-card overflow-hidden">
+            <div class="surface-card admin-table-panel">
+                <div class="admin-table-heading"><h2>Danh sách gói tập</h2><p class="admin-scroll-hint">Cuộn ngang để xem đầy đủ trên máy tính bảng.</p></div>
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
+                    <table class="table table-hover align-middle mb-0 admin-data-table">
                         <thead>
                         <tr>
                             <th class="ps-4" style="width: 70px;">ID</th>
@@ -60,37 +62,37 @@
                             <th>Thời hạn</th>
                             <th>Giá niêm yết</th>
                             <th>Trạng thái</th>
-                            <th class="text-end pe-4">Thao tác</th>
+                            <th class="pe-4">Thao tác</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr th:if="${planPage.empty}">
-                            <td colspan="6" class="text-center py-5 text-muted">
+                            <td colspan="6" class="text-center py-5 text-muted admin-empty">
                                 <i class="bi bi-card-checklist fs-1 d-block mb-2 text-secondary opacity-50"></i>
                                 Chưa có gói tập nào phù hợp. Hãy nhấn "Thêm gói tập" để tạo mới.
                             </td>
                         </tr>
                         <tr th:each="p : ${planPage.content}">
-                            <td class="ps-4 fw-bold text-secondary" th:text="'#' + ${p.id}">#1</td>
-                            <td>
+                            <td class="ps-4 fw-bold text-secondary" th:text="'#' + ${p.id}" data-label="ID">#1</td>
+                            <td data-label="Tên gói tập" class="admin-record-primary">
                                 <div class="fw-bold text-dark fs-6" th:text="${@membershipDisplay.name(p.name)}">Gói 1 Tháng</div>
                                 <div class="small text-primary" th:text="${@membershipDisplay.benefit(p.effectiveBenefit())}" data-uf-label></div>
                                 <small th:each="branch : ${scopeBranches}" th:if="${p.branchIds.contains(branch.id)}" class="d-block" th:text="${@membershipDisplay.name(branch.name)}"></small>
                                 <small th:if="${!p.fixedBranch()}" class="text-warning">Gói cũ cần chọn một chi nhánh trước khi mở bán mới.</small>
-                                <div class="text-muted small text-truncate" style="max-width: 380px;"
+                                <div class="text-muted small" style="max-width: 380px;"
                                      th:text="${p.description != null and !#strings.isEmpty(p.description) ? p.description : 'Chưa có mô tả chi tiết.'}"></div>
                             </td>
-                            <td>
-                                <span class="badge bg-info bg-opacity-10 text-dark border border-info border-opacity-25 px-3 py-2 rounded-pill fw-semibold">
+                            <td data-label="Thời hạn">
+                                <span class="badge bg-info bg-opacity-10 text-dark border border-info border-opacity-25 px-3 py-2 fw-semibold">
                                     <i class="bi bi-calendar2-week text-info me-1"></i>
                                     <span th:text="${p.durationDescription()}">30 ngày</span>
                                 </span>
                             </td>
-                            <td>
+                            <td data-label="Giá niêm yết" class="admin-number">
                                 <span class="fw-bolder text-success fs-6"
                                       th:text="${@membershipDisplay.money(p.price)}">500.000đ</span>
                             </td>
-                            <td>
+                            <td data-label="Trạng thái">
                                 <span th:if="${p.active}" class="status-pill bg-success bg-opacity-10 text-success">
                                     <span class="dot bg-success"></span> Đang mở bán
                                 </span>
@@ -98,12 +100,12 @@
                                     <span class="dot bg-secondary"></span> Tạm ngưng
                                 </span>
                             </td>
-                            <td class="text-end pe-4">
-                                <a th:href="@{/admin/membership-plans/{id}/edit(id=${p.id})}" class="btn btn-sm btn-outline-dark rounded-pill px-3 me-1">
+                            <td class="pe-4 admin-record-actions" data-label="Thao tác">
+                                <a th:href="@{/admin/membership-plans/{id}/edit(id=${p.id})}" class="btn btn-sm btn-outline-dark px-3 me-1">
                                     <i class="bi bi-pencil-square me-1"></i> Sửa
                                 </a>
                                 <form th:action="@{/admin/membership-plans/{id}/toggle-active(id=${p.id})}" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-sm rounded-pill px-3"
+                                    <button type="submit" class="btn btn-sm px-3"
                                             th:classappend="${p.active ? 'btn-outline-warning' : 'btn-outline-success'}">
                                         <span th:text="${p.active ? 'Tắt' : 'Bật'}"></span>
                                     </button>
@@ -114,7 +116,7 @@
                     </table>
                 </div>
 
-                <div class="card-footer bg-white d-flex justify-content-between align-items-center px-4 py-3" th:if="${planPage.totalPages > 1}">
+                <div class="admin-pagination" th:if="${planPage.totalPages > 1}">
                     <span class="small text-muted">Trang <b th:text="${planPage.number + 1}"></b> / <b th:text="${planPage.totalPages}"></b></span>
                     <ul class="pagination pagination-sm mb-0">
                         <li class="page-item" th:classappend="${planPage.first} ? 'disabled'">

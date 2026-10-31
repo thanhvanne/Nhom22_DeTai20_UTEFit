@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.Optional;
 
 public interface SepayPaymentDetailsRepository extends JpaRepository<SepayPaymentDetails, Long> {
+    @Query("select d.id from SepayPaymentDetails d where d.payment.user.id = :userId and d.environment = 'LIVE'")
+    java.util.Set<Long> livePaymentIds(@org.springframework.data.repository.query.Param("userId") Long userId);
     @Override
     @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"payment", "payment.membership"})
     Optional<SepayPaymentDetails> findById(Long id);

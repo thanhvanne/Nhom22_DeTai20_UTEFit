@@ -13,11 +13,13 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@com.utefit.validation.ConsistentForm
 public class ClassScheduleFormDto {
 
     private Long id;
 
     @NotNull(message = "Vui lòng chọn lớp tập")
+    @com.utefit.validation.ValidInput("id")
     private Long fitnessClassId;
 
     @NotNull(message = "Vui lòng chọn ngày học")

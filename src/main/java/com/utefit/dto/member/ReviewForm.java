@@ -12,9 +12,11 @@ import lombok.Setter;
 public class ReviewForm {
 
     @NotNull(message = "Vui lòng chọn chi nhánh.")
+    @com.utefit.validation.ValidInput("id")
     private Long branchId;
 
     // null = đánh giá chi nhánh; có ID = đánh giá PT.
+    @com.utefit.validation.ValidInput("id")
     private Long trainerId;
 
     @NotNull(message = "Vui lòng chọn số sao.")
@@ -23,6 +25,7 @@ public class ReviewForm {
     private Integer rating;
 
     @Size(max = 2000, message = "Nội dung tối đa 2000 ký tự.")
+    @com.utefit.validation.ValidInput("comment")
     private String comment;
 
     private boolean removeVideo;

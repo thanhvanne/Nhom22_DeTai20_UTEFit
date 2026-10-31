@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" fill="none">
+  <g transform="translate(450 305) rotate(-23)">
+    <path fill="#777971" d="M-390-10h780v25h-780z"/>
+    <path fill="#d4d5cb" d="M-390-10h780v7h-780z"/>
+    <g fill="#ac3023" stroke="#ed6149" stroke-width="2">
+      <path d="M-290-130h34v260h-34zM-245-145h38v290h-38zM220-145h38v290h-38zM270-130h34v260h-34z"/>
+      <ellipse cx="-290" rx="40" ry="130"/><ellipse cx="-245" rx="44" ry="145"/>
+      <ellipse cx="220" rx="44" ry="145"/><ellipse cx="270" rx="40" ry="130"/>
+    </g>
+    <g fill="#f04a35"><ellipse cx="-207" rx="44" ry="145"/><ellipse cx="304" rx="40" ry="130"/></g>
+    <g stroke="#171613" stroke-width="4"><ellipse cx="-207" rx="34" ry="130"/><ellipse cx="304" rx="31" ry="116"/></g>
+    <g fill="#c5c6bc"><ellipse cx="-207" rx="9" ry="27"/><ellipse cx="304" rx="9" ry="27"/></g>
+    <path fill="#aaaca3" d="M-390-10h90v25h-90zM315-10h75v25h-75z"/>
+    <path stroke="#72746c" stroke-width="2" stroke-dasharray="3 5" d="M-160 6h325"/>
+  </g>
+</svg>

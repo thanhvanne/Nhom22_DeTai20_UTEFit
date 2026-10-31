@@ -2,16 +2,16 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/layout :: head('Check-in')}"></head>
-<body class="uf-theme uf-area-admin uf-page-admin-checkins-list">
-<div class="d-flex">
+<body class="uf-theme uf-area-admin uf-page-admin-checkins-list uf-admin">
+<div class="admin-shell">
     <aside th:replace="~{admin/fragments/layout :: sidebar}"></aside>
-    <div class="flex-grow-1 min-vh-100" style="min-width:0">
+    <div class="admin-workspace">
         <nav th:replace="~{admin/fragments/layout :: topbar('Quản lý Check-in')}"></nav>
 
-        <main class="container-fluid px-4 pb-5 admin-checkins">
-            <div class="admin-hero-banner mb-4">
+        <main class="admin-main admin-checkins" id="utefit-content" tabindex="-1">
+            <div class="admin-page-heading mb-4">
                 <h2 class="fw-bold">Quản lý Vào tập / Ra về</h2>
-                <p class="mb-0 text-white-50">
+                <p class="mb-0 text-muted">
                     Xác nhận Hội viên đến phòng tập, kiểm tra gói tập
                     và quản lý lịch sử ra vào.
                 </p>
@@ -22,8 +22,8 @@
             <div th:if="${error}" class="alert alert-danger"
                  th:text="${error}" data-uf-label></div>
 
-            <div class="surface-card p-3 p-md-4 mb-4">
-                <h5 class="fw-bold mb-3">Quét Quét QR vào tập / ra về</h5>
+            <div class="surface-card admin-panel admin-qr-panel mb-4">
+                <h2 class="fw-bold mb-3">Quét QR vào tập / ra về</h2>
                 <form th:action="@{/admin/checkins/qr}" method="post" id="qr-checkin-form" class="row g-3">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     <div class="col-12 col-xl-5">
@@ -39,7 +39,7 @@
                         <div id="qr-token-help" class="form-text">Dán QR vào tập hoặc Ra về của Hội viên. Backend xác định thao tác từ token; mã có hiệu lực 120 giây và dùng một lần.</div>
                     </div>
                     <div class="col-12 col-xl-2 d-flex align-items-end">
-                        <button type="submit" class="btn btn-success w-100">Xác nhận QR</button>
+                        <button type="submit" class="btn btn-primary w-100">Xác nhận QR</button>
                     </div>
                 </form>
                 <div class="qr-camera-actions d-flex flex-column flex-sm-row flex-wrap gap-2 mt-3">
@@ -58,20 +58,20 @@
             <script th:src="@{/js/qr-scanner.js}" defer></script>
 
             <div class="surface-card p-3 p-md-4 mb-4">
-                <h5 class="fw-bold mb-3">Vào tập Hội viên</h5>
+                <h2 class="fw-bold mb-3">Vào tập Hội viên</h2>
                 <form th:action="@{/admin/checkins}" method="post"
                       class="row g-3">
                     <input type="hidden" th:name="${_csrf.parameterName}"
                            th:value="${_csrf.token}">
                     <div class="col-12 col-xl-5">
-                        <label class="form-label">Email Hội viên</label>
+                        <label class="form-label" for="admin-checkins-list-html-email">Email Hội viên</label>
                         <input type="email" name="email" required
                                class="form-control"
-                               placeholder="member@gmail.com">
+                               placeholder="member@gmail.com" id="admin-checkins-list-html-email">
                     </div>
                     <div class="col-12 col-xl-5">
-                        <label class="form-label">Chi nhánh</label>
-                        <select name="branchId" class="form-select" required>
+                        <label class="form-label" for="admin-checkins-list-html-branchId">Chi nhánh</label>
+                        <select name="branchId" class="form-select" required id="admin-checkins-list-html-branchId">
                             <option value="">-- Chọn chi nhánh --</option>
                             <option th:each="b : ${branches}"
                                     th:value="${b.id}"
@@ -87,17 +87,17 @@
             </div>
 
             <div class="surface-card p-3 p-md-4">
-                <h5 class="fw-bold mb-3">Lịch sử Vào tập</h5>
+                <h2 class="fw-bold mb-3">Lịch sử Vào tập</h2>
 
                 <form method="get" th:action="@{/admin/checkins}"
-                      class="row g-2 mb-4">
+                      class="admin-query admin-history-filter">
                     <div class="col-12 col-sm-6 col-xl-3">
                         <input name="email" class="form-control"
                                placeholder="Tìm email"
-                               th:value="${email}">
+                               th:value="${email}" aria-label="Email hội viên">
                     </div>
                     <div class="col-12 col-sm-6 col-xl-3">
-                        <select name="branchId" class="form-select">
+                        <select name="branchId" class="form-select" aria-label="Chi nhánh">
                             <option value="">Tất cả chi nhánh</option>
                             <option th:each="b : ${branches}"
                                     th:value="${b.id}"
@@ -107,10 +107,10 @@
                     </div>
                     <div class="col-12 col-sm-6 col-xl-2">
                         <input type="date" name="date" class="form-control"
-                               th:value="${date}">
+                               th:value="${date}" aria-label="Ngày giao dịch">
                     </div>
                     <div class="col-12 col-sm-6 col-xl-2">
-                        <select name="open" class="form-select">
+                        <select name="open" class="form-select" aria-label="Trạng thái ra về">
                             <option value="">Tất cả</option>
                             <option value="true" th:selected="${open == true}">
                                 Chưa ra về
@@ -121,12 +121,12 @@
                         </select>
                     </div>
                     <div class="col-12 col-xl-2">
-                        <button class="btn btn-primary w-100">Lọc</button>
+                        <button class="btn btn-primary">Lọc</button>
                     </div>
                 </form>
 
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle">
+                    <table class="table table-hover align-middle admin-data-table">
                         <thead>
                         <tr>
                             <th>ID</th><th>Hội viên</th><th>Chi nhánh</th>
@@ -135,19 +135,19 @@
                         </thead>
                         <tbody>
                         <tr th:each="c : ${checkinPage.content}">
-                            <td th:text="${c.id}"></td>
-                            <td>
+                            <td th:text="${c.id}" data-label="ID"></td>
+                            <td data-label="Hội viên" class="admin-record-primary">
                                 <strong th:text="${c.user.fullName}"></strong>
                                 <div class="small text-muted"
                                      th:text="${c.user.email}"></div>
                             </td>
-                            <td th:text="${@membershipDisplay.name(c.branch.name)}"></td>
+                            <td th:text="${@membershipDisplay.name(c.branch.name)}" data-label="Chi nhánh"></td>
                             <td th:text="${#temporals.format(c.checkInAt,
-                                               'dd/MM/yyyy HH:mm')}"></td>
+                                               'dd/MM/yyyy HH:mm')}" data-label="Vào tập"></td>
                             <td th:text="${c.checkOutAt == null ? 'Chưa checkout' :
                                      #temporals.format(c.checkOutAt,
-                                               'dd/MM/yyyy HH:mm')}"></td>
-                            <td>
+                                               'dd/MM/yyyy HH:mm')}" data-label="Ra về"></td>
+                            <td data-label="Thao tác" class="admin-record-actions">
                                 <form th:if="${c.checkOutAt == null}"
                                       th:action="@{/admin/checkins/{id}/checkout(id=${c.id})}"
                                       method="post">
@@ -161,13 +161,13 @@
                                     </button>
                                 </form>
                                 <span th:if="${c.checkOutAt != null}"
-                                      class="badge text-bg-success">
+                                      class="badge admin-badge-success">
                                     Đã hoàn tất
                                 </span>
                             </td>
                         </tr>
                         <tr th:if="${checkinPage.empty}">
-                            <td colspan="6" class="text-center text-muted py-4">
+                            <td colspan="6" class="text-center text-muted py-4 admin-empty">
                                 Chưa có dữ liệu vào tập.
                             </td>
                         </tr>

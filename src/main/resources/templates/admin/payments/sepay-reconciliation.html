@@ -1,51 +1,51 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/layout :: head('Đối soát SePay')}"></head>
-<body class="uf-theme uf-area-admin uf-page-admin-payments-sepay-reconciliation"><div class="d-flex">
+<body class="uf-theme uf-area-admin uf-page-admin-payments-sepay-reconciliation uf-admin"><div class="admin-shell">
 <aside th:replace="~{admin/fragments/layout :: sidebar}"></aside>
-<div class="flex-grow-1 min-vh-100" style="min-width:0">
+<div class="admin-workspace">
     <nav th:replace="~{admin/fragments/layout :: topbar('Đối soát SePay')}"></nav>
-    <main class="container-fluid px-4 pb-5">
-        <h1 class="h3">Giao dịch Webhook SePay đã xác thực</h1>
+    <main class="admin-main admin-reconciliation-list" id="utefit-content" tabindex="-1">
+        <h2 class="admin-section-title">Giao dịch Webhook SePay đã xác thực</h2>
         <p>MATCHED: đã ghi PAID và kích hoạt gói. REVIEW: cần đối soát, không đồng nghĩa chưa nhận tiền. IGNORED: không phải tiền vào. Luồng xác minh ngân hàng thủ công bên dưới dành cho mọi quản trị viên đang hoạt động và đã được bật tài khoản khi chức năng đối soát được bật.</p>
         <p>Giao dịch Test không phải tiền thật. Không cộng sổ kỹ thuật vào doanh thu PAID lần nữa.</p>
         <a th:href="@{/admin/payments}" class="btn btn-outline-secondary mb-3">Lịch sử Giao dịch</a>
-        <section class="surface-card p-3 mb-3">
+        <section class="surface-card admin-panel mb-4">
             <h2 class="h5">Đơn SePay Live PENDING / có webhook REVIEW</h2>
             <p>Chưa có webhook không chứng minh chưa nhận tiền. Mở đơn để xem lý do, xác minh trực tiếp ngân hàng nhận và lưu audit. Không dùng ảnh người chuyển làm bằng chứng duy nhất.</p>
-            <div class="table-responsive"><table class="table align-middle">
+            <div class="table-responsive"><table class="table align-middle admin-data-table">
                 <thead><tr><th>Giao dịch / trạng thái</th><th>Mã / số tiền</th><th>Ngân hàng / TK chính / VA</th><th>Tạo / hết hạn</th><th>Đối soát</th></tr></thead>
                 <tbody><tr th:each="order : ${pendingOrders.content}">
-                    <td th:text="|#${order.id} / ${order.payment.status}|" data-uf-label></td>
-                    <td style="overflow-wrap:anywhere"><span th:text="${order.paymentReference}"></span><br><strong th:text="|${@membershipDisplay.money(order.payment.amount)}|"></strong></td>
-                    <td><span th:text="${order.gateway}"></span><br><span th:text="${order.accountNumber}"></span><br>VA: <span th:text="${order.vaNumber ?: 'Không có (đơn cũ)'}"></span></td>
-                    <td><span th:text="${order.payment.createdAt}" data-uf-date></span><br><span th:text="${order.expiresAt}" data-uf-date></span></td>
-                    <td><a class="btn btn-outline-primary" th:href="@{/admin/payments/sepay-reconciliation/{id}(id=${order.id})}">Xem / xác minh ngân hàng</a></td>
+                    <td th:text="|#${order.id} / ${order.payment.status}|" data-uf-label data-label="Giao dịch / trạng thái" class="admin-record-primary"></td>
+                    <td style="overflow-wrap:anywhere" data-label="Mã / số tiền"><span th:text="${order.paymentReference}"></span><br><strong th:text="|${@membershipDisplay.money(order.payment.amount)}|"></strong></td>
+                    <td data-label="Ngân hàng / TK chính / VA"><span th:text="${order.gateway}"></span><br><span th:text="${order.accountNumber}"></span><br>VA: <span th:text="${order.vaNumber ?: 'Không có (đơn cũ)'}"></span></td>
+                    <td data-label="Tạo / hết hạn"><span th:text="${order.payment.createdAt}" data-uf-date></span><br><span th:text="${order.expiresAt}" data-uf-date></span></td>
+                    <td data-label="Đối soát" class="admin-record-actions"><a class="btn btn-outline-primary" th:href="@{/admin/payments/sepay-reconciliation/{id}(id=${order.id})}">Xem / xác minh ngân hàng</a></td>
                 </tr></tbody>
             </table></div>
             <p th:if="${pendingOrders.empty}">Không có đơn PENDING / REVIEW trong trang này.</p>
             <nav class="d-flex gap-3"><a th:if="${pendingOrders.hasPrevious()}" th:href="@{/admin/payments/sepay-reconciliation(page=${pendingOrders.number - 1})}">Đơn trước</a><a th:if="${pendingOrders.hasNext()}" th:href="@{/admin/payments/sepay-reconciliation(page=${pendingOrders.number + 1})}">Đơn sau</a></nav>
         </section>
-        <section class="surface-card p-3 mb-3">
+        <section class="surface-card admin-panel mb-4">
             <h2 class="h5">Tra cứu SePay API Live (chỉ đọc)</h2>
             <p>Mặc định tắt. Đối chiếu API v2 với sổ Webhook; ID API là UUID, không được dùng thay ID số của Webhook. Không tự ghi PAID hoặc hoàn tiền. Với giao dịch thiếu, yêu cầu phát lại Webhook có HMAC từ Tổng quan.</p>
-            <form th:action="@{/admin/payments/sepay-reconciliation/lookup}" method="post" class="d-flex flex-wrap gap-2">
-                <input class="form-control w-auto" name="date" type="date" required aria-label="Ngày giao dịch">
-                <input class="form-control w-auto" name="apiPage" type="number" value="1" min="1" max="10000" required aria-label="Trang API">
+            <form th:action="@{/admin/payments/sepay-reconciliation/lookup}" method="post" class="admin-lookup-form">
+                <div class="admin-lookup-field"><label class="form-label" for="admin-lookup-date">Ngày giao dịch</label><input class="form-control" name="date" type="date" required aria-label="Ngày giao dịch" id="admin-lookup-date"></div>
+                <div class="admin-lookup-field"><label class="form-label" for="admin-lookup-page">Trang API</label><input class="form-control" name="apiPage" type="number" value="1" min="1" max="10000" required aria-label="Trang API" id="admin-lookup-page"></div>
                 <button class="btn btn-outline-primary" type="submit">Tra cứu 20 giao dịch</button>
             </form>
             <p th:if="${apiError != null}" th:text="${apiError}" role="alert"></p>
             <pre th:if="${apiResult != null}" th:text="${apiResult}" style="max-height:400px;overflow:auto"></pre>
         </section>
-        <div class="table-responsive surface-card p-3"><table class="table table-hover align-middle">
+        <div class="table-responsive surface-card admin-webhook-table"><table class="table table-hover align-middle admin-data-table">
             <thead><tr><th>SePay ID / môi trường</th><th>Ngân hàng / tài khoản</th><th>Tiền / thời gian GD</th><th>Nội dung / mã</th><th>Kết quả</th><th>Giao dịch</th></tr></thead>
             <tbody><tr th:each="receipt : ${transactions.content}">
-                <td><strong th:text="${receipt.transactionId}"></strong><br><span th:text="${receipt.environment}"></span><br><small th:text="${receipt.bankReference}"></small></td>
-                <td><span th:text="${receipt.gateway}"></span><br>TK chính: <span th:text="${receipt.accountNumber}"></span><br>VA / subAccount: <span th:text="${receipt.subAccount ?: 'Không có trong bản ghi'}"></span></td>
-                <td><strong th:text="|${@membershipDisplay.money(receipt.amount)}|"></strong><br><small th:text="${receipt.transactionDate}"></small></td>
-                <td style="max-width:300px;overflow-wrap:anywhere"><strong th:text="${receipt.paymentReference}"></strong><p th:text="${receipt.content}"></p></td>
-                <td><span th:text="${receipt.outcome}"></span><br><small th:text="${receipt.reason}"></small><p th:if="${receipt.conflictHash != null}" class="text-danger">Phát hiện ID/tham chiếu ngân hàng gửi lại với dữ liệu khác. ID: <span th:text="${receipt.conflictTransactionId}"></span>. Cần kiểm tra log SePay; không kích hoạt thêm.</p></td>
-                <td><a th:if="${receipt.payment != null}" th:href="@{/admin/payments/{id}(id=${receipt.payment.id})}" th:text="|#${receipt.payment.id}|"></a></td>
+                <td data-label="SePay ID / môi trường" class="admin-record-primary"><strong th:text="${receipt.transactionId}"></strong><br><span th:text="${receipt.environment}"></span><br><small th:text="${receipt.bankReference}"></small></td>
+                <td data-label="Ngân hàng / tài khoản"><span th:text="${receipt.gateway}"></span><br>TK chính: <span th:text="${receipt.accountNumber}"></span><br>VA / subAccount: <span th:text="${receipt.subAccount ?: 'Không có trong bản ghi'}"></span></td>
+                <td data-label="Tiền / thời gian GD"><strong th:text="|${@membershipDisplay.money(receipt.amount)}|"></strong><br><small th:text="${receipt.transactionDate}"></small></td>
+                <td style="max-width:300px;overflow-wrap:anywhere" data-label="Nội dung / mã"><strong th:text="${receipt.paymentReference}"></strong><p th:text="${receipt.content}"></p></td>
+                <td data-label="Kết quả"><span th:text="${receipt.outcome}"></span><br><small th:text="${receipt.reason}"></small><p th:if="${receipt.conflictHash != null}" class="text-danger">Phát hiện ID/tham chiếu ngân hàng gửi lại với dữ liệu khác. ID: <span th:text="${receipt.conflictTransactionId}"></span>. Cần kiểm tra log SePay; không kích hoạt thêm.</p></td>
+                <td data-label="Giao dịch" class="admin-record-actions"><a th:if="${receipt.payment != null}" th:href="@{/admin/payments/{id}(id=${receipt.payment.id})}" th:text="|#${receipt.payment.id}|"></a></td>
             </tr></tbody>
         </table><p th:if="${transactions.empty}">Chưa có Webhook đã xác thực được lưu.</p></div>
         <nav class="d-flex gap-3 mt-3"><a th:if="${transactions.hasPrevious()}" th:href="@{/admin/payments/sepay-reconciliation(page=${transactions.number - 1})}">Trước</a><span th:text="|Trang ${transactions.number + 1}|"></span><a th:if="${transactions.hasNext()}" th:href="@{/admin/payments/sepay-reconciliation(page=${transactions.number + 1})}">Sau</a></nav>

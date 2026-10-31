@@ -1,121 +1,124 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments/layout :: head('Quản lý Người dùng')}"></head>
-<body class="uf-theme uf-area-admin uf-page-admin-users-list">
-<div class="d-flex">
+<head th:replace="~{admin/fragments/layout :: head('Tài khoản')}"></head>
+<body class="uf-theme uf-area-admin uf-page-admin-users-list uf-admin">
+<div class="admin-shell">
     <div th:replace="~{admin/fragments/layout :: sidebar}"></div>
 
-    <div class="flex-grow-1">
-        <div th:replace="~{admin/fragments/layout :: topbar('Quản lý Người dùng (User Management)')}"></div>
+    <div class="admin-workspace">
+        <div th:replace="~{admin/fragments/layout :: topbar('Tài khoản')}"></div>
 
-        <main class="container-fluid px-4 pb-5">
-            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm rounded-4 border-0">
+        <main class="admin-main" id="utefit-content" tabindex="-1">
+            <div class="admin-page-heading"><p>Tra cứu hội viên, phân biệt vai trò và quản lý trạng thái tài khoản.</p></div>
+            <div th:if="${successMessage}" role="status" class="alert alert-success alert-dismissible fade show">
                 <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}" data-uf-label></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng thông báo"></button>
             </div>
-            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm rounded-4 border-0">
+            <div th:if="${errorMessage}" role="alert" class="alert alert-danger alert-dismissible fade show">
                 <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${errorMessage}" data-uf-label></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng thông báo"></button>
             </div>
 
             <!-- Bộ lọc & Tìm kiếm -->
-            <div class="surface-card p-4 mb-4">
-                <form method="get" th:action="@{/admin/users}" class="row g-3 align-items-end">
-                    <div class="col-md-4">
-                        <label class="form-label small fw-bold text-secondary text-uppercase">Từ khóa tìm kiếm</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
-                            <input type="text" name="keyword" class="form-control border-start-0"
+            <div>
+                <form method="get" th:action="@{/admin/users}" class="surface-card admin-filter">
+                    <div>
+                        <label class="form-label" for="admin-user-keyword">Tìm tài khoản</label>
+                        <div>
+                            <input id="admin-user-keyword" type="text" name="keyword" class="form-control"
                                    placeholder="Nhập họ tên, email hoặc SĐT..." th:value="${keyword}">
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label small fw-bold text-secondary text-uppercase">Vai trò (Role)</label>
-                        <select name="role" class="form-select">
+                    <div>
+                        <label class="form-label" for="admin-user-role">Vai trò</label>
+                        <select id="admin-user-role" name="role" class="form-select">
                             <option value="">-- Tất cả vai trò --</option>
                             <option th:each="r : ${roles}" th:value="${r}" th:text="${r}"
                                     th:selected="${r == selectedRole}" data-uf-label></option>
                         </select>
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label small fw-bold text-secondary text-uppercase">Trạng thái</label>
-                        <select name="status" class="form-select">
+                    <div>
+                        <label class="form-label" for="admin-user-status">Trạng thái</label>
+                        <select id="admin-user-status" name="status" class="form-select">
                             <option value="">-- Tất cả trạng thái --</option>
                             <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}"
                                     th:selected="${s == selectedStatus}" data-uf-label></option>
                         </select>
                     </div>
-                    <div class="col-md-2 d-flex gap-2">
-                        <button type="submit" class="btn btn-utefit w-100"><i class="bi bi-funnel-fill me-1"></i> Lọc</button>
-                        <a th:href="@{/admin/users}" class="btn btn-outline-secondary" title="Đặt lại"><i class="bi bi-arrow-counterclockwise"></i></a>
+                    <div class="admin-filter-actions">
+                        <button type="submit" class="btn btn-utefit"><i class="bi bi-funnel" aria-hidden="true"></i> Lọc</button>
+                        <a th:href="@{/admin/users}" class="btn btn-outline-secondary" title="Đặt lại" aria-label="Đặt lại bộ lọc"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>Đặt lại</a>
                     </div>
                 </form>
             </div>
 
             <!-- Bảng danh sách User -->
-            <div class="surface-card overflow-hidden">
+            <div class="surface-card admin-users-table">
+                <div class="admin-table-heading"><h2>Danh sách tài khoản</h2><p><strong th:text="${userPage.totalElements}">0</strong> tài khoản</p></div>
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
+                    <table class="table table-hover align-middle mb-0 admin-data-table">
                         <thead>
                         <tr>
-                            <th class="ps-4" style="width: 70px;">ID</th>
+                            <th>ID</th>
                             <th>Thành viên</th>
                             <th>Số điện thoại</th>
                             <th>Vai trò</th>
                             <th>Trạng thái</th>
                             <th>Ngày tham gia</th>
-                            <th class="text-end pe-4">Thao tác</th>
+                            <th class="">Thao tác</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr th:if="${userPage.empty}">
-                            <td colspan="7" class="text-center py-5 text-muted">
+                            <td colspan="7" class="text-center py-5 text-muted admin-empty">
                                 <i class="bi bi-people fs-1 d-block mb-2 text-secondary opacity-50"></i>
                                 Không tìm thấy người dùng nào phù hợp.
                             </td>
                         </tr>
                         <tr th:each="u : ${userPage.content}">
-                            <td class="ps-4 fw-bold text-secondary" th:text="'#' + ${u.id}">#1</td>
-                            <td>
-                                <div class="d-flex align-items-center">
+                            <td data-label="ID" th:text="'#' + ${u.id}">#1</td>
+                            <td data-label="Thành viên" class="admin-record-primary">
+                                <div class="admin-person">
                                     <img th:src="${u.avatarUrl != null and !#strings.isEmpty(u.avatarUrl) ? u.avatarUrl : 'https://ui-avatars.com/api/?background=10b981&color=fff&bold=true&name=' + u.fullName}"
-                                         alt="Ảnh đại diện" class="rounded-circle border shadow-sm me-3" width="42" height="42" style="object-fit: cover;">
+                                         alt="Ảnh đại diện" width="42" height="42">
                                     <div>
-                                        <div class="fw-bold text-dark" th:text="${u.fullName}">Nguyễn Văn A</div>
-                                        <div class="text-muted small" th:text="${u.email}">a@gmail.com</div>
+                                        <div class="admin-person-name" th:text="${u.fullName}">Nguyễn Văn A</div>
+                                        <div class="admin-person-email" th:text="${u.email}">a@gmail.com</div>
                                     </div>
                                 </div>
                             </td>
-                            <td class="fw-medium" th:text="${u.phone != null and !#strings.isEmpty(u.phone) ? u.phone : '—'}">0901234567</td>
-                            <td>
-                                <span class="badge rounded-pill px-3 py-2"
+                            <td data-label="Số điện thoại" th:text="${u.phone != null and !#strings.isEmpty(u.phone) ? u.phone : '—'}">0901234567</td>
+                            <td data-label="Vai trò">
+                                <span class="badge"
                                       th:classappend="${u.role.name() == 'ADMIN' ? 'bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25' : (u.role.name() == 'PT' ? 'bg-warning bg-opacity-15 text-dark border border-warning border-opacity-50' : 'bg-info bg-opacity-10 text-info border border-info border-opacity-25')}"
                                       th:text="${u.role}" data-uf-label>MEMBER</span>
                             </td>
-                            <td>
+                            <td data-label="Trạng thái">
                                 <span th:if="${u.status.name() == 'ACTIVE'}" class="status-pill bg-success bg-opacity-10 text-success">
-                                    <span class="dot bg-success"></span> đang hoạt động
+                                    <span class="dot bg-success"></span> Đang hoạt động
                                 </span>
                                 <span th:if="${u.status.name() == 'LOCKED'}" class="status-pill bg-secondary bg-opacity-10 text-secondary">
-                                    <span class="dot bg-secondary"></span> LOCKED
+                                    <span class="dot bg-secondary"></span> Đã khóa
                                 </span>
                                 <span th:if="${u.status.name() != 'ACTIVE' and u.status.name() != 'LOCKED'}" class="status-pill bg-warning bg-opacity-15 text-dark">
                                     <span class="dot bg-warning"></span> <span th:text="${u.status}" data-uf-label>PENDING</span>
                                 </span>
                             </td>
-                            <td class="text-secondary small fw-medium" th:text="${u.createdAt != null ? #temporals.format(u.createdAt, 'dd/MM/yyyy HH:mm') : '—'}"></td>
-                            <td class="text-end pe-4">
-                                <a th:href="@{/admin/users/{id}(id=${u.id})}" class="btn btn-sm btn-outline-dark rounded-pill px-3 me-1">
+                            <td data-label="Ngày tham gia" th:text="${u.createdAt != null ? #temporals.format(u.createdAt, 'dd/MM/yyyy HH:mm') : '—'}"></td>
+                            <td data-label="Thao tác" class="admin-record-actions">
+                                <div class="admin-row-actions">
+                                <a th:href="@{/admin/users/{id}(id=${u.id})}" class="btn btn-sm btn-outline-dark">
                                     <i class="bi bi-eye me-1"></i> Hồ sơ
                                 </a>
                                 <form th:action="@{/admin/users/{id}/toggle-lock(id=${u.id})}" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-sm rounded-pill px-3"
+                                    <button type="submit" class="btn btn-sm"
                                             th:classappend="${u.status.name() == 'LOCKED' ? 'btn-success' : 'btn-outline-danger'}"
                                             onclick="return confirm('Bạn có chắc muốn thay đổi trạng thái khóa tài khoản này?');">
                                         <i class="bi" th:classappend="${u.status.name() == 'LOCKED' ? 'bi-unlock' : 'bi-lock'}"></i>
                                         <span th:text="${u.status.name() == 'LOCKED' ? 'Mở khóa' : 'Khóa'}" data-uf-label></span>
                                     </button>
                                 </form>
+                                </div>
                             </td>
                         </tr>
                         </tbody>
@@ -123,7 +126,7 @@
                 </div>
 
                 <!-- Phân trang -->
-                <div class="card-footer bg-white d-flex justify-content-between align-items-center px-4 py-3" th:if="${userPage.totalPages > 1}">
+                <div class="admin-pagination" th:if="${userPage.totalPages > 1}">
                     <span class="small text-muted">Trang <b th:text="${userPage.number + 1}"></b> / <b th:text="${userPage.totalPages}"></b></span>
                     <ul class="pagination pagination-sm mb-0">
                         <li class="page-item" th:classappend="${userPage.first} ? 'disabled'">

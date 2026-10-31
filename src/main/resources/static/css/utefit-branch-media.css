@@ -1,0 +1,18 @@
+.branch-source-preview { margin: 0; max-width: 240px; }
+.branch-source-preview img { display: block; width: 180px; max-width: 100%; height: auto; aspect-ratio: 45 / 28; object-fit: cover; }
+.uf-page-admin-branches-list .branch-source-preview img { width: 88px; }
+.branch-source-preview figcaption { margin-top: 8px; font-size: 12px; line-height: 1.5; }
+.branch-source-preview [hidden] { display: none !important; }
+.branch-source-url { margin-top: 6px; font-size: 12px; }
+.branch-source-url summary { cursor: pointer; }
+.branch-source-url code { display: block; margin-top: 8px; color: inherit; overflow-wrap: anywhere; white-space: normal; }
+.branch-source-error { margin: 0; padding: 12px; background: #f5f5f2; color: #343b42; }
+.ut-empty-image.branch-media-detail { min-height: clamp(240px, 35vw, 360px); }
+.branch-media { position: relative; overflow: hidden; }
+.branch-media-member { aspect-ratio: 16 / 10; }
+.ut-empty-image.branch-media-detail { aspect-ratio: auto; height: clamp(240px, 35vw, 360px); }
+.branch-media .branch-display-photo { position: absolute; inset: 0; z-index: 1; display: block; width: 100%; height: 100%; object-fit: cover; }
+.branch-media.has-photo [data-branch-placeholder], .branch-media.has-photo [data-branch-fallback-note] { visibility: hidden; }
+.branch-media [hidden] { display: none !important; }
+.branch-media .branch-fallback-text { font-weight: inherit; }
+.branch-media .branch-photo-caption { position: absolute; left: 16px; bottom: 16px; z-index: 2; width: auto; margin: 0; padding: 6px 10px; font: 500 12px/1.5 'Be Vietnam Pro', sans-serif; color: #fff; background: #182129; }

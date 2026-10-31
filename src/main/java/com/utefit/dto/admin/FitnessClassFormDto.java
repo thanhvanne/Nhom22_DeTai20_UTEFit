@@ -24,16 +24,20 @@ public class FitnessClassFormDto {
     private String description;
 
     @NotNull(message = "Vui lòng chọn chi nhánh tổ chức lớp tập")
+    @com.utefit.validation.ValidInput("id")
     private Long branchId;
 
     @NotNull(message = "Vui lòng chọn danh mục loại lớp")
+    @com.utefit.validation.ValidInput("id")
     private Long categoryId;
 
     // PT có thể chọn hoặc để trống (nhưng nếu chọn thì bắt buộc PT phải ACTIVE)
+    @com.utefit.validation.ValidInput("id")
     private Long trainerId;
 
     @NotNull(message = "Vui lòng nhập sức chứa tối đa (số học viên)")
     @Min(value = 1, message = "Sức chứa lớp tập phải lớn hơn 0")
+    @com.utefit.validation.ValidInput("capacity")
     private Integer capacity;
 
     @Builder.Default

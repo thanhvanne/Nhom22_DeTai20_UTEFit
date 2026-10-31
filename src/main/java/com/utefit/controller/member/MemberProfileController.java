@@ -23,6 +23,12 @@ import java.time.Duration;
 @Controller
 @RequestMapping("/member/profile")
 public class MemberProfileController {
+    @org.springframework.beans.factory.annotation.Autowired private com.utefit.service.MemberLoyaltyService loyalty;
+
+    @ModelAttribute("loyalty")
+    public com.utefit.service.MemberLoyaltyService.Summary loyalty(Principal principal) {
+        return loyalty.summary(principal.getName());
+    }
 
     private final MemberProfileService profiles;
 

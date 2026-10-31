@@ -51,6 +51,11 @@ public class ManagerAccessService {
     @Transactional
     public Long createManager(String adminEmail, String email, String name, String password) {
         account(adminEmail, UserRole.ADMIN, false);
+        com.utefit.validation.InputRules.require("email",email);
+        com.utefit.validation.InputRules.require("managerPassword",password);
+        String nameError = com.utefit.validation.InputRules.error("personalName",name);
+        if (nameError != null || name == null || name.isBlank()) throw new com.utefit.validation.InputViolationException(Map.of("name",nameError == null ? "Vui lòng nhập tên Manager." : nameError));
+        name = com.utefit.validation.InputRules.normalize(name,com.utefit.validation.InputRules.rule("personalName"));
         String normalized = email == null ? "" : email.trim().toLowerCase(Locale.ROOT);
         if (normalized.length() > 100 || !normalized.matches("[^\\s@]+@[^\\s@]+\\.[^\\s@]+")
                 || name == null || name.isBlank() || name.trim().length() > 50

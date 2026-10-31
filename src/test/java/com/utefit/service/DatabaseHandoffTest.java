@@ -103,6 +103,22 @@ class DatabaseHandoffTest {
         try (var paths = Files.list(Path.of("database/migrations"))) {
             for (var path : paths.filter(path -> path.getFileName().toString().matches("V7\\d\\d__.*\\.sql")).toList()) {
                 String name = path.getFileName().toString();
+                if (name.equals("V717__automatic_promotion_management.sql")) {
+                    String additive = Files.readString(path);
+                    assertFalse(schema.contains("-- BEGIN EMBEDDED " + name));
+                    assertTrue(additive.contains("DB_NAME() <> N'UTEFitDB'"));
+                    assertTrue(additive.contains("INSERT dbo.automatic_promotions"));
+                    assertFalse(java.util.regex.Pattern.compile("(?im)^\\s*(UPDATE|DELETE|DROP|TRUNCATE)\\b").matcher(additive).find());
+                    continue;
+                }
+                if (name.equals("V716__member_loyalty_offers.sql")) {
+                    String additive = Files.readString(path);
+                    assertFalse(schema.contains("-- BEGIN EMBEDDED " + name));
+                    assertTrue(additive.contains("DB_NAME() <> N'UTEFitDB'"));
+                    assertTrue(additive.contains("loyalty_payment_exclusions"));
+                    assertFalse(java.util.regex.Pattern.compile("(?im)^\\s*(INSERT|UPDATE|DELETE|DROP|TRUNCATE)\\b").matcher(additive).find());
+                    continue;
+                }
                 String embedded = schema.substring(schema.indexOf("-- BEGIN EMBEDDED " + name), schema.indexOf("-- END EMBEDDED " + name)).replace("''", "'");
                 assertTrue(embedded.replace("\r\n", "\n").contains(Files.readString(path).strip().replace("\r\n", "\n")), name);
             }

@@ -43,6 +43,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public String register(RegisterRequest request) {
+        com.utefit.validation.FormChecks.validate(request);
 
         if (!request.getPassword()
                 .equals(request.getConfirmPassword())) {
@@ -98,6 +99,7 @@ public class AuthServiceImpl implements AuthService {
     public void verifyRegistration(
             VerifyOtpRequest request
     ) {
+        com.utefit.validation.FormChecks.validate(request);
         User user = users
                 .findByEmail(normalize(request.getEmail()))
                 .orElseThrow(() ->
@@ -133,6 +135,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void resendRegistrationOtp(String email) {
+        com.utefit.validation.InputRules.require("email",email);
 
         User user = users
                 .findByEmail(normalize(email))
@@ -159,6 +162,7 @@ public class AuthServiceImpl implements AuthService {
             String email,
             String rawPassword
     ) {
+        com.utefit.validation.InputRules.require("email",email);
         String normalized = normalize(email);
 
         authenticationManager.authenticate(
@@ -175,6 +179,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void requestPasswordReset(String email) {
+        com.utefit.validation.InputRules.require("email",email);
 
         users.findByEmail(normalize(email))
                 .ifPresent(user -> {
@@ -199,6 +204,7 @@ public class AuthServiceImpl implements AuthService {
     public void resetPassword(
             ResetPasswordRequest request
     ) {
+        com.utefit.validation.FormChecks.validate(request);
         if (!request.getNewPassword()
                 .equals(request.getConfirmPassword())) {
 

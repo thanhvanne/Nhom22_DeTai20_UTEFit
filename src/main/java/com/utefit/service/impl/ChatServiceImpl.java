@@ -101,7 +101,8 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public ChatMessageResponse sendMessage(Long senderUserId,
                                            Long conversationId,
-                                           String content) {
+                                             String content) {
+        com.utefit.validation.InputRules.require("content",content);
 
         if (content == null || content.trim().isEmpty()) {
             throw new IllegalArgumentException("Nội dung tin nhắn không được để trống.");

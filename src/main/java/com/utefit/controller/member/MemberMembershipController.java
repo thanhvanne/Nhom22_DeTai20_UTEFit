@@ -91,6 +91,21 @@ public class MemberMembershipController {
         return "redirect:/member/memberships";
     }
 
+    @GetMapping("/memberships/quote")
+    @ResponseBody
+    public org.springframework.http.ResponseEntity<?> quote(@Valid @ModelAttribute MembershipPurchaseRequest request, BindingResult result, Principal principal) {
+        if (result.hasErrors()) {
+            var fields = new java.util.LinkedHashMap<String,String>();
+            result.getFieldErrors().forEach(error -> fields.putIfAbsent(error.getField(),error.isBindingFailure() ? "Giá trị không hợp lệ." : error.getDefaultMessage()));
+            return org.springframework.http.ResponseEntity.badRequest().body(java.util.Map.of("error", "Vui lòng chọn gói, chi nhánh và ưu đãi hợp lệ.","fieldErrors",fields));
+        }
+        try {
+            return org.springframework.http.ResponseEntity.ok().header("Cache-Control", "private, no-store").body(billing.quote(principal.getName(), request));
+        } catch (IllegalArgumentException | IllegalStateException exception) {
+            return org.springframework.http.ResponseEntity.badRequest().body(java.util.Map.of("error", exception.getMessage(),"fieldErrors",com.utefit.validation.ValidationMessages.fields(exception.getMessage(),java.util.Set.of("branchId","planId","promotionCode","offerSelection"))));
+        }
+    }
+
     @PostMapping("/memberships/{id}/renew")
     public String renew(@PathVariable Long id, Principal principal, RedirectAttributes redirect) {
         try {

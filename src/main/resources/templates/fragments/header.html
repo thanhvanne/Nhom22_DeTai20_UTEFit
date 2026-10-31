@@ -3,9 +3,21 @@
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
-<header th:fragment="header"
+<th:block th:fragment="header">
+<th:block th:if="${#authorization.expression('isAnonymous()')}">
+    <link rel="stylesheet" th:href="@{/css/utefit-public-cinematic.css(v=2)}">
+    <th:block th:with="publicSkipTarget='#utefit-content'"><header th:replace="~{fragments/public-cinematic :: navigation}"></header></th:block>
+    <script defer th:src="@{/js/utefit-public-navigation.js(v=1)}"></script>
+</th:block>
+<th:block th:if="${#authorization.expression('hasRole(''PT'')')}">
+    <th:block th:replace="~{pt/fragments/layout :: header}"></th:block>
+</th:block>
+<th:block th:if="${#authorization.expression('hasRole(''MANAGER'')')}"><th:block th:replace="~{manager/fragments/layout :: header}"></th:block></th:block>
+<th:block th:unless="${#authorization.expression('hasRole(''PT'') or hasRole(''MANAGER'')')}">
+<header th:unless="${#authorization.expression('isAnonymous()')}"
         th:with="navCsrfToken=${#authorization.expression('isAuthenticated()') and _csrf != null ? _csrf.token : ''}"
         class="ut-site-header">
+    <a class="uf-skip-link" href="#utefit-content" hidden>Đến nội dung chính</a>
 
     <!-- CSS navbar đặt cùng fragment
          để trang có head riêng vẫn đồng bộ. -->
@@ -604,14 +616,14 @@
                        th:href="@{/member/notifications}"
                        title="Thông báo"
                        aria-label="Thông báo">
-                        ♧
+                        <svg aria-hidden="true" viewBox="0 0 24 24"><use href="/images/utefit-icons.svg#bell"></use></svg>
                     </a>
 
                     <a class="ut-nav-icon"
                        th:href="@{/member/chats}"
                        title="Tin nhắn"
                        aria-label="Tin nhắn">
-                        ✉
+                        <svg aria-hidden="true" viewBox="0 0 24 24"><use href="/images/utefit-icons.svg#message"></use></svg>
                     </a>
 
                     <div class="dropdown">
@@ -683,14 +695,14 @@
                        th:href="@{/notifications}"
                        title="Thông báo"
                        aria-label="Thông báo">
-                        ♧
+                        <svg aria-hidden="true" viewBox="0 0 24 24"><use href="/images/utefit-icons.svg#bell"></use></svg>
                     </a>
 
                     <a class="ut-nav-icon ut-pt-chat"
                        th:href="@{/pt/chats}"
                        title="Tin nhắn"
                        aria-label="Tin nhắn">
-                        ✉
+                        <svg aria-hidden="true" viewBox="0 0 24 24"><use href="/images/utefit-icons.svg#message"></use></svg>
                     </a>
 
                     <form th:attr="action=@{/auth/logout}"
@@ -739,4 +751,6 @@
     <script defer th:src="@{/js/utefit-navbar.js(v=1)}"></script>
 
 </header>
+</th:block>
+</th:block>
 </html>

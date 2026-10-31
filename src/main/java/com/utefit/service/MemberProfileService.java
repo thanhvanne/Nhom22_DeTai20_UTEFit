@@ -64,6 +64,7 @@ public class MemberProfileService {
             String email,
             ProfileUpdateRequest request
     ) {
+        com.utefit.validation.FormChecks.validate(request);
         User user = currentMember(email);
 
         user.setFirstName(request.getFirstName().trim());
@@ -84,6 +85,7 @@ public class MemberProfileService {
             String email,
             PasswordChangeRequest request
     ) {
+        com.utefit.validation.FormChecks.validate(request);
         User user = currentMember(email);
 
         if (!passwordEncoder.matches(

@@ -13,15 +13,14 @@ public class ProfileUpdateRequest {
 
     @NotBlank(message = "Vui lòng nhập họ")
     @Size(max = 50, message = "Họ tối đa 50 ký tự")
+    @com.utefit.validation.ValidInput("lastName")
     private String lastName;
 
     @NotBlank(message = "Vui lòng nhập tên")
     @Size(max = 50, message = "Tên tối đa 50 ký tự")
+    @com.utefit.validation.ValidInput("firstName")
     private String firstName;
 
-    @Pattern(
-            regexp = "^(0[0-9]{9,10})?$",
-            message = "Số điện thoại không hợp lệ"
-    )
+    @com.utefit.validation.ValidInput("phone")
     private String phone;
 }

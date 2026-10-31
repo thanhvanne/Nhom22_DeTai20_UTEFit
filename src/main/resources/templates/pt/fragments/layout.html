@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<h1 th:fragment="notificationTitle" class="mb-1 text-white">Thông báo</h1>
+<th:block th:fragment="header">
+    <link rel="stylesheet" th:href="@{/css/utefit-pt.css(v=2)}">
+    <script defer th:src="@{/js/utefit-pt.js(v=1)}"></script>
+    <link rel="stylesheet" th:href="@{/css/utefit-staff.css(v=1)}">
+    <script defer th:src="@{/js/utefit-staff.js(v=1)}"></script>
+    <header class="pt-header">
+        <a class="uf-skip-link" href="#utefit-content">Đến nội dung chính</a>
+        <div class="pt-topbar">
+            <a class="pt-brand" th:href="@{/pt/dashboard}" aria-label="UTEFit — Không gian huấn luyện viên">UTE<span>FIT</span><small>COACH</small></a>
+            <div class="offcanvas-xl offcanvas-end pt-navigation" id="pt-navigation" tabindex="-1" aria-labelledby="pt-navigation-title">
+                <div class="offcanvas-header">
+                    <span class="pt-brand" id="pt-navigation-title">UTE<span>FIT</span><small>COACH</small></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#pt-navigation" aria-label="Đóng menu PT"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <nav class="pt-primary-nav" aria-label="Điều hướng huấn luyện viên">
+                        <a th:href="@{/pt/dashboard}" data-pt-nav>Tổng quan</a>
+                        <a th:href="@{/pt/trainer-requests}" data-pt-nav>Yêu cầu hội viên</a>
+                        <a th:href="@{/pt/classes}" data-pt-nav>Lớp được phân công</a>
+                        <a th:href="@{/pt/personal-schedules}" data-pt-nav>Lịch PT 1:1</a>
+                        <a th:href="@{/pt/chats}" data-pt-nav>Tin nhắn</a>
+                        <a th:href="@{/pt/profile}" data-pt-nav>Hồ sơ PT</a>
+                        <a class="pt-drawer-notifications" th:href="@{/notifications}" data-pt-nav>Thông báo</a>
+                    </nav>
+                    <p class="pt-drawer-caption">Chủ động dẫn dắt.<br>Đồng hành cùng mỗi bước tiến.</p>
+                </div>
+            </div>
+            <div class="pt-header-actions">
+                <a class="pt-icon-button" th:href="@{/notifications}" aria-label="Thông báo" title="Thông báo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg></a>
+                <a class="pt-icon-button" th:href="@{/pt/chats}" aria-label="Tin nhắn" title="Tin nhắn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v13H9l-5 4V4Z"/><path d="M8 8h8m-8 4h5"/></svg></a>
+                <details class="staff-account" data-staff-account th:with="accountAvatar=${trainer != null and trainer.user != null ? trainer.user.avatarUrl : dashboard != null ? dashboard.avatarUrl : null}">
+                    <summary aria-label="Tài khoản PT" aria-expanded="false"><span class="staff-account-avatar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M5 22v-2a7 7 0 0 1 14 0v2"/></svg><img th:if="${!#strings.isEmpty(accountAvatar)}" th:src="${accountAvatar}" alt="" data-staff-avatar></span><span class="staff-account-label">Tài khoản</span><span class="staff-account-chevron" aria-hidden="true">⌄</span></summary>
+                    <div class="staff-account-menu"><p>Không gian huấn luyện</p><strong th:text="${#authentication.name}"></strong><a th:href="@{/pt/profile}">Hồ sơ PT</a><a th:href="@{/pt/profile/edit}">Chỉnh sửa hồ sơ</a><form th:attr="action=@{/auth/logout}" method="post"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><button type="submit">Đăng xuất <span aria-hidden="true">↗</span></button></form></div>
+                </details>
+                <button class="pt-icon-button pt-menu-toggle" type="button" data-bs-toggle="offcanvas" data-bs-target="#pt-navigation" aria-controls="pt-navigation" aria-expanded="false" aria-label="Mở menu PT"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16M4 16h16"/></svg></button>
+            </div>
+        </div>
+    </header>
+</th:block>
+<th:block th:fragment="avatar(source)">
+    <button class="staff-profile-avatar" type="button" data-staff-avatar-view disabled aria-label="Xem ảnh đại diện phóng to"><svg viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="27" r="13"/><path d="M15 75v-7a25 25 0 0 1 50 0v7"/></svg><img th:if="${!#strings.isEmpty(source)}" th:src="${source}" alt="Ảnh huấn luyện viên" data-staff-avatar></button>
+    <span class="staff-avatar-hint" data-staff-avatar-hint>Ảnh đại diện của bạn</span>
+</th:block>
+<dialog th:fragment="lightbox" class="staff-avatar-dialog" data-staff-dialog aria-label="Ảnh đại diện phóng to"><button type="button" data-staff-avatar-close aria-label="Đóng ảnh đại diện">×</button><img data-staff-avatar-full alt="Ảnh đại diện huấn luyện viên phóng to"></dialog>
+</body>
+</html>

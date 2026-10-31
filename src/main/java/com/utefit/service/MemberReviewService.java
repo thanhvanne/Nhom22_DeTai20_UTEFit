@@ -113,11 +113,13 @@ public class MemberReviewService {
             ReviewForm form,
             MultipartFile image
     ) {
+        com.utefit.validation.FormChecks.validate(form);
         return create(email, form, image, null);
     }
 
     @Transactional
     public Long create(String email, ReviewForm form, MultipartFile image, MultipartFile video) {
+        com.utefit.validation.FormChecks.validate(form);
         // Khóa Member để hai POST đồng thời không tạo Review trùng.
         User user = lockedMember(email);
 
@@ -195,11 +197,13 @@ public class MemberReviewService {
             ReviewForm form,
             MultipartFile image
     ) {
+        com.utefit.validation.FormChecks.validate(form);
         update(email, id, form, image, null);
     }
 
     @Transactional
     public void update(String email, Long id, ReviewForm form, MultipartFile image, MultipartFile video) {
+        com.utefit.validation.FormChecks.validate(form);
         User user = lockedMember(email);
 
         validateRating(form);

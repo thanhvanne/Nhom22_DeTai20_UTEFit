@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<header th:fragment="navigation" class="pc-nav">
+    <a class="pc-skip" href="#gioi-thieu" th:href="${publicSkipTarget != null ? publicSkipTarget : '#gioi-thieu'}">Đến nội dung chính</a>
+    <a class="pc-brand" th:href="@{/}" aria-label="UTEFit — Trang chủ">UTE<span>FIT</span><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M5 5v18h6V5zm12 0v18h6V5zM0 11v6h28v-6z" fill="currentColor"/></svg></a>
+    <nav class="pc-desktop-links" aria-label="Điều hướng chính">
+        <a th:href="@{/branches}">Chi nhánh</a>
+        <a th:href="@{/classes}">Lớp tập</a>
+        <a th:href="@{/trainers}">Huấn luyện viên</a>
+        <a th:href="@{/membership-plans}">Gói tập</a>
+        <a th:href="@{/promotions}">Khuyến mãi</a>
+    </nav>
+    <div class="pc-account"><a th:href="@{/login}">Đăng nhập</a><a class="pc-join" th:href="@{/register}">Tham gia UTEFit</a></div>
+    <details class="pc-menu">
+        <summary>Menu <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h18M3 16h18" fill="none" stroke="currentColor" stroke-width="2"/></svg></summary>
+        <nav aria-label="Điều hướng di động">
+            <a th:href="@{/branches}">Chi nhánh</a><a th:href="@{/classes}">Lớp tập</a>
+            <a th:href="@{/trainers}">Huấn luyện viên</a><a th:href="@{/membership-plans}">Gói tập</a>
+            <a th:href="@{/promotions}">Khuyến mãi</a>
+            <a th:href="@{/login}">Đăng nhập</a><a th:href="@{/register}">Tham gia UTEFit</a>
+        </nav>
+    </details>
+</header>
+
+<section th:fragment="experience" id="gioi-thieu" class="pc-story" tabindex="-1" aria-label="Sức mạnh từ bạn">
+    <div class="pc-stage">
+        <div class="pc-studio-light" aria-hidden="true"></div>
+        <div class="pc-shadow pc-shadow--source" aria-hidden="true"></div>
+        <div class="pc-shadow pc-shadow--target" aria-hidden="true"></div>
+        <canvas class="pc-particles" aria-hidden="true"></canvas>
+        <section class="pc-scene pc-scene--hero" aria-labelledby="pc-hero-title">
+            <div class="pc-copy">
+                <h1 id="pc-hero-title" class="pc-title"><span class="pc-line"><span>Sức mạnh.</span></span><span class="pc-line"><span>Từ bạn.</span></span></h1>
+                <p>Mỗi buổi tập là một bước tiến.<br>Chọn cách chuyển động của riêng bạn cùng UTEFit.</p>
+                <div class="pc-actions"><a class="pc-button" th:href="@{/membership-plans}">Khám phá gói tập</a><a class="pc-text-link" th:href="@{/branches}">Tìm chi nhánh</a></div>
+            </div>
+            <figure class="pc-poster pc-poster--bar"><picture><source media="(max-width: 600px)" th:srcset="@{/images/cinema-barbell-v2-mobile.webp}"><img th:src="@{/images/cinema-barbell-v2.webp}" width="1280" height="853" alt="Đồ họa sản phẩm thanh tạ: đĩa graphite, trục chrome và vòng đồng" fetchpriority="high"></picture></figure>
+        </section>
+        <section class="pc-scene pc-scene--resolve" aria-labelledby="pc-resolve-title">
+            <div class="pc-copy">
+                <h2 id="pc-resolve-title" class="pc-title"><span class="pc-line"><span>Đổi nhịp tập.</span></span><span class="pc-line"><span>Mở giới hạn.</span></span></h2>
+                <p>Từ sức mạnh đến sự linh hoạt.<br>Khám phá lớp tập và người đồng hành phù hợp với mục tiêu của bạn.</p>
+                <div class="pc-actions"><a class="pc-button" th:href="@{/classes}">Khám phá lớp tập</a><a class="pc-text-link" th:href="@{/trainers}">Tìm huấn luyện viên</a></div>
+            </div>
+            <figure class="pc-poster pc-poster--kettle"><picture><source media="(max-width: 600px)" th:srcset="@{/images/cinema-kettlebell-v2-mobile.webp}"><img th:src="@{/images/cinema-kettlebell-v2.webp}" width="896" height="1120" alt="Đồ họa sản phẩm kettlebell: thép đúc graphite, tay cầm kim loại và vòng đồng" decoding="sync"></picture></figure>
+        </section>
+    </div>
+</section>
+</body>
+</html>

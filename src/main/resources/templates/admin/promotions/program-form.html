@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/layout :: head('Chỉnh sửa chương trình tự động')}"></head>
+<body class="uf-theme uf-area-admin uf-admin uf-page-admin-promotion-program">
+<link rel="stylesheet" th:href="@{/css/utefit-admin-promotions.css}">
+<script defer th:src="@{/js/admin-promotion-programs.js}"></script>
+<div class="admin-shell">
+    <aside th:replace="~{admin/fragments/layout :: sidebar}"></aside>
+    <div class="admin-workspace">
+        <nav th:replace="~{admin/fragments/layout :: topbar('Cấu hình ưu đãi tự động')}"></nav>
+        <main class="admin-main" id="utefit-content" tabindex="-1">
+            <a class="program-back" th:href="@{/admin/promotions}">← Quản lý khuyến mãi</a>
+            <div class="admin-page-heading mb-4"><h2 th:text="${program.name}"></h2><p th:text="|${kind} · Cấu hình được lưu vào database, không cần khởi động lại ứng dụng.|"></p></div>
+            <div class="program-editor-grid">
+                <form class="surface-card program-editor" method="post" th:action="@{/admin/promotions/programs/{kind}(kind=${kind})}" th:object="${programForm}" data-program-form th:attr="data-program-name=${kind},data-confirm-pause=${programRule.active}">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><input type="hidden" th:field="*{version}">
+                    <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger" role="alert" tabindex="-1" data-program-errors><strong>Chưa lưu thay đổi</strong><ul class="mb-0"><li th:each="error : ${#fields.allErrors()}" th:text="${error}"></li></ul></div>
+                    <div th:unless="${programRule.persisted}" class="alert alert-warning" role="alert">Chưa có cấu hình trong database. Cần duyệt migration V717 và quyền runtime trước khi lưu hoặc bật.</div>
+                    <section class="program-field-section"><h3>Trạng thái áp dụng</h3><div class="program-fields">
+                        <div><label for="active" class="form-label">Hoạt động</label><select th:field="*{active}" class="form-select" required><option value="false">Tạm dừng</option><option value="true">Bật chương trình</option></select><small>Lịch áp dụng bên dưới được kiểm tra tại backend.</small></div>
+                        <div><label class="form-label" for="program-kind">Loại chương trình</label><input id="program-kind" class="form-control" th:value="${kind}" readonly><small>Loại cố định, không thể chuyển sang chương trình khác.</small></div>
+                    </div></section>
+                    <section class="program-field-section"><h3>Mức ưu đãi</h3><div class="program-fields">
+                        <div th:if="${kind != 'VALUE'}"><label for="percent" class="form-label">Giảm (%)</label><input th:field="*{percent}" type="number" min="0.01" max="99.99" step="0.01" required class="form-control" th:classappend="${#fields.hasErrors('percent') ? 'is-invalid' : ''}"><small>Lớn hơn 0 và nhỏ hơn 100%.</small></div>
+                        <div th:if="${kind == 'WELCOME' or kind == 'SILVER' or kind == 'GOLD'}"><label for="discountCap" class="form-label">Giảm tối đa (đ)</label><input th:field="*{discountCap}" type="number" min="1" max="9999999999999" step="1" th:required="${kind == 'WELCOME'}" class="form-control" th:classappend="${#fields.hasErrors('discountCap') ? 'is-invalid' : ''}" placeholder="Không giới hạn"><small th:text="${kind == 'WELCOME' ? 'Bắt buộc có trần cho ưu đãi lần đầu.' : 'Để trống nếu không giới hạn số tiền giảm.'}"></small></div>
+                        <div th:if="${kind == 'WELCOME'}"><label for="welcome-limit" class="form-label">Giới hạn mỗi tài khoản</label><input id="welcome-limit" class="form-control" value="1 lần mua hợp lệ" readonly><small>Cố định một lần. Hủy chưa trả tiền giải phóng quyền; mua rồi hoàn tiền không nhận lại.</small></div>
+                        <div th:if="${kind == 'LOYAL'}"><label for="minimumMonths" class="form-label">Số tháng gắn bó tối thiểu</label><input th:field="*{minimumMonths}" type="number" min="1" max="1200" step="1" required class="form-control"><small>Tính thời gian đã sử dụng, không cộng trùng ngày hoặc gói demo.</small></div>
+                        <div th:if="${kind == 'LOYAL'}"><label for="renewalGraceDays" class="form-label">Số ngày cho phép gia hạn sau hết hạn</label><input th:field="*{renewalGraceDays}" type="number" min="0" max="3650" step="1" required class="form-control"><small>Gia hạn cùng gói và chi nhánh; gói nguồn phải đã bắt đầu. 0: chỉ đến ngày hết hạn.</small></div>
+                        <th:block th:if="${kind == 'VALUE'}">
+                            <div><label for="valueThreshold" class="form-label">Ngưỡng đơn mức 1 (đ)</label><input th:field="*{valueThreshold}" type="number" min="1" max="9999999999999" step="1" required class="form-control"></div>
+                            <div><label for="valueDiscount" class="form-label">Giảm mức 1 (đ)</label><input th:field="*{valueDiscount}" type="number" min="1" max="9999999999999" step="1" required class="form-control"></div>
+                            <div><label for="premiumThreshold" class="form-label">Ngưỡng đơn mức 2 (đ)</label><input th:field="*{premiumThreshold}" type="number" min="1" max="9999999999999" step="1" required class="form-control"></div>
+                            <div><label for="premiumDiscount" class="form-label">Giảm mức 2 (đ)</label><input th:field="*{premiumDiscount}" type="number" min="1" max="9999999999999" step="1" required class="form-control"></div>
+                        </th:block>
+                    </div><p th:if="${kind == 'VALUE'}" class="program-field-note">Xét trên giá gốc; chỉ chọn một mức. Ngưỡng 2 lớn hơn ngưỡng 1, tiền giảm nhỏ hơn ngưỡng tương ứng.</p><p th:if="${kind == 'SILVER' or kind == 'GOLD'}" class="program-field-note">Chỉ sửa quyền lợi, không thay đổi ngưỡng phân hạng Bronze / Silver / Gold.</p></section>
+                    <section class="program-field-section"><h3>Thời gian áp dụng</h3><div class="program-fields">
+                        <div><label for="startDate" class="form-label">Ngày bắt đầu</label><input th:field="*{startDate}" type="date" class="form-control"><small>Để trống nếu không giới hạn ngày bắt đầu.</small></div>
+                        <div><label for="endDate" class="form-label">Ngày kết thúc</label><input th:field="*{endDate}" type="date" class="form-control"><small>Bao gồm ngày kết thúc, múi giờ Việt Nam.</small></div>
+                    </div></section>
+                    <div class="program-save-row"><a th:href="@{/admin/promotions}" class="btn btn-outline-secondary">Hủy thay đổi</a><button type="submit" class="btn btn-primary" th:disabled="${!programRule.persisted}">Lưu chương trình</button></div>
+                </form>
+                <aside class="program-editor-summary surface-card" aria-labelledby="program-current-title"><span class="program-kind" th:text="${kind}"></span><h3 id="program-current-title">Đang lưu trong hệ thống</h3><strong class="program-summary-benefit" th:text="${program.benefit}"></strong><span class="program-status" th:classappend="${programRule.available ? 'is-active' : ''}" th:text="${programRule.state()}"></span><p th:text="${program.condition}"></p><hr><h3>Chỉ áp dụng cho đơn mới</h3><p>Giá đã chốt, mã QR và quyền lợi của đơn đang chờ không đổi khi bạn chỉnh sửa hoặc tạm dừng.</p><p>Mỗi đơn chỉ dùng một ưu đãi; mã nhập tay thay thế ưu đãi tự động.</p><small th:if="${programRule.updatedAt != null}" th:text="|Cập nhật: ${#temporals.format(programRule.updatedAt, 'dd/MM/yyyy HH:mm')}|"></small><small th:if="${programRule.updatedBy != null}" th:text="|Bởi: ${programRule.updatedBy}|"></small></aside>
+            </div>
+        </main>
+    </div>
+</div>
+<div th:replace="~{admin/fragments/layout :: scripts}"></div>
+</body>
+</html>

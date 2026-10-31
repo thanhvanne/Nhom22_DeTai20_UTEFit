@@ -36,6 +36,7 @@ public class TrainerRequestServiceImpl implements TrainerRequestService {
     public TrainerRequestResponse createRequest(Long memberUserId,
                                                 Long trainerId,
                                                 String message) {
+        com.utefit.validation.InputRules.check("message",message);
 
         User member = userRepository.findById(memberUserId)
                 .orElseThrow(() ->

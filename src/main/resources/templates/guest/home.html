@@ -1,303 +1,30 @@
 <!DOCTYPE html>
 <html lang="vi"
-      xmlns:th="http://www.thymeleaf.org">
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head th:replace="~{fragments/head :: head('UTEFit - Fitness Center')}">
 </head>
 
 <body class="uf-theme uf-area-guest uf-page-guest-home">
 
-<header th:replace="~{fragments/header :: header}">
-</header>
+<link rel="stylesheet" th:href="@{/css/utefit-public-cinematic.css(v=2)}">
+<link rel="stylesheet" th:href="@{/css/utefit-public-journey.css(v=1)}">
+<link rel="stylesheet" th:href="@{/css/utefit-public-finale.css(v=1)}">
+<th:block th:replace="~{fragments/branch-media :: assets}"></th:block>
+<th:block sec:authorize="isAnonymous()">
+    <header th:replace="~{fragments/public-cinematic :: navigation}"></header>
+</th:block>
+<th:block sec:authorize="isAuthenticated()">
+    <header th:replace="~{fragments/header :: header}"></header>
+</th:block>
 
 <main>
-<div class="container py-3"><a class="btn btn-outline-primary" th:href="@{/promotions}">Khuyến mãi gói tập</a></div>
+    <section th:replace="~{fragments/public-cinematic :: experience}"></section>
 
-    <section id="gioi-thieu" class="hero-section">
-        <div class="container hero-content">
+    <th:block th:replace="~{fragments/public-journey :: journey}"></th:block>
 
-            <span class="eyebrow">UTEFIT Trung tâm thể hình</span>
-
-            <h1 class="hero-title mt-4">
-                Bắt đầu hành trình
-                <span>phiên bản tốt hơn</span>
-                của bạn
-            </h1>
-
-            <p class="hero-description">
-                Khám phá hệ thống phòng tập UTEFit,
-                các gói tập linh hoạt, lớp tập đa dạng
-                và đội ngũ huấn luyện viên chuyên nghiệp.
-            </p>
-
-            <div class="d-flex flex-wrap gap-3 mt-4">
-
-                <a class="btn btn-brand btn-lg"
-                   th:href="@{/membership-plans}">
-                    Khám phá gói tập
-                </a>
-
-                <a class="btn btn-outline-light btn-lg"
-                   th:href="@{/branches}">
-                    Tìm chi nhánh
-                </a>
-
-            </div>
-
-            <div class="hero-features">
-                <span>Nhiều chương trình tập</span>
-                <span>Nhiều chi nhánh</span>
-                <span>Đồng hành cùng huấn luyện viên</span>
-            </div>
-        </div>
-    </section>
-
-    <section class="site-section">
-        <div class="container">
-
-            <div class="section-heading">
-                <span class="eyebrow">Không gian tập luyện</span>
-                <h2>Chi nhánh <span>UTEFit</span></h2>
-                <p>
-                    Tìm không gian luyện tập phù hợp
-                    với khu vực sinh sống của bạn.
-                </p>
-            </div>
-
-            <div class="row g-4">
-
-                <div class="col-md-6 col-lg-4"
-                     th:each="b : ${featuredBranches}">
-
-                    <div class="program-card">
-
-                        <div class="program-icon">◆</div>
-
-                        <h3 th:text="${b.name}" data-uf-label>Chi nhánh</h3>
-
-                        <p th:text="${b.address}">
-                            Địa chỉ chi nhánh
-                        </p>
-
-                        <a class="btn btn-outline-light mt-3"
-                           th:href="@{/branches/{id}(id=${b.id})}">
-                            Xem chi tiết
-                        </a>
-
-                    </div>
-                </div>
-
-            </div>
-
-            <div th:if="${#lists.isEmpty(featuredBranches)}"
-                 class="text-center text-secondary">
-                Chưa có chi nhánh hoạt động.
-            </div>
-
-            <div class="text-center mt-4">
-                <a class="btn btn-brand"
-                   th:href="@{/branches}">
-                    Xem tất cả chi nhánh
-                </a>
-            </div>
-
-        </div>
-    </section>
-
-    <section id="bang-gia"
-             class="site-section section-alternate">
-        <div class="container">
-
-            <div class="section-heading">
-                <span class="eyebrow">Gói tập</span>
-                <h2>Gói tập <span>linh hoạt</span></h2>
-                <p>
-                    Lựa chọn thời hạn và mức giá
-                    phù hợp với nhu cầu luyện tập.
-                </p>
-            </div>
-
-            <div class="row g-4">
-
-                <div class="col-md-6 col-lg-4"
-                     th:each="p : ${featuredPlans}">
-
-                    <div class="pricing-card">
-
-                        <span class="pricing-label">
-                            Gói tập UTEFit
-                        </span>
-
-                        <h3 th:text="${@membershipDisplay.name(p.name)}" data-uf-label>Tên gói</h3>
-
-                        <p th:text="${p.description}">
-                            Mô tả gói tập
-                        </p>
-
-                        <h3 class="mt-4"
-                            style="color:#ff326b"
-                            th:text="${@membershipDisplay.money(p.price)}" data-uf-label>
-                            0 VND
-                        </h3>
-
-                        <div class="pricing-status">
-                            <span th:text="${p.durationDescription}">
-                                30
-                            </span>
-                        </div>
-
-                        <a class="btn btn-brand w-100 mt-4"
-                           th:href="@{/member/memberships(planId=${p.id})}">
-                            Đăng ký gói tập
-                        </a>
-
-                    </div>
-                </div>
-
-            </div>
-
-            <div th:if="${#lists.isEmpty(featuredPlans)}"
-                 class="text-center text-secondary">
-                Chưa có gói tập hoạt động.
-            </div>
-
-            <div class="text-center mt-4">
-                <a class="btn btn-outline-light"
-                   th:href="@{/membership-plans}">
-                    Xem bảng giá đầy đủ
-                </a>
-            </div>
-
-        </div>
-    </section>
-
-    <section class="site-section">
-        <div class="container">
-
-            <div class="section-heading">
-                <span class="eyebrow">Lớp tập</span>
-                <h2>Khám phá <span>lớp tập</span></h2>
-                <p>
-                    Lựa chọn lớp tập theo mục tiêu,
-                    chi nhánh và hướng dẫn của PT.
-                </p>
-            </div>
-
-            <div class="row g-4">
-
-                <div class="col-md-6 col-lg-4"
-                     th:each="c : ${featuredClasses}">
-
-                    <div class="program-card">
-
-                        <span class="card-note"
-                              th:text="${c.categoryName}">
-                            DANH MỤC
-                        </span>
-
-                        <h3 class="mt-3"
-                            th:text="${c.name}" data-uf-label>
-                            Tên lớp
-                        </h3>
-
-                        <p th:text="${c.description}">
-                            Mô tả lớp học
-                        </p>
-
-                        <p>
-                            Chi nhánh:
-                            <strong th:text="${@membershipDisplay.name(c.branchName)}">
-                                UTEFit
-                            </strong>
-                        </p>
-
-                        <a class="btn btn-outline-light"
-                           th:href="@{/classes}">
-                            Xem các lớp tập
-                        </a>
-
-                    </div>
-                </div>
-
-            </div>
-
-            <div th:if="${#lists.isEmpty(featuredClasses)}"
-                 class="text-center text-secondary">
-                Chưa có lớp tập đang mở.
-            </div>
-
-            <div class="text-center mt-4">
-                <a class="btn btn-brand"
-                   th:href="@{/trainers}">
-                    Khám phá đội ngũ PT
-                </a>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- Giai đoạn 6: Đánh giá từ Member -->
-    <section class="site-section" id="danh-gia">
-        <div class="container">
-
-            <div class="section-heading">
-                <span class="eyebrow">
-                    MEMBER REVIEWS
-                </span>
-
-                <h2>
-                    Hội viên <span>đánh giá</span>
-                </h2>
-
-                <p>
-                    Trải nghiệm thực tế từ người
-                    đã sử dụng dịch vụ UTEFit.
-                </p>
-            </div>
-
-            <div class="row g-4">
-
-                <div class="col-12 col-md-6 col-lg-4"
-                     th:each="r : ${featuredReviews}">
-
-                    <article class="program-card h-100">
-
-                        <p class="text-warning fw-bold"
-                           th:text="|${r.rating} / 5 sao|">
-                        </p>
-
-                        <h3 th:text="${r.branch}" data-uf-label></h3>
-
-                        <p th:if="${r.trainer != null}"
-                           th:text="|PT: ${r.trainer}|">
-                        </p>
-
-                        <p class="review-text"
-                           th:text="${r.comment ?: 'Không có nhận xét'}">
-                        </p>
-
-                        <video th:if="${r.videoUrl != null}" th:src="${r.videoUrl}" controls preload="none" class="w-100 rounded mb-3" style="max-height:260px"></video>
-                        <img th:if="${r.imageUrl != null}"
-                             th:src="${r.imageUrl}"
-                             alt="Ảnh đánh giá"
-                             loading="lazy"
-                             class="review-photo img-fluid rounded mb-2">
-
-                        <small th:text="|Hội viên ${r.author}|"></small>
-
-                    </article>
-                </div>
-            </div>
-
-            <div class="text-center mt-4">
-                <a class="btn btn-outline-light"
-                   th:href="@{/reviews}">
-                    Xem tất cả đánh giá
-                </a>
-            </div>
-
-        </div>
-    </section>
+    <section th:replace="~{fragments/public-finale :: finale}"></section>
 
 </main>
 
@@ -306,6 +33,13 @@
 
 <div th:replace="~{fragments/scripts :: scripts}">
 </div>
+<script defer th:src="@{/vendor/gsap/gsap-3.13.0.min.js}"></script>
+<script defer th:src="@{/vendor/gsap/ScrollTrigger-3.13.0.min.js}"></script>
+<script defer th:src="@{/js/utefit-public-surface.js(v=2)}"></script>
+<script defer th:src="@{/js/utefit-public-cinematic.js(v=2)}"></script>
+
+<script defer th:src="@{/js/utefit-public-journey.js(v=1)}"></script>
+<script defer th:src="@{/js/utefit-public-finale.js(v=1)}"></script>
 
 </body>
 </html>

@@ -1,217 +1,39 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-
 <head th:replace="~{fragments/head :: head('Chỉnh sửa hồ sơ huấn luyện viên - UTEFit')}"></head>
-
-<body class="bg-dark uf-theme uf-area-pt uf-page-pt-profile-edit">
+<body class="uf-theme uf-area-pt uf-page-pt-profile-edit">
 <header th:replace="~{fragments/header :: header}"></header>
-
-<main class="py-5">
-    <style>
-        .uf-page-pt-profile-edit .pt-page-bg{
-            background: var(--uf-canvas);
-            min-height: calc(100vh - 140px);
-        }
-        .uf-page-pt-profile-edit .pt-title{ color:#fff; }
-        .uf-page-pt-profile-edit .pt-muted{ color: var(--uf-muted) !important; }
-
-        .uf-page-pt-profile-edit .pt-surface{
-            background: var(--uf-surface);
-            border: 1px solid var(--uf-border);
-            border-radius: 18px;
-            box-shadow: 0 12px 30px rgba(0,0,0,.35);
-        }
-        .uf-page-pt-profile-edit .pt-surface .card{
-            background: transparent;
-        }
-
-        /* Form controls on dark */
-        .uf-page-pt-profile-edit .form-label{ color: rgba(255,255,255,.85); }
-        .uf-page-pt-profile-edit .form-text{ color: rgba(255,255,255,.55) !important; }
-        .uf-page-pt-profile-edit .form-control, .uf-page-pt-profile-edit textarea, .uf-page-pt-profile-edit input[type="number"]{
-            background: var(--uf-surface-raised);
-            border: 1px solid rgba(255,255,255,0.12);
-            color: rgba(255,255,255,0.92);
-        }
-        .uf-page-pt-profile-edit .form-control:focus, .uf-page-pt-profile-edit textarea:focus{
-            background: rgba(255,255,255,0.08);
-            border-color: var(--uf-accent);
-            box-shadow: 0 0 0 .2rem rgba(217,35,50,.18);
-            color: #fff;
-        }
-
-        .uf-page-pt-profile-edit .divider-soft{
-            border-color: var(--uf-border) !important;
-        }
-
-        .uf-page-pt-profile-edit .border-end-md{
-            border-right: 1px solid var(--uf-border);
-        }
-        @media (max-width: 767.98px){
-            .uf-page-pt-profile-edit .border-end-md{ border-right: none; border-bottom: 1px solid var(--uf-border); padding-bottom: 18px; margin-bottom: 18px;}
-        }
-    </style>
-
-    <div class="pt-page-bg py-4">
-        <div class="container">
-
-            <!-- Tiêu đề -->
-            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-                <div>
-                    <h1 class="fw-bold mb-1 pt-title">Chỉnh sửa hồ sơ huấn luyện viên</h1>
-                    <p class="pt-muted mb-0">
-                        Cập nhật thông tin chuyên môn, chi nhánh làm việc và ảnh đại diện.
-                    </p>
-                </div>
-
-                <a th:href="@{/pt/profile}" class="btn btn-outline-light">
-                    Quay lại hồ sơ
-                </a>
-            </div>
-
-            <div class="pt-surface p-3 p-md-4">
-                <div class="row g-4">
-
-                    <!-- Cột trái: avatar hiện tại -->
-                    <div class="col-12 col-md-4 border-end-md">
-                        <h5 class="fw-semibold mb-3 text-white">Ảnh đại diện hiện tại</h5>
-
-                        <div class="text-center mb-3">
-                            <div class="rounded-circle overflow-hidden mx-auto mb-3"
-                                 style="width: 140px; height: 140px; border: 3px solid var(--uf-accent); box-shadow: none;">
-                                <img th:if="${trainer.user != null and trainer.user.avatarUrl != null}"
-                                     th:src="${trainer.user.avatarUrl}"
-                                     alt="Ảnh đại diện huấn luyện viên"
-                                     class="img-fluid h-100 w-100"
-                                     style="object-fit: cover;">
-
-                                <div th:if="${trainer.user == null or trainer.user.avatarUrl == null}"
-                                     class="h-100 w-100 d-flex align-items-center justify-content-center"
-                                     style="background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.55);">
-                                    Không có ảnh
-                                </div>
-                            </div>
-
-                            <p class="pt-muted small mb-0">
-                                Ảnh đại diện sẽ xuất hiện trên trang giới thiệu huấn luyện viên và hồ sơ cá nhân.
-                            </p>
-                        </div>
-
-                        <!-- Upload ảnh mới -->
-                        <form th:action="@{/pt/profile/edit}"
-                              method="post"
-                              enctype="multipart/form-data"
-                              th:object="${trainer}">
-                            <input type="hidden"
-                                   th:name="${_csrf.parameterName}"
-                                   th:value="${_csrf.token}"/>
-
-                            <!-- Hidden để không mất các field khi chỉ đổi ảnh -->
-                            <input type="hidden" th:field="*{specialization}"/>
-                            <input type="hidden" th:field="*{yearsExperience}"/>
-                            <input type="hidden" th:field="*{bio}"/>
-
-                            <div class="mb-3">
-                                <label class="form-label">Đổi ảnh đại diện</label>
-                                <input type="file"
-                                       name="avatarFile"
-                                       class="form-control"
-                                       accept="image/*">
-                                <div class="form-text">
-                                    JPG, PNG hoặc WebP. Tối đa 5MB.
-                                </div>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary w-100">
-                                Cập nhật ảnh
-                            </button>
-                        </form>
-                    </div>
-
-                    <!-- Cột phải: form thông tin -->
-                    <div class="col-12 col-md-8">
-                        <h5 class="fw-semibold mb-3 text-white">Thông tin huấn luyện viên</h5>
-
-                        <form th:action="@{/pt/profile/edit}"
-                              th:object="${trainer}"
-                              method="post"
-                              enctype="multipart/form-data">
-
-                            <input type="hidden"
-                                   th:name="${_csrf.parameterName}"
-                                   th:value="${_csrf.token}"/>
-
-                            <!-- Ẩn avatarFile để form này không bắt buộc upload -->
-                            <input type="hidden" name="avatarFile"/>
-
-                            <p class="form-text">
-                                Chi nhánh do quản trị viên phân công:
-                                <strong class="text-white"
-                                        th:text="${trainer.branch != null ? trainer.branch.name : 'Chưa phân công'}"></strong>
-                            </p>
-
-                            <!-- Chuyên môn -->
-                            <div class="mb-3">
-                                <label class="form-label">Chuyên môn</label>
-                                <input type="text"
-                                       th:field="*{specialization}"
-                                       class="form-control"
-                                       maxlength="255"
-                                       placeholder="Ví dụ: Gym giảm mỡ, Yoga, Powerlifting...">
-                                <div class="text-danger"
-                                     th:if="${#fields.hasErrors('specialization')}"
-                                     th:errors="*{specialization}">
-                                </div>
-                            </div>
-
-                            <!-- Số năm kinh nghiệm -->
-                            <div class="mb-3">
-                                <label class="form-label">Số năm kinh nghiệm</label>
-                                <input type="number"
-                                       th:field="*{yearsExperience}"
-                                       class="form-control"
-                                       min="0" max="80">
-                                <div class="text-danger"
-                                     th:if="${#fields.hasErrors('yearsExperience')}"
-                                     th:errors="*{yearsExperience}">
-                                </div>
-                            </div>
-
-                            <!-- Giới thiệu -->
-                            <div class="mb-3">
-                                <label class="form-label">Giới thiệu</label>
-                                <textarea th:field="*{bio}"
-                                          class="form-control"
-                                          rows="6"
-                                          maxlength="2000"
-                                          placeholder="Giới thiệu ngắn gọn về bạn, phong cách huấn luyện, đối tượng học viên phù hợp..."></textarea>
-                                <div class="text-danger"
-                                     th:if="${#fields.hasErrors('bio')}"
-                                     th:errors="*{bio}">
-                                </div>
-                            </div>
-
-                            <!-- Actions -->
-                            <div class="mt-4 d-flex flex-wrap gap-2">
-                                <button type="submit" class="btn btn-success">
-                                    Lưu thay đổi
-                                </button>
-
-                                <a th:href="@{/pt/profile}" class="btn btn-outline-light">
-                                    Hủy
-                                </a>
-                            </div>
-                        </form>
-                    </div>
-
-                </div>
-            </div>
-
-        </div>
+<main class="staff-profile" id="utefit-content" tabindex="-1" data-staff-profile-editor>
+    <div class="staff-page-heading"><div><p class="staff-kicker">UTEFIT / COACH IDENTITY</p><h1>Chỉnh sửa hồ sơ</h1><p>Cập nhật diện mạo và thông tin chuyên môn của bạn.</p></div><a class="btn btn-outline-light" th:href="@{/pt/profile}">← Quay lại hồ sơ</a></div>
+    <div class="staff-profile-edit-grid">
+        <section class="staff-profile-panel staff-avatar-panel" data-staff-reveal>
+            <p class="staff-kicker">DIỆN MẠO CỦA BẠN</p><h2>Ảnh đại diện</h2>
+            <th:block th:replace="~{pt/fragments/layout :: avatar(${trainer.user != null ? trainer.user.avatarUrl : null})}"></th:block>
+            <form th:action="@{/pt/profile/edit}" method="post" enctype="multipart/form-data" th:object="${trainer}" data-staff-profile-form="avatar">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <input type="hidden" th:field="*{specialization}" id="avatar-specialization">
+                <input type="hidden" th:field="*{yearsExperience}" id="avatar-yearsExperience">
+                <input type="hidden" th:field="*{bio}" id="avatar-bio">
+                <div class="staff-upload"><label for="pt-avatar-file"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V3m-5 5 5-5 5 5M4 16v5h16v-5"/></svg><strong>Chọn ảnh đại diện mới</strong><span data-staff-file-name>JPG, PNG hoặc GIF · tối đa 5 MB</span></label><input id="pt-avatar-file" name="avatarFile" type="file" accept="image/jpeg,image/png,image/gif" data-staff-avatar-file aria-describedby="pt-avatar-help"></div>
+                <p id="pt-avatar-help" class="staff-help">Ảnh xuất hiện trên hồ sơ và trang giới thiệu PT. Chọn ảnh không làm thay đổi ảnh đang lưu.</p>
+                <div class="staff-avatar-preview" hidden data-staff-preview-panel><button type="button" data-staff-preview-view aria-label="Phóng to ảnh xem trước"><img data-staff-preview alt="Ảnh mới xem trước, chưa lưu"></button><span>Xem trước · chưa lưu</span><button type="button" data-staff-preview-clear>Bỏ lựa chọn</button></div>
+                <p class="staff-form-feedback" role="alert" data-staff-form-error hidden></p>
+                <button type="submit" class="btn btn-primary w-100">Cập nhật ảnh</button>
+            </form>
+        </section>
+        <section class="staff-profile-panel" data-staff-reveal>
+            <p class="staff-kicker">HỒ SƠ NGHỀ NGHIỆP</p><h2>Thông tin huấn luyện</h2><p class="staff-help">Chi nhánh do quản trị viên phân công: <strong th:text="${trainer.branch != null ? @membershipDisplay.name(trainer.branch.name) : 'Chưa phân công'}"></strong></p>
+            <form th:action="@{/pt/profile/edit}" th:object="${trainer}" method="post" enctype="multipart/form-data" data-staff-profile-form="information">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><input type="hidden" name="avatarFile">
+                <div class="staff-field"><label class="form-label" for="specialization">Chuyên môn</label><input type="text" th:field="*{specialization}" class="form-control" maxlength="255" placeholder="Lĩnh vực huấn luyện của bạn"><div class="text-danger" th:if="${#fields.hasErrors('specialization')}" th:errors="*{specialization}"></div></div>
+                <div class="staff-field"><label class="form-label" for="yearsExperience">Số năm kinh nghiệm</label><input type="number" th:field="*{yearsExperience}" class="form-control" min="0" max="70" required><div class="text-danger" th:if="${#fields.hasErrors('yearsExperience')}" th:errors="*{yearsExperience}"></div></div>
+                <div class="staff-field"><label class="form-label" for="bio">Giới thiệu bản thân</label><textarea th:field="*{bio}" class="form-control" rows="7" maxlength="2000" placeholder="Phong cách huấn luyện và cách bạn đồng hành cùng học viên…"></textarea><small class="staff-help">Tối đa 2.000 ký tự. Chỉ chia sẻ thông tin nghề nghiệp phù hợp.</small><div class="text-danger" th:if="${#fields.hasErrors('bio')}" th:errors="*{bio}"></div></div>
+                <p class="staff-form-feedback" role="alert" data-staff-form-error hidden></p>
+                <div class="staff-form-actions"><button type="submit" class="btn btn-primary">Lưu thay đổi</button><a th:href="@{/pt/profile}" class="btn btn-outline-light">Hủy</a></div>
+            </form>
+        </section>
     </div>
 </main>
-
-<footer th:replace="~{fragments/footer :: footer}"></footer>
-<div th:replace="~{fragments/scripts :: scripts}"></div>
-</body>
-</html>
+<dialog th:replace="~{pt/fragments/layout :: lightbox}"></dialog>
+<footer th:replace="~{fragments/footer :: footer}"></footer><div th:replace="~{fragments/scripts :: scripts}"></div>
+</body></html>

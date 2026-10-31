@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head('Gói tập của tôi - UTEFit')}"></head>
-<body class="uf-theme memberships-page uf-area-member uf-page-member-memberships">
-<link rel="stylesheet" th:href="@{/css/utefit-premium.css(v=1)}">
-<link rel="stylesheet" th:href="@{/css/member-memberships.css(v=1)}">
+<head th:replace="~{member/fragments/layout :: head('Gói tập của tôi - UTEFit')}"></head>
+<body class="uf-theme memberships-page uf-area-member uf-page-member-memberships uf-member">
+<link rel="stylesheet" th:href="@{/css/utefit-loyalty.css(v=1)}">
 <a class="uf-skip-link" href="#membership-content">Đến nội dung chính</a>
-<header th:replace="~{fragments/header :: header}"></header>
+<header th:replace="~{member/fragments/layout :: header}"></header>
 <main id="membership-content" class="uf-shell memberships-main" tabindex="-1">
-<div class="container py-3"><a class="btn btn-outline-primary" th:href="@{/promotions}">Khuyến mãi gói tập</a></div>
     <nav class="membership-breadcrumb" aria-label="Đường dẫn">
         <a th:href="@{/member/dashboard}">Tổng quan</a><span aria-hidden="true">/</span><span aria-current="page">Gói tập của tôi</span>
     </nav>
@@ -24,6 +22,7 @@
     <nav class="membership-section-nav" aria-label="Nội dung gói tập">
         <a href="#my-memberships">Gói đã đăng ký</a>
         <a href="#purchase-memberships">Mua thêm gói tập</a>
+        <a th:href="@{/promotions}">Khuyến mãi gói tập</a>
         <span>Đồng hành cùng mỗi buổi tập của bạn</span>
     </nav>
     <div th:if="${success}" class="uf-notice uf-notice-success" role="status" th:text="${success}" data-uf-label></div>
@@ -68,6 +67,10 @@
                     <h4 th:text="|${@membershipDisplay.name(period.planName)} · #${period.id}|" data-uf-label></h4>
                     <p class="membership-pass-benefits" th:text="|${period.durationDescription} · Quyền lợi: ${@membershipDisplay.benefit(period.benefit)}|" data-uf-label></p>
                     <p class="membership-pass-price" th:text="|${@membershipDisplay.money(period.price)}|"></p>
+                    <div th:if="${period.offerLabel != null}" class="membership-offer-snapshot">
+                        <span th:text="${period.offerLabel}"></span>
+                        <p>Giá gốc <b th:text="${@membershipDisplay.money(period.originalPrice)}"></b> · Giảm <b th:text="${@membershipDisplay.money(period.discountAmount)}"></b> · Thanh toán <b th:text="${@membershipDisplay.money(period.price)}"></b></p>
+                    </div>
                     <div class="membership-pass-validity">
                         <div th:if="${period.startDate != null and period.endDate != null}">
                             <span class="uf-muted">Thời gian sử dụng</span>
@@ -114,6 +117,7 @@
                     <option value="">Tất cả chi nhánh</option>
                     <option th:each="branch : ${branches}" th:value="${branch.id}" th:text="${@membershipDisplay.name(branch.name)}"></option>
                 </select>
+                <button type="button" class="membership-expand" data-catalog-expand>Mở tất cả chi nhánh</button>
             </div>
         </div>
         <details class="membership-policy">
@@ -121,37 +125,51 @@
             <p>Ngày dự kiến có thể thay đổi nếu giao dịch khác được xác nhận trước. Kỳ mới tại cùng chi nhánh bắt đầu sau kỳ đã thanh toán cuối cùng; không cộng ngày giữa các chi nhánh. Kỳ đã hoàn/hủy không làm dịch ngày những kỳ khác.</p>
         </details>
         <div id="membership-catalog-branches">
-            <section th:each="branch : ${branches}" class="membership-catalog-branch" th:attr="data-branch-id=${branch.id}">
-                <h3><svg class="uf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span th:text="${@membershipDisplay.name(branch.name)}"></span></h3>
+            <details th:each="branch : ${branches}" class="membership-catalog-branch" th:attr="data-branch-id=${branch.id}">
+                <summary class="membership-catalog-summary">
+                    <h3><svg class="uf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span th:text="${@membershipDisplay.name(branch.name)}"></span></h3>
+                    <span class="membership-catalog-count" data-branch-option-count>Xem gói tập</span>
+                </summary>
                 <div class="membership-options">
                     <article th:each="option : ${purchaseOptions}" th:if="${option.branchId == branch.id}" class="membership-option">
                         <div class="membership-option-top"><span class="uf-badge">Một chi nhánh</span><svg class="uf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 9v6M6 6v12M6 12h12M18 6v12M21 9v6"/></svg></div>
                         <h4 th:text="${@membershipDisplay.name(option.planName)}" data-uf-label></h4>
                         <p class="membership-option-price" th:text="${@membershipDisplay.money(option.price)}"></p>
                         <ul class="membership-option-benefits">
-                            <li><span aria-hidden="true">✓</span><span th:text="${@membershipDisplay.benefit(option.benefit)}" data-uf-label></span></li>
-                            <li><span aria-hidden="true">✓</span><span th:text="${option.durationDescription}"></span></li>
+                            <li><svg width="16" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg><span th:text="${@membershipDisplay.benefit(option.benefit)}" data-uf-label></span></li>
+                            <li><svg width="16" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg><span th:text="${option.durationDescription}"></span></li>
                         </ul>
                         <p class="membership-option-projection" th:text="|Dự kiến sau thanh toán: ${#temporals.format(option.projectedStart, 'dd/MM/yyyy')} → ${#temporals.format(option.projectedEnd, 'dd/MM/yyyy')}|"></p>
-                        <form th:action="@{/member/memberships}" method="post">
+                        <form th:action="@{/member/memberships}" method="post" data-offer-form>
                         <input type="hidden" name="branchId" th:value="${option.branchId}">
                         <input type="hidden" name="planId" th:value="${option.planId}">
-<label>Mã khuyến mãi <input class="form-control" name="promotionCode" maxlength="50" placeholder="Nhập mã ưu đãi"></label>
-<a th:href="@{/promotions}">Xem khuyến mãi đang có</a>
+                            <label class="form-label" th:for="|offer-selection-${option.planId}|">Ưu đãi tự động</label>
+                            <select name="offerSelection" class="form-select mb-3" th:id="|offer-selection-${option.planId}|"><option value="AUTO">Chọn ưu đãi tự động tiết kiệm nhất</option><option value="NONE">Không dùng ưu đãi tự động</option></select>
+                            <label class="form-label d-block mb-2" th:for="|promotion-code-${option.branchId}-${option.planId}|">Mã khuyến mãi</label>
+                            <input class="form-control mb-2" th:id="|promotion-code-${option.branchId}-${option.planId}|" name="promotionCode" maxlength="50" placeholder="Nhập mã ưu đãi">
+                            <a class="d-inline-block mb-3" th:href="@{/promotions}">Xem khuyến mãi đang có</a>
+                            <div class="membership-offer-quote" data-offer-quote aria-live="polite" hidden>
+                                <strong data-offer-name></strong>
+                                <dl><div><dt>Giá gốc</dt><dd data-offer-original></dd></div><div><dt>Tiết kiệm</dt><dd data-offer-discount></dd></div><div><dt>Thanh toán</dt><dd data-offer-total></dd></div></dl>
+                            </div>
+                            <p class="membership-offer-help">Mỗi đơn một ưu đãi. Nhập mã sẽ thay thế ưu đãi tự động. Giá được backend kiểm tra lại và chốt khi tạo đơn.</p>
+                            <p data-offer-error role="status" hidden></p>
+                            <button type="button" class="uf-button uf-button-secondary mb-3" data-offer-retry hidden>Thử lại giá ưu đãi</button>
                             <button type="submit" class="uf-button uf-button-primary">Mua gói tại chi nhánh này</button>
                         </form>
                     </article>
                 </div>
                 <p class="uf-empty membership-branch-empty">Chi nhánh này chưa có gói đang mở bán. Bạn có thể xem các chi nhánh khác.</p>
-            </section>
+            </details>
         </div>
         <p class="membership-filter-result uf-muted" data-branch-filter-result role="status" aria-live="polite" hidden></p>
         <p th:if="${#lists.isEmpty(purchaseOptions)}" class="uf-notice">Chưa có gói một chi nhánh đang mở bán. Các quyền đã mua trước đây vẫn được giữ nguyên.</p>
         <div class="membership-payment-note"><svg class="uf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/><path d="m8 12 3 3 5-6"/></svg><p>Gói tập chỉ có hiệu lực sau khi thanh toán được xác nhận.<br><span class="uf-muted">Chọn chuyển khoản VietQR hoặc thanh toán tiền mặt sau khi đăng ký.</span></p></div>
     </section>
 </main>
-<footer th:replace="~{fragments/footer :: footer}"></footer>
-<div th:replace="~{fragments/scripts :: scripts}"></div>
-<script defer th:src="@{/js/member-memberships.js(v=1)}"></script>
+<footer th:replace="~{member/fragments/layout :: footer}"></footer>
+<div th:replace="~{member/fragments/layout :: scripts}"></div>
+<script defer th:src="@{/js/member-memberships.js(v=2)}"></script>
+<script defer th:src="@{/js/member-offers.js(v=1)}"></script>
 </body>
 </html>

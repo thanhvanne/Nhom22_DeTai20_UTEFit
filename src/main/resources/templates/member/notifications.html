@@ -3,108 +3,18 @@
 <html lang="vi"
       xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments/head :: head('Thông báo - UTEFit')}">
+<head th:replace="~{member/fragments/layout :: head('Thông báo - UTEFit')}">
 </head>
 
-<body class="uf-theme uf-area-member uf-page-member-notifications">
+<body class="uf-theme uf-area-member uf-page-member-notifications uf-member">
 
 <!-- HEADER CHUNG CUA THANH VIEN A -->
-<header th:replace="~{fragments/header :: header}">
+<header th:replace="~{member/fragments/layout :: header}">
 </header>
 
 <main class="container ut-page py-5">
 
     <!-- CSS RIENG CHO TRANG THONG BAO -->
-    <style>
-        .ut-notifications {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        .ut-notification-card {
-            background: #111b31;
-            border: 1px solid #35415b;
-            border-radius: 14px;
-            padding: 22px;
-            margin-bottom: 14px;
-            color: #f3f6ff;
-            transition: border-color .2s ease;
-        }
-
-        .ut-notification-card[data-unread="true"] {
-            border-left: 4px solid #ff326b;
-            background: #192540;
-        }
-
-        /* GD5-C: Noi bat thong bao huy lop/lich */
-        .ut-notification-card[data-cancelled="true"] {
-            border-color: #dc3545;
-        }
-
-        .ut-notification-card[data-cancelled="true"]
-        .ut-notification-title {
-            color: #ff8b9b;
-        }
-
-        .ut-notification-title {
-            font-size: 1.05rem;
-            font-weight: 700;
-            color: #ffffff;
-            margin-bottom: 0;
-            overflow-wrap: anywhere;
-        }
-
-        .ut-notification-content {
-            color: #d4dced;
-            margin: 12px 0;
-            line-height: 1.7;
-            white-space: pre-line;
-            overflow-wrap: anywhere;
-        }
-
-        .ut-notification-time {
-            color: #a9b6cf;
-            font-size: .85rem;
-        }
-
-        .ut-notification-badge {
-            border-radius: 999px;
-            padding: 6px 12px;
-            font-size: .76rem;
-            font-weight: 700;
-        }
-
-        .ut-badge-unread {
-            background: #ff326b;
-            color: white;
-        }
-
-        .ut-badge-read {
-            background: #263650;
-            color: #ced9ee;
-        }
-
-        .ut-badge-cancelled {
-            background: rgba(220, 53, 69, .15);
-            color: #ff9faa;
-            border: 1px solid rgba(220, 53, 69, .5);
-        }
-
-        .ut-notification-empty {
-            background: #111b31;
-            border: 1px dashed #35415b;
-            border-radius: 14px;
-            padding: 60px 20px;
-            text-align: center;
-            color: #a9b6cf;
-        }
-
-        @media (max-width: 576px) {
-            .ut-notification-card {
-                padding: 16px;
-            }
-        }
-    </style>
 
     <div class="ut-notifications">
 
@@ -178,7 +88,7 @@
                      #lists.isEmpty(notifications)}"
              class="ut-notification-empty">
 
-            <h3 class="text-white">
+            <h3 class="member-empty-title">
                 Chưa có thông báo
             </h3>
 
@@ -318,11 +228,11 @@
 <a th:if="${notificationPage.hasNext()}" th:href="@{/member/notifications(page=${notificationPage.number + 1})}">Trang sau</a></nav></main>
 
 <!-- FOOTER CHUNG CUA THANH VIEN A -->
-<footer th:replace="~{fragments/footer :: footer}">
+<footer th:replace="~{member/fragments/layout :: footer}">
 </footer>
 
 <!-- SCRIPT CHUNG CUA PROJECT -->
-<div th:replace="~{fragments/scripts :: scripts}">
+<div th:replace="~{member/fragments/layout :: scripts}">
 </div>
 
 </body>

@@ -1,127 +1,71 @@
 
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments/layout :: head('Dashboard')}"></head>
-<body class="uf-theme uf-area-admin uf-page-admin-dashboard">
-<div class="d-flex">
+<head th:replace="~{admin/fragments/layout :: head('Tổng quan')}"></head>
+<body class="uf-theme uf-area-admin uf-page-admin-dashboard uf-admin">
+<div class="admin-shell">
     <aside th:replace="~{admin/fragments/layout :: sidebar}"></aside>
-    <div class="flex-grow-1 min-vh-100" style="min-width:0">
-        <nav th:replace="~{admin/fragments/layout :: topbar('Dashboard tổng quan')}"></nav>
+    <div class="admin-workspace">
+        <nav th:replace="~{admin/fragments/layout :: topbar('Tổng quan hệ thống')}"></nav>
 
-        <main class="container-fluid px-4 pb-5">
-            <div class="admin-hero-banner mb-4">
-                <span class="admin-eyebrow">Vận hành UTEFit</span>
-                <h2 class="fw-bold">Tổng quan hệ thống</h2>
-                <p class="mb-0 text-white-50">
+        <main class="admin-main" id="utefit-content" tabindex="-1">
+            <div class="admin-page-heading">
+                <p>
                     Theo dõi hoạt động phòng tập và hiệu quả kinh doanh.
                 </p>
             </div>
 
-            <div class="row g-3 mb-4">
-                <div class="col-md-3 col-sm-6">
-                    <div class="kpi-card h-100">
-                        <div class="text-muted small">Tổng tài khoản</div>
-                        <div class="display-6 fw-bold"
-                             th:text="${totalUsers}">0</div>
-                    </div>
-                </div>
-                <div class="col-md-3 col-sm-6">
-                    <div class="kpi-card h-100">
-                        <div class="text-muted small">Tổng PT</div>
-                        <div class="display-6 fw-bold"
-                             th:text="${totalTrainers}">0</div>
-                    </div>
-                </div>
-                <div class="col-md-3 col-sm-6">
-                    <div class="kpi-card h-100">
-                        <div class="text-muted small">Chi nhánh</div>
-                        <div class="display-6 fw-bold"
-                             th:text="${totalBranches}">0</div>
-                    </div>
-                </div>
-                <div class="col-md-3 col-sm-6">
-                    <div class="kpi-card h-100">
-                        <div class="text-muted small">Lớp tập</div>
-                        <div class="display-6 fw-bold"
-                             th:text="${totalClasses}">0</div>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="kpi-card h-100">
-                        <div class="text-muted small">
-                            Gói tập còn hiệu lực
-                        </div>
-                        <div class="display-6 fw-bold text-success"
-                             th:text="${activeMemberships}">0</div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="kpi-card h-100">
-                        <div class="text-muted small">
-                            Lượt vào tập tháng này
-                        </div>
-                        <div class="display-6 fw-bold"
-                             th:text="${checkinsThisMonth}">0</div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="kpi-card h-100">
-                        <div class="text-muted small">Tổng doanh thu</div>
-                        <div class="fs-3 fw-bold text-success"
-                             th:text="|${#numbers.formatDecimal(revenueTotal,1,0)} đ|" data-uf-money>
-                            0 đ
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="surface-card p-4 mb-4">
-                <div class="d-flex justify-content-between
-                            align-items-center flex-wrap gap-2 mb-3">
-                    <h5 class="fw-bold mb-0">
-                        Biểu đồ doanh thu 6 tháng gần nhất
-                    </h5>
+            <div class="admin-overview">
+            <section class="surface-card admin-revenue" aria-labelledby="revenue-title">
+                <div class="admin-panel-heading">
+                    <div><h2 id="revenue-title">Doanh thu theo tháng</h2><p>6 tháng gần nhất · VND</p></div>
                     <a th:href="@{/admin/statistics}"
-                       class="btn btn-outline-success btn-sm">
-                        Xem báo cáo chi tiết
+                       class="btn btn-outline-secondary btn-sm">
+                        Xem báo cáo
                     </a>
                 </div>
-                <div style="height:280px;position:relative">
-                    <canvas id="dashboardRevenue"></canvas>
+                <div class="admin-chart">
+                    <canvas id="dashboardRevenue" role="img" aria-label="Biểu đồ doanh thu sáu tháng gần nhất"></canvas>
                 </div>
+            </section>
+            <section class="surface-card admin-operating" aria-labelledby="operating-title">
+                <h2 id="operating-title">Hoạt động phòng tập</h2>
+                <div class="admin-metric"><div class="admin-metric-label">Gói tập còn hiệu lực</div><div class="admin-metric-value" th:text="${activeMemberships}">0</div></div>
+                <div class="admin-metric"><div class="admin-metric-label">Lượt vào tập tháng này</div><div class="admin-metric-value" th:text="${checkinsThisMonth}">0</div></div>
+                <div class="admin-metric"><div class="admin-metric-label">Tổng doanh thu</div><div class="admin-metric-value admin-revenue-total" th:text="|${#numbers.formatDecimal(revenueTotal,1,0)} đ|" data-uf-money>0 đ</div></div>
+            </section>
             </div>
-
-            <div class="row g-3">
-                <div class="col-sm-6 col-lg-3">
+            <section class="surface-card admin-inventory" aria-label="Quy mô hệ thống">
+                <div><div class="admin-metric-label">Tổng tài khoản</div><div class="admin-metric-value" th:text="${totalUsers}">0</div></div>
+                <div><div class="admin-metric-label">Huấn luyện viên</div><div class="admin-metric-value" th:text="${totalTrainers}">0</div></div>
+                <div><div class="admin-metric-label">Chi nhánh</div><div class="admin-metric-value" th:text="${totalBranches}">0</div></div>
+                <div><div class="admin-metric-label">Lớp tập</div><div class="admin-metric-value" th:text="${totalClasses}">0</div></div>
+            </section>
+            <section class="surface-card admin-shortcuts" aria-labelledby="shortcuts-title">
+                <h2 id="shortcuts-title">Truy cập nhanh</h2>
+                <div class="admin-shortcut-grid">
                     <a th:href="@{/admin/checkins}"
-                       class="btn btn-outline-success w-100 py-3">
+                       >
                         <i class="bi bi-person-check"></i>
                         Quản lý Vào tập
                     </a>
-                </div>
-                <div class="col-sm-6 col-lg-3">
                     <a th:href="@{/admin/payments}"
-                       class="btn btn-outline-primary w-100 py-3">
+                       >
                         <i class="bi bi-credit-card"></i>
                         Thanh toán
                     </a>
-                </div>
-                <div class="col-sm-6 col-lg-3">
                     <a th:href="@{/admin/promotions}"
-                       class="btn btn-outline-warning w-100 py-3">
+                       >
                         <i class="bi bi-ticket-perforated"></i>
                         Khuyến mãi
                     </a>
-                </div>
-                <div class="col-sm-6 col-lg-3">
                     <a th:href="@{/admin/reviews}"
-                       class="btn btn-outline-secondary w-100 py-3">
+                       >
                         <i class="bi bi-star"></i>
                         Đánh giá
                     </a>
                 </div>
-            </div>
+            </section>
         </main>
     </div>
 </div>
@@ -139,18 +83,29 @@
             datasets: [{
                 label: 'Doanh thu (VND)',
                 data: values,
-                borderColor: '#10b981',
-                backgroundColor: 'rgba(16,185,129,.12)',
-                fill: true,
-                tension: 0.35,
-                pointRadius: 4
+                borderColor: '#D92332',
+                backgroundColor: '#D92332',
+                fill: false,
+                tension: 0,
+                borderWidth: 2,
+                pointRadius: 0,
+                pointHoverRadius: 4,
+                pointHitRadius: 16
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            animation: false,
+            color: '#616975',
+            font: { family: 'Be Vietnam Pro', size: 12 },
+            plugins: {
+                legend: { display: false },
+                tooltip: { titleFont: { family: 'Be Vietnam Pro' }, bodyFont: { family: 'Be Vietnam Pro' }, callbacks: { label: context => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(context.parsed.y) } }
+            },
             scales: {
-                y: { beginAtZero: true }
+                x: { grid: { display: false }, border: { display: false }, ticks: { font: { family: 'Be Vietnam Pro', size: 12 }, color: '#616975', maxRotation: 0, maxTicksLimit: 4 } },
+                y: { beginAtZero: true, border: { display: false }, grid: { color: '#EEF0F3' }, ticks: { font: { family: 'Be Vietnam Pro', size: 12 }, color: '#616975', maxTicksLimit: 5, callback: value => new Intl.NumberFormat('vi-VN', { notation: 'compact', maximumFractionDigits: 1 }).format(value) } }
             }
         }
     });

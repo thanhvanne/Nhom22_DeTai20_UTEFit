@@ -18,7 +18,7 @@ local riêng; không đồng bộ tiền thật hoặc dùng database Live/QA c�
 
 ## 1. Clone/Pull và IntelliJ
 
-1. Clone repository của nhóm hoặc pull nhánh đã được review. Không tự merge thay người phụ trách.
+1. Clone repository của nhóm và làm việc trực tiếp trên `main` theo quy trình main-only bên dưới. Không tự commit/push thay người phụ trách khi chưa được duyệt.
 2. Mở thư mục project bằng IntelliJ, chọn JDK 17, reload Maven.
 3. Cài SQL Server và SSMS, bật TCP/IP/cổng SQL Server thích hợp.
 4. Chưa chạy ứng dụng trước khi dựng schema. Hibernate mặc định **validate**, không tự cập nhật bảng.
@@ -263,6 +263,30 @@ Không có migration/reset/seed nào được tự chạy trên SQL Server trong
 0 lỗi cú pháp; đây không phải bằng chứng đã dựng/seed thành công trên SQL Server.
 
 ## 8. Chuẩn bị GitHub, chưa commit/push/merge
+
+### Quy trình main-only
+
+Từ 30/10/2026, nhóm phát triển trực tiếp trên `main`. Trước khi sửa, kiểm tra
+`git branch --show-current` và `git status`. Trước khi đồng bộ, sao lưu cả thay đổi
+tracked và untracked cần thiết, fetch `origin`, tích hợp code mới rồi chạy compile/test.
+Không tiếp tục công việc trên `feat/giai-doan-7`; nhánh cũ có thể giữ để đối chiếu lịch sử.
+Không dùng reset/clean phá hủy dữ liệu, force push hoặc chọn ours/theirs hàng loạt.
+
+Uyên phụ trách commit/push đợt đồng bộ này sau khi nhóm duyệt. Chỉ khi Uyên đã cung cấp
+chính xác thông tin, cấu hình ở repository này bằng:
+
+```powershell
+git config --local user.name "TEN_CHINH_XAC_UYEN_CUNG_CAP"
+git config --local user.email "EMAIL_CHINH_XAC_UYEN_CUNG_CAP"
+git config --show-origin --get user.name
+git config --show-origin --get user.email
+```
+
+Các giá trị trên là placeholder hướng dẫn, không chạy nguyên văn. `user.name`/`user.email`
+là metadata author/committer của commit mới, không đổi tài khoản GitHub dùng để push.
+Tài khoản push do credential/SSH hiện có quyết định; không suy ra từ email commit và
+không tự đổi đăng nhập. Giữ tác giả các commit cũ; chỉ thêm ghi nhận đồng tác giả khi
+đúng đóng góp thực tế và đã xác nhận thông tin. Không gán toàn bộ lịch sử cho người push.
 
 Review `git status` và stage theo tên file, không `git add .`. Nên commit sau review:
 source/template/static/test mới, hai SQL chuẩn, migration mới, tài liệu liên quan,

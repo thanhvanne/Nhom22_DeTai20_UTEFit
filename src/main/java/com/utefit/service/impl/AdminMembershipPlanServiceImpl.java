@@ -60,6 +60,7 @@ public class AdminMembershipPlanServiceImpl implements AdminMembershipPlanServic
     @Override
     @Transactional
     public void createPlan(MembershipPlanFormDto dto) {
+        com.utefit.validation.FormChecks.validate(dto);
         validatePlanBusinessRules(dto, null);
 
         MembershipPlan plan = MembershipPlan.builder()
@@ -79,6 +80,7 @@ public class AdminMembershipPlanServiceImpl implements AdminMembershipPlanServic
     @Override
     @Transactional
     public void updatePlan(Long id, MembershipPlanFormDto dto) {
+        com.utefit.validation.FormChecks.validate(dto);
         MembershipPlan plan = planRepository.lockForUpdate(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy gói tập."));
         validatePlanBusinessRules(dto, id);
         plan.setBenefit(dto.getBenefit());

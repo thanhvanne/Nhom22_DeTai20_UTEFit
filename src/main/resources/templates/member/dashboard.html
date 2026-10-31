@@ -1,13 +1,14 @@
+<!-- Lucian UX/UI Prompt #050 · MIT License (c) 2026 Seokwoooo · https://lucianlabs.dev/uxui-prompt/#050 -->
 <!DOCTYPE html>
 <html lang="vi"
       xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments/head :: head('Tổng quan hội viên - UTEFit')}">
+<head th:insert="~{member/fragments/layout :: dashboardHead('Tổng quan hội viên - UTEFit')}">
 </head>
 
-<body class="ut-member-layout uf-theme uf-area-member uf-page-member-dashboard">
+<body class="ut-member-layout uf-theme uf-area-member uf-page-member-dashboard uf-member">
 
-<header th:replace="~{fragments/header :: header}"></header>
+<header th:replace="~{member/fragments/layout :: header}"></header>
 
 <main class="ut-dashboard container-fluid">
 
@@ -20,28 +21,23 @@
 
         <div class="ut-welcome-content">
 
-            <p class="ut-kicker">
-                Hội viên UTEFit
-            </p>
-
             <p class="ut-greeting">
-                Chào mừng trở lại,
+                Sẵn sàng cho buổi tập mới,
             </p>
 
             <h1 th:text="${dashboard.memberName}" data-uf-label>
                 Hội viên UTEFit
             </h1>
 
-            <p>
-                Theo dõi gói tập, lịch luyện tập và
-                kết nối cùng huấn luyện viên tại một nơi.
+            <p class="member-hero-description">
+                Giữ nhịp tập luyện. Gói tập, lịch hẹn và huấn luyện viên của bạn luôn ở đây.
             </p>
 
             <div class="ut-hero-links">
 
                 <a th:href="@{/member/classes}"
                    class="btn btn-brand">
-                    Khám phá lớp tập →
+                    Khám phá lớp tập <span aria-hidden="true">↗</span>
                 </a>
 
                 <a th:href="@{/member/schedule}"
@@ -52,32 +48,249 @@
             </div>
         </div>
 
-        <div class="ut-hero-decoration"
-             aria-hidden="true">
-            UTE<span>FIT</span>
-            <small>Mạnh mẽ hơn mỗi ngày</small>
-        </div>
+        <figure class="member-hero-visual">
+            <img th:src="@{/images/strength-session.jpg}" alt="Buổi luyện sức mạnh với tạ đòn" width="1200" height="800" fetchpriority="high">
+            <figcaption>Ảnh: <a href="https://unsplash.com/photos/YwK5YfOkqww" target="_blank" rel="noopener noreferrer">Farkas Mario / Unsplash</a></figcaption>
+        </figure>
 
     </section>
 
     <div class="ut-dashboard-grid">
 
+        <section class="ut-dash-panel ut-membership-panel ux u050"
+                 aria-labelledby="ut-membership-title">
+            <div class="member-pass-face u050-card">
+            <span class="u050-glare" aria-hidden="true"></span>
+            <div class="ut-panel-heading">
 
-        <!-- ======================================
-             THÔNG BÁO GẦN ĐÂY
-             ====================================== -->
+                <h2 id="ut-membership-title">
+                    <span class="ut-icon-square"><svg class="uf-icon" aria-hidden="true"><use href="/images/utefit-icons.svg#membership"></use></svg></span>
+                    Gói tập hiện tại
+                </h2>
+
+                <a th:href="@{/member/memberships}"
+                   class="ut-panel-link">
+                    Xem chi tiết →
+                </a>
+            </div>
+
+            <!-- Có Membership ACTIVE và còn hạn -->
+            <th:block th:if="${dashboard.activeMembership != null}">
+
+                <div class="ut-plan-display">
+                    <div class="member-pass-wordmark" aria-hidden="true">UTE<span>FIT</span><span class="member-pass-caption">Training club</span></div>
+
+                    <div class="ut-membership-symbol"
+                         aria-hidden="true">
+                        <svg class="uf-icon" aria-hidden="true"><use href="/images/utefit-icons.svg#membership"></use></svg>
+                    </div>
+
+                    <div class="ut-plan-details">
+
+                        <span class="ut-pill ut-pill-active">
+                            Đang hoạt động
+                        </span>
+
+                        <h3 class="ut-membership-name" th:text="${@membershipDisplay.name(dashboard.activeMembership.planName)}" data-uf-label>
+                            Gói tập
+                        </h3>
+
+                        <p class="ut-membership-branch">
+                            ⌖
+                            <span th:text="${@membershipDisplay.name(dashboard.activeMembership.branchName)}">
+                                Chi nhánh
+                            </span>
+                        </p>
+
+                        <p class="ut-membership-validity">
+                            ◷
+                            <span th:text="${dashboard.activeMembership.startDate}" data-uf-date>
+                            </span>
+                            —
+                            <span th:text="${dashboard.activeMembership.endDate}" data-uf-date>
+                            </span>
+                        </p>
+
+                        <div class="ut-progress"
+                             role="progressbar"
+                             aria-label="Thời gian gói đã sử dụng"
+                             th:attr="aria-valuenow=${dashboard.progressPercent}"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+
+                            <span th:style="|width:${dashboard.progressPercent}%|">
+                            </span>
+                        </div>
+
+                        <p class="ut-membership-remaining"
+                           th:text="|Còn ${dashboard.daysLeft} ngày sử dụng|">
+                            Còn hạn
+                        </p>
+
+                    </div>
+                </div>
+
+                <a class="btn btn-outline-light"
+                   th:href="@{/member/memberships}">
+                    Quản lý gói tập →
+                </a>
+
+            </th:block>
+
+            <!-- Chưa có gói ACTIVE -->
+            <div th:if="${dashboard.activeMembership == null}"
+                 class="ut-empty-state">
+
+                <div class="ut-empty-icon">
+                    <svg class="uf-icon" aria-hidden="true"><use href="/images/utefit-icons.svg#membership"></use></svg>
+                </div>
+
+                <h3 th:text="${dashboard.pendingMembership}
+                    ? 'Có gói tập chờ thanh toán'
+                    : 'Chưa có gói tập đang sử dụng'" data-uf-label>
+                    Chưa có gói tập
+                </h3>
+
+                <p th:text="${dashboard.pendingMembership}
+                    ? 'Hoàn tất thanh toán CASH và chờ Admin xác nhận để sử dụng dịch vụ.'
+                    : 'Chọn chi nhánh và gói tập phù hợp để bắt đầu.'" data-uf-label>
+                </p>
+
+                <a class="btn btn-brand"
+                   th:href="${dashboard.pendingMembership}
+                       ? @{/member/payments}
+                       : @{/member/memberships}"
+                   th:text="${dashboard.pendingMembership}
+                       ? 'Theo dõi thanh toán'
+                       : 'Đăng ký gói tập'">
+                    Đăng ký gói
+                </a>
+
+            </div>
+
+            </div>
+        </section>
+
+        <section class="ut-dash-panel ut-upcoming-panel"
+                 aria-labelledby="ut-upcoming-title">
+
+            <div class="ut-panel-heading">
+
+                <h2 id="ut-upcoming-title">
+                    <span class="ut-icon-square"><svg class="uf-icon" aria-hidden="true"><use href="/images/utefit-icons.svg#calendar"></use></svg></span>
+                    Buổi tập sắp tới
+                </h2>
+
+                <a th:href="@{/member/schedule}"
+                   class="ut-panel-link">
+                    Lịch lớp →
+                </a>
+
+            </div>
+
+            <!-- Lịch thật: Class + PT -->
+            <div class="ut-upcoming-list"
+                 th:if="${!#lists.isEmpty(dashboard.upcoming)}">
+
+                <article class="ut-upcoming-item"
+                         th:each="s : ${dashboard.upcoming}">
+
+                    <div class="ut-date-box">
+
+                        <strong th:text="${#temporals.format(s.date,'dd')}">
+                            22
+                        </strong>
+
+                        <span th:text="${#temporals.format(s.date,'MM/yyyy')}">
+                            10/2026
+                        </span>
+
+                    </div>
+
+                    <div class="ut-upcoming-copy">
+
+                        <span class="ut-upcoming-kind"
+                              th:text="${s.kind == 'PT'}
+                                  ? 'PT 1:1'
+                                  : 'Lớp nhóm'">
+                            Lớp nhóm
+                        </span>
+
+                        <h3 th:text="${s.title}" data-uf-label>
+                            Buổi tập
+                        </h3>
+
+                        <p>
+                            <span th:text="${s.startTime}">
+                                18:00
+                            </span>
+                            –
+                            <span th:text="${s.endTime}">
+                                19:00
+                            </span>
+
+                            <span th:if="${s.branchName != null}">
+                                ·
+                                <span th:text="${@membershipDisplay.name(s.branchName)}">
+                                </span>
+                            </span>
+                        </p>
+
+                    </div>
+
+                    <a class="ut-upcoming-action"
+                       th:href="${s.kind == 'PT'}
+                           ? @{/member/pt-schedules}
+                           : @{/member/schedule}"
+                       aria-label="Xem lịch">
+                        →
+                    </a>
+
+                </article>
+
+            </div>
+
+            <div th:if="${#lists.isEmpty(dashboard.upcoming)}"
+                 class="ut-empty-state ut-empty-small">
+
+                <div class="ut-empty-icon">
+                    <svg class="uf-icon" aria-hidden="true"><use href="/images/utefit-icons.svg#calendar"></use></svg>
+                </div>
+
+                <h3>
+                    Chưa có buổi tập sắp tới
+                </h3>
+
+                <p>
+                    Khám phá lịch lớp còn chỗ
+                    hoặc xem lịch PT của bạn.
+                </p>
+
+                <a class="btn btn-outline-light"
+                   th:href="@{/member/classes}">
+                    Tìm lớp tập
+                </a>
+
+            </div>
+
+            <a th:href="@{/member/pt-schedules}"
+               class="ut-panel-link ut-upcoming-footer">
+                Xem lịch PT cá nhân →
+            </a>
+
+        </section>
 
         <section class="ut-dash-panel ut-notify-panel"
                  aria-labelledby="ut-notify-title">
 
-            <div class="ut-panel-top">
+            <div class="ut-panel-heading">
 
                 <h2 id="ut-notify-title">
 
-                    <span class="ut-icon-square">◉</span>
+                    <span class="ut-icon-square"><svg class="uf-icon" aria-hidden="true"><use href="/images/utefit-icons.svg#bell"></use></svg></span>
                     Thông báo
 
-                    <span class="ut-unread"
+                    <span class="ut-notify-count"
                           th:if="${dashboard.unreadCount > 0}"
                           th:text="${dashboard.unreadCount}">
                         2
@@ -95,10 +308,10 @@
             <div class="ut-notification-list"
                  th:if="${!#lists.isEmpty(dashboard.notifications)}">
 
-                <article class="ut-notification"
+                <article class="ut-notification-item"
                          th:each="n : ${dashboard.notifications}">
 
-                    <span class="ut-notify-dot"
+                    <span class="ut-notification-dot"
                           th:classappend="${n.read} ? ' is-read'">
                     </span>
 
@@ -133,287 +346,54 @@
 
         </section>
 
-
-        <!-- ======================================
-             GÓI TẬP HIỆN TẠI
-             ====================================== -->
-
-        <section class="ut-dash-panel ut-membership-panel"
-                 aria-labelledby="ut-membership-title">
-
-            <div class="ut-panel-top">
-
-                <h2 id="ut-membership-title">
-                    <span class="ut-icon-square">◆</span>
-                    Gói tập hiện tại
-                </h2>
-
-                <a th:href="@{/member/memberships}"
-                   class="ut-panel-link">
-                    Xem chi tiết →
-                </a>
-            </div>
-
-            <!-- Có Membership ACTIVE và còn hạn -->
-            <th:block th:if="${dashboard.activeMembership != null}">
-
-                <div class="ut-plan-display">
-
-                    <div class="ut-plan-symbol"
-                         aria-hidden="true">
-                        ✦
-                    </div>
-
-                    <div class="ut-plan-details">
-
-                        <span class="ut-pill ut-pill-success">
-                            Đang hoạt động
-                        </span>
-
-                        <h3 th:text="${@membershipDisplay.name(dashboard.activeMembership.planName)}" data-uf-label>
-                            Gói tập
-                        </h3>
-
-                        <p>
-                            ⌖
-                            <span th:text="${@membershipDisplay.name(dashboard.activeMembership.branchName)}">
-                                Chi nhánh
-                            </span>
-                        </p>
-
-                        <p>
-                            ◷
-                            <span th:text="${dashboard.activeMembership.startDate}" data-uf-date>
-                            </span>
-                            —
-                            <span th:text="${dashboard.activeMembership.endDate}" data-uf-date>
-                            </span>
-                        </p>
-
-                        <div class="ut-progress-track"
-                             role="progressbar"
-                             aria-label="Thời gian gói đã sử dụng"
-                             th:attr="aria-valuenow=${dashboard.progressPercent}"
-                             aria-valuemin="0"
-                             aria-valuemax="100">
-
-                            <span th:style="|width:${dashboard.progressPercent}%|">
-                            </span>
-                        </div>
-
-                        <p class="ut-pink"
-                           th:text="|Còn ${dashboard.daysLeft} ngày sử dụng|">
-                            Còn hạn
-                        </p>
-
-                    </div>
-                </div>
-
-                <a class="ut-wide-action"
-                   th:href="@{/member/memberships}">
-                    Quản lý gói tập →
-                </a>
-
-            </th:block>
-
-            <!-- Chưa có gói ACTIVE -->
-            <div th:if="${dashboard.activeMembership == null}"
-                 class="ut-empty-state">
-
-                <div class="ut-empty-icon">
-                    ✦
-                </div>
-
-                <h3 th:text="${dashboard.pendingMembership}
-                    ? 'Có gói tập chờ thanh toán'
-                    : 'Chưa có gói tập đang sử dụng'" data-uf-label>
-                    Chưa có gói tập
-                </h3>
-
-                <p th:text="${dashboard.pendingMembership}
-                    ? 'Hoàn tất thanh toán CASH và chờ Admin xác nhận để sử dụng dịch vụ.'
-                    : 'Chọn chi nhánh và gói tập phù hợp để bắt đầu.'" data-uf-label>
-                </p>
-
-                <a class="btn btn-brand"
-                   th:href="${dashboard.pendingMembership}
-                       ? @{/member/payments}
-                       : @{/member/memberships}"
-                   th:text="${dashboard.pendingMembership}
-                       ? 'Theo dõi thanh toán'
-                       : 'Đăng ký gói tập'">
-                    Đăng ký gói
-                </a>
-
-            </div>
-
-        </section>
-
-        <!-- ======================================
-             BUỔI TẬP SẮP TỚI
-             ====================================== -->
-
-        <section class="ut-dash-panel ut-upcoming-panel"
-                 aria-labelledby="ut-upcoming-title">
-
-            <div class="ut-panel-top">
-
-                <h2 id="ut-upcoming-title">
-                    <span class="ut-icon-square">▣</span>
-                    Buổi tập sắp tới
-                </h2>
-
-                <a th:href="@{/member/schedule}"
-                   class="ut-panel-link">
-                    Lịch lớp →
-                </a>
-
-            </div>
-
-            <!-- Lịch thật: Class + PT -->
-            <div class="ut-upcoming-list"
-                 th:if="${!#lists.isEmpty(dashboard.upcoming)}">
-
-                <article class="ut-session"
-                         th:each="s : ${dashboard.upcoming}">
-
-                    <div class="ut-date-box">
-
-                        <strong th:text="${#temporals.format(s.date,'dd')}">
-                            22
-                        </strong>
-
-                        <span th:text="${#temporals.format(s.date,'MM/yyyy')}">
-                            10/2026
-                        </span>
-
-                    </div>
-
-                    <div class="ut-session-details">
-
-                        <span class="ut-session-tag"
-                              th:text="${s.kind == 'PT'}
-                                  ? 'PT 1:1'
-                                  : 'Lớp nhóm'">
-                            Lớp nhóm
-                        </span>
-
-                        <h3 th:text="${s.title}" data-uf-label>
-                            Buổi tập
-                        </h3>
-
-                        <p>
-                            <span th:text="${s.startTime}">
-                                18:00
-                            </span>
-                            –
-                            <span th:text="${s.endTime}">
-                                19:00
-                            </span>
-
-                            <span th:if="${s.branchName != null}">
-                                ·
-                                <span th:text="${@membershipDisplay.name(s.branchName)}">
-                                </span>
-                            </span>
-                        </p>
-
-                    </div>
-
-                    <a class="ut-session-arrow"
-                       th:href="${s.kind == 'PT'}
-                           ? @{/member/pt-schedules}
-                           : @{/member/schedule}"
-                       aria-label="Xem lịch">
-                        →
-                    </a>
-
-                </article>
-
-            </div>
-
-            <div th:if="${#lists.isEmpty(dashboard.upcoming)}"
-                 class="ut-empty-state ut-empty-small">
-
-                <div class="ut-empty-icon">
-                    ▣
-                </div>
-
-                <h3>
-                    Chưa có buổi tập sắp tới
-                </h3>
-
-                <p>
-                    Khám phá lịch lớp còn chỗ
-                    hoặc xem lịch PT của bạn.
-                </p>
-
-                <a class="btn btn-outline-light"
-                   th:href="@{/member/classes}">
-                    Tìm lớp tập
-                </a>
-
-            </div>
-
-            <a th:href="@{/member/pt-schedules}"
-               class="ut-secondary-link">
-                Xem lịch PT cá nhân →
-            </a>
-
-        </section>
-
-        <!-- ======================================
-             THAO TÁC NHANH
-             ====================================== -->
-
         <section class="ut-dash-panel ut-action-panel"
                  aria-labelledby="ut-actions-title">
 
-            <div class="ut-panel-top">
+            <div class="ut-panel-heading">
 
                 <h2 id="ut-actions-title">
-                    <span class="ut-icon-square">⚡</span>
+                    <span class="ut-icon-square"><svg class="uf-icon" aria-hidden="true"><use href="/images/utefit-icons.svg#activity"></use></svg></span>
                     Thao tác nhanh
                 </h2>
 
             </div>
 
-            <div class="ut-quick-grid">
+            <div class="ut-quick-actions">
 
-                <a th:href="@{/member/classes}">
-                    <span>▣</span>
+                <a class="ut-quick-action" th:href="@{/member/classes}">
+                    <svg class="uf-icon" aria-hidden="true"><use href="/images/utefit-icons.svg#calendar"></use></svg>
                     Đăng ký lớp
                 </a>
 
-                <a th:href="@{/member/schedule}">
-                    <span>▤</span>
+                <a class="ut-quick-action" th:href="@{/member/schedule}">
+                    <svg class="uf-icon" aria-hidden="true"><use href="/images/utefit-icons.svg#calendar"></use></svg>
                     Lịch của tôi
                 </a>
 
-                <a th:href="@{/trainers}">
-                    <span>♙</span>
+                <a class="ut-quick-action" th:href="@{/trainers}">
+                    <svg class="uf-icon" aria-hidden="true"><use href="/images/utefit-icons.svg#person"></use></svg>
                     Tìm PT
                 </a>
 
-                <a th:href="@{/member/payments}">
-                    <span>▰</span>
+                <a class="ut-quick-action" th:href="@{/member/payments}">
+                    <svg class="uf-icon" aria-hidden="true"><use href="/images/utefit-icons.svg#membership"></use></svg>
                     Thanh toán
                 </a>
 
-                <a th:href="@{/member/reviews}">
-                    <span>☆</span>
+                <a class="ut-quick-action" th:href="@{/member/reviews}">
+                    <svg class="uf-icon" aria-hidden="true"><use href="/images/utefit-icons.svg#star"></use></svg>
                     Đánh giá
                 </a>
 
-                <a th:href="@{/member/history}">
-                    <span>◷</span>
+                <a class="ut-quick-action" th:href="@{/member/history}">
+                    <svg class="uf-icon" aria-hidden="true"><use href="/images/utefit-icons.svg#clock"></use></svg>
                     Lịch sử
                 </a>
 
             </div>
 
             <!-- Giao dịch mới nhất -->
-            <div class="ut-payment-line"
+            <div class="ut-latest-payment"
                  th:if="${dashboard.latestPayment != null}">
 
                 <div>
@@ -439,11 +419,12 @@
 
 </main>
 
-<footer th:replace="~{fragments/footer :: footer}">
+<footer th:replace="~{member/fragments/layout :: footer}">
 </footer>
 
-<div th:replace="~{fragments/scripts :: scripts}">
+<div th:replace="~{member/fragments/layout :: scripts}">
 </div>
+<th:block th:replace="~{member/fragments/layout :: dashboardMotion}"></th:block>
 
 </body>
 </html>

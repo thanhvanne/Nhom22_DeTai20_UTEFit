@@ -1,284 +1,194 @@
 <!DOCTYPE html>
-<html lang="vi"
-      xmlns:th="http://www.thymeleaf.org">
-
-<head th:replace="~{fragments/head :: head('Hồ sơ hội viên - UTEFit')}">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{member/fragments/layout :: headAssets('Hồ sơ hội viên - UTEFit')}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/utefit-member-profile.css(v=1)}">
 </head>
+<body class="uf-theme uf-area-member uf-page-member-profile uf-member">
+<header th:replace="~{member/fragments/layout :: header}"></header>
+<main class="container ut-page member-profile" data-member-profile
+      th:attr="data-initial-tab=${#fields.hasErrors('${passwordForm.*}') ? 'security' : (#fields.hasErrors('${profileForm.*}') ? 'edit' : 'overview')}">
+    <div class="profile-heading">
+        <div><h1>Hồ sơ cá nhân</h1><p class="ut-subtitle mb-0">Không gian của bạn. Dấu ấn của riêng bạn.</p></div>
+        <a class="profile-back" th:href="@{/member/dashboard}"><span aria-hidden="true">←</span> Về tổng quan</a>
+    </div>
+    <div th:if="${success}" class="alert alert-success" th:text="${success}" data-uf-label role="status"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}" data-uf-label role="alert" data-profile-server-error></div>
 
-<body class="uf-theme uf-area-member uf-page-member-profile">
-
-<header th:replace="~{fragments/header :: header}">
-</header>
-
-<main class="container ut-page">
-
-    <div class="d-flex flex-wrap align-items-center
-                justify-content-between gap-3 mb-4">
-
-        <div>
-            <h1 class="ut-page-title">
-                Hồ sơ <span>hội viên</span>
-            </h1>
-            <p class="ut-subtitle mb-0">
-                Cập nhật thông tin và bảo mật tài khoản.
-            </p>
-        </div>
-
-        <a class="btn btn-outline-light"
-           th:href="@{/member/dashboard}">
-            Tổng quan
-        </a>
+    <div class="profile-tabs" data-profile-tabs role="tablist" aria-label="Hồ sơ cá nhân" hidden>
+        <button type="button" id="profile-tab-overview" role="tab" aria-controls="profile-overview" aria-selected="true" data-profile-tab="overview">Tổng quan</button>
+        <button type="button" id="profile-tab-edit" role="tab" aria-controls="profile-edit" aria-selected="false" tabindex="-1" data-profile-tab="edit">Chỉnh sửa hồ sơ</button>
+        <button type="button" id="profile-tab-security" role="tab" aria-controls="profile-security" aria-selected="false" tabindex="-1" data-profile-tab="security">Bảo mật</button>
+        <span class="profile-tab-indicator" aria-hidden="true"></span>
     </div>
 
-    <div th:if="${success}"
-         class="alert alert-success"
-         th:text="${success}" data-uf-label>
-    </div>
-
-    <div th:if="${error}"
-         class="alert alert-danger"
-         th:text="${error}" data-uf-label>
-    </div>
-
-    <div class="row g-4">
-
-        <div class="col-lg-4">
-
-            <div class="ut-panel text-center">
-
-                <img th:if="${profile.avatarUrl != null}"
-                     th:src="${profile.avatarUrl}"
-                     alt="Ảnh đại diện"
-                     class="ut-avatar mx-auto">
-
-                <div th:unless="${profile.avatarUrl != null}"
-                     class="ut-avatar-placeholder mx-auto">
-                    ◆
+    <section id="profile-overview" data-profile-panel="overview" aria-labelledby="profile-tab-overview">
+        <div class="profile-identity">
+            <div class="profile-portrait">
+                <button class="profile-avatar-view" type="button" data-avatar-view aria-label="Xem ảnh đại diện phóng to" aria-haspopup="dialog" aria-controls="profile-avatar-dialog" disabled>
+                    <span class="profile-avatar-fallback" aria-hidden="true"><svg viewBox="0 0 80 80"><circle cx="40" cy="29" r="12"/><path d="M17 66c1-17 10-24 23-24s22 7 23 24"/></svg></span>
+                    <img th:if="${!#strings.isEmpty(profile.avatarUrl)}" th:src="${profile.avatarUrl}" alt="Ảnh đại diện" data-profile-avatar>
+                    <span class="profile-avatar-zoom" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5M7 10h6m-3-3v6"/></svg></span>
+                </button>
+                <span class="profile-photo-hint" data-avatar-hint>Ảnh đại diện của bạn</span>
+            </div>
+            <div class="profile-identity-body">
+                <p class="profile-member-label">Hội viên UTEFit</p>
+                <h2 th:text="${profile.firstName + ' ' + profile.lastName}" data-uf-label>Hội viên</h2>
+                <p class="profile-identity-email" th:text="${profile.email}"></p>
+                <div class="profile-actions">
+                    <button type="button" class="btn btn-brand" data-profile-open="edit" hidden>Chỉnh sửa hồ sơ <span aria-hidden="true">↗</span></button>
+                    <button type="button" class="btn btn-outline-light" data-profile-open="security" hidden>Bảo mật tài khoản</button>
                 </div>
-
-                <h3 class="mt-3"
-                    th:text="${profile.firstName + ' ' + profile.lastName}" data-uf-label>
-                    Hội viên
-                </h3>
-
-                <p class="ut-subtitle"
-                   th:text="${profile.email}">
-                    email@example.com
-                </p>
-
-                <form th:action="@{/member/profile/avatar}"
-                      method="post"
-                      enctype="multipart/form-data"
-                      class="text-start mt-4">
-
-                    <input type="hidden"
-                           th:name="${_csrf.parameterName}"
-                           th:value="${_csrf.token}">
-
-                    <label class="form-label">
-                        Ảnh đại diện mới
-                    </label>
-
-                    <input type="file"
-                           name="avatar"
-                           class="form-control"
-                           accept="image/jpeg,image/png,image/gif"
-                           required>
-
-                    <small class="text-secondary d-block mt-2">
-                        JPG, PNG hoặc GIF (tối đa 5 MB).
-                    </small>
-
-                    <button class="btn btn-brand w-100 mt-3"
-                            type="submit">
-                        Cập nhật ảnh đại diện
-                    </button>
-                </form>
-
+            </div>
+            <div class="profile-member-mark" aria-label="UTEFit">
+                <span>UTE<strong>FIT</strong></span>
+                <small>Mã tài khoản <b th:text="${'#' + profile.id}"></b></small>
+                <svg viewBox="0 0 160 60" aria-hidden="true"><path d="M2 43h34L57 10l27 43 29-48 22 28h23"/></svg>
             </div>
         </div>
+        <section class="profile-loyalty" th:if="${loyalty != null}" th:classappend="|profile-tier-${loyalty.tier.toLowerCase()}|" aria-labelledby="profile-tier-title">
+            <div class="profile-tier-badge" aria-hidden="true"><svg viewBox="0 0 64 72"><path d="m18 3 14 12L46 3l7 21-21 43L11 24Z"/><path th:if="${loyalty.tier == 'GOLD'}" d="m32 26 4 8 9 1-7 7 2 10-8-5-8 5 2-10-7-7 9-1Z"/><path th:if="${loyalty.tier == 'SILVER'}" d="m22 39 10-10 10 10m-20 10 10-10 10 10"/><circle th:if="${loyalty.tier == 'BRONZE'}" cx="32" cy="38" r="9"/></svg></div>
+            <div class="profile-tier-main">
+                <p class="profile-tier-caption">Hạng hội viên</p>
+                <h2 id="profile-tier-title" th:text="${loyalty.tier}"></h2>
+                <p th:text="${loyalty.percent.signum() > 0 ? 'Đặc quyền giảm ' + loyalty.percent.stripTrailingZeros().toPlainString() + '% cho đơn tiếp theo. Xem điều kiện tại trang ưu đãi.' : loyalty.tier == 'BRONZE' ? 'Ưu đãi chào mừng nếu đủ điều kiện mua lần đầu.' : 'Ưu đãi theo hạng hiện tạm dừng hoặc ngoài thời gian áp dụng.'}"></p>
+                <small th:unless="${loyalty.enabled}">Các ưu đãi tự động hiện chưa có chương trình đang áp dụng.</small>
+            </div>
+            <div class="profile-tier-progress">
+                <div><span>Chi tiêu hợp lệ</span><strong th:text="${@membershipDisplay.money(loyalty.spending)}"></strong></div>
+                <th:block th:if="${loyalty.nextTier != null}">
+                    <progress max="100" th:value="${loyalty.progress}" th:attr="aria-label=|Tiến độ đến ${loyalty.nextTier}|"></progress>
+                    <p>Còn <b th:text="${@membershipDisplay.money(loyalty.remaining)}"></b> để lên <b th:text="${loyalty.nextTier}"></b>.</p>
+                </th:block>
+                <p th:unless="${loyalty.nextTier != null}" class="profile-tier-highest">Bạn đã đạt hạng cao nhất.</p>
+                <a th:href="@{/promotions}">Xem ưu đãi của bạn <span aria-hidden="true">↗</span></a>
+            </div>
+        </section>
+        <div class="profile-overview-grid">
+            <section class="profile-surface profile-contact">
+                <div class="profile-section-heading"><h2>Thông tin liên hệ</h2><span>Thông tin cá nhân</span></div>
+                <dl class="profile-details">
+                    <div><dt>Họ và tên</dt><dd th:text="${profile.firstName + ' ' + profile.lastName}" data-uf-label></dd></div>
+                    <div><dt>Email</dt><dd th:text="${profile.email}"></dd></div>
+                    <div><dt>Số điện thoại</dt><dd th:text="${#strings.isEmpty(profile.phone) ? 'Chưa cập nhật' : profile.phone}"></dd></div>
+                </dl>
+            </section>
+            <section class="profile-surface profile-training">
+                <div><h2>Hành trình tập luyện</h2><p>Xem gói tập, thời hạn và quyền sử dụng của bạn tại một nơi.</p></div>
+                <a class="profile-text-link" th:href="@{/member/memberships}">Gói tập của tôi <span aria-hidden="true">↗</span></a>
+                <div class="profile-training-note">Sẵn sàng cho buổi tập tiếp theo?</div>
+                <a class="profile-schedule-link" th:href="@{/member/schedule}">Mở lịch tập <span aria-hidden="true">→</span></a>
+            </section>
+        </div>
+    </section>
 
-        <div class="col-lg-8">
-
-            <div class="ut-panel mb-4">
-
-                <h3 class="mb-4">
-                    Thông tin cá nhân
-                </h3>
-
-                <form th:action="@{/member/profile}"
-                      th:object="${profileForm}"
-                      method="post">
-
-                    <input type="hidden"
-                           th:name="${_csrf.parameterName}"
-                           th:value="${_csrf.token}">
-
+    <section id="profile-edit" data-profile-panel="edit" aria-labelledby="profile-tab-edit">
+        <div class="profile-edit-grid">
+            <section class="profile-surface profile-upload">
+                <h2>Ảnh đại diện</h2><p class="ut-subtitle">Một dấu ấn để mọi người nhận ra bạn.</p>
+                <div class="profile-upload-portrait">
+                    <span class="profile-avatar-fallback" aria-hidden="true"><svg viewBox="0 0 80 80"><circle cx="40" cy="29" r="12"/><path d="M17 66c1-17 10-24 23-24s22 7 23 24"/></svg></span>
+                    <img th:if="${!#strings.isEmpty(profile.avatarUrl)}" th:src="${profile.avatarUrl}" alt="Ảnh đại diện hiện tại" data-profile-avatar>
+                    <img data-avatar-preview alt="Ảnh mới xem trước, chưa lưu" hidden>
+                </div>
+                <form th:action="@{/member/profile/avatar}" method="post" enctype="multipart/form-data" data-profile-form="edit" data-avatar-form>
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <div class="profile-file-control">
+                        <input type="file" id="member-avatar-upload" name="avatar" accept="image/jpeg,image/png,image/gif" required aria-describedby="profile-avatar-help profile-avatar-file profile-avatar-error">
+                        <label for="member-avatar-upload"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m-4 4 4-4 4 4M4 15v5h16v-5"/></svg> Chọn ảnh mới</label>
+                    </div>
+                    <small id="profile-avatar-help">JPG, PNG hoặc GIF (tối đa 5 MB).</small>
+                    <p id="profile-avatar-file" class="profile-file-name" aria-live="polite">Chưa chọn ảnh mới.</p>
+                    <p id="profile-avatar-error" class="text-danger small" role="alert" hidden></p>
+                    <button class="btn btn-brand w-100" type="submit" data-busy-label="Đang tải ảnh…">Cập nhật ảnh đại diện</button>
+                    <p class="profile-save-note">Ảnh xem trước chỉ được lưu khi bạn cập nhật.</p>
+                </form>
+            </section>
+            <section class="profile-surface profile-form-panel">
+                <h2>Thông tin cá nhân</h2><p class="ut-subtitle">Giữ thông tin của bạn luôn chính xác.</p>
+                <form th:action="@{/member/profile}" th:object="${profileForm}" method="post" data-profile-form="edit">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     <div class="row g-3">
-
                         <div class="col-md-6">
-                            <label class="form-label">
-                                Họ
-                            </label>
-
-                            <input type="text"
-                                   th:field="*{firstName}"
-                                   class="form-control"
-                                   maxlength="50"
-                                   required>
-
-                            <div class="text-danger small mt-1"
-                                 th:errors="*{firstName}">
-                            </div>
+                            <label class="form-label" for="firstName">Họ</label>
+                            <input type="text" th:field="*{firstName}" class="form-control" maxlength="50" required aria-describedby="profile-firstname-error" th:attr="aria-invalid=${#fields.hasErrors('firstName')}">
+                            <div id="profile-firstname-error" class="text-danger small mt-1" th:errors="*{firstName}"></div>
                         </div>
-
                         <div class="col-md-6">
-                            <label class="form-label">
-                                Tên
-                            </label>
-
-                            <input type="text"
-                                   th:field="*{lastName}"
-                                   class="form-control"
-                                   maxlength="50"
-                                   required>
-
-                            <div class="text-danger small mt-1"
-                                 th:errors="*{lastName}">
-                            </div>
+                            <label class="form-label" for="lastName">Tên</label>
+                            <input type="text" th:field="*{lastName}" class="form-control" maxlength="50" required aria-describedby="profile-lastname-error" th:attr="aria-invalid=${#fields.hasErrors('lastName')}">
+                            <div id="profile-lastname-error" class="text-danger small mt-1" th:errors="*{lastName}"></div>
                         </div>
-
                         <div class="col-12">
-                            <label class="form-label">
-                                Số điện thoại
-                            </label>
-
-                            <input type="tel"
-                                   th:field="*{phone}"
-                                   class="form-control"
-                                   maxlength="11">
-
-                            <div class="text-danger small mt-1"
-                                 th:errors="*{phone}">
-                            </div>
+                            <label class="form-label" for="phone">Số điện thoại</label>
+                            <input type="tel" th:field="*{phone}" class="form-control" maxlength="11" aria-describedby="profile-phone-error" th:attr="aria-invalid=${#fields.hasErrors('phone')}">
+                            <div id="profile-phone-error" class="text-danger small mt-1" th:errors="*{phone}"></div>
                         </div>
-
                         <div class="col-12">
-                            <label class="form-label">
-                                Email
-                            </label>
-
-                            <input type="email"
-                                   class="form-control"
-                                   th:value="${profile.email}"
-                                   readonly>
-
-                            <small class="text-secondary">
-                                Không thể thay đổi email tại đây.
-                            </small>
+                            <label class="form-label" for="member-profile-email">Email</label>
+                            <input type="email" id="member-profile-email" class="form-control" th:value="${profile.email}" readonly aria-describedby="profile-email-help">
+                            <small id="profile-email-help">Không thể thay đổi email tại đây.</small>
                         </div>
-
                     </div>
-
-                    <button class="btn btn-brand mt-4"
-                            type="submit">
-                        Lưu thay đổi
-                    </button>
-
+                    <div class="profile-form-footer"><button class="btn btn-brand" type="submit" data-busy-label="Đang lưu…">Lưu thay đổi</button><span>Thông tin chỉ thay đổi sau khi lưu.</span></div>
                 </form>
-
-            </div>
-
-            <div class="ut-panel">
-
-                <h3 class="mb-4">
-                    Đổi mật khẩu
-                </h3>
-
-                <form th:action="@{/member/profile/password}"
-                      th:object="${passwordForm}"
-                      method="post">
-
-                    <input type="hidden"
-                           th:name="${_csrf.parameterName}"
-                           th:value="${_csrf.token}">
-
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Mật khẩu hiện tại
-                        </label>
-
-                        <input type="password"
-                               th:field="*{currentPassword}"
-                               class="form-control"
-                               autocomplete="current-password"
-                               required>
-
-                        <div class="text-danger small mt-1"
-                             th:errors="*{currentPassword}">
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Mật khẩu mới
-                        </label>
-
-                        <input type="password"
-                               th:field="*{newPassword}"
-                               class="form-control"
-                               minlength="8"
-                               autocomplete="new-password"
-                               required>
-
-                        <div class="text-danger small mt-1"
-                             th:errors="*{newPassword}">
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Xác nhận mật khẩu mới
-                        </label>
-
-                        <input type="password"
-                               th:field="*{confirmPassword}"
-                               class="form-control"
-                               autocomplete="new-password"
-                               required>
-
-                        <div class="text-danger small mt-1"
-                             th:errors="*{confirmPassword}">
-                        </div>
-                    </div>
-
-                    <button class="btn btn-outline-light"
-                            type="submit">
-                        Đổi mật khẩu
-                    </button>
-
-                    <p class="ut-subtitle mt-3 mb-0">
-                        Sau khi đổi mật khẩu,
-                        bạn cần đăng nhập lại.
-                    </p>
-
-                </form>
-
-            </div>
-
+            </section>
         </div>
-    </div>
+    </section>
 
+    <section id="profile-security" data-profile-panel="security" aria-labelledby="profile-tab-security">
+        <div class="profile-security-grid">
+            <div class="profile-security-intro">
+                <svg viewBox="0 0 64 72" aria-hidden="true"><path d="M32 4 56 14v20c0 16-10 26-24 34C18 60 8 50 8 34V14Z"/><path d="m21 35 8 8 15-17"/></svg>
+                <h2>Bảo mật tài khoản</h2><p>Một mật khẩu mạnh giúp bảo vệ hành trình tập luyện của bạn.</p>
+                <ul><li>Dùng ít nhất 8 ký tự.</li><li>Không dùng lại mật khẩu cũ.</li><li>Không chia sẻ mật khẩu cho người khác.</li></ul>
+                <div class="profile-security-note">Sau khi đổi mật khẩu, bạn cần đăng nhập lại.</div>
+            </div>
+            <section class="profile-surface profile-form-panel">
+                <h2>Đổi mật khẩu</h2><p class="ut-subtitle">Xác nhận mật khẩu hiện tại để tiếp tục.</p>
+                <form th:action="@{/member/profile/password}" th:object="${passwordForm}" method="post" data-profile-form="security">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <div class="mb-3">
+                        <label class="form-label" for="currentPassword">Mật khẩu hiện tại</label>
+                        <div class="ux u036">
+                            <input type="password" th:field="*{currentPassword}" class="form-control" autocomplete="current-password" required aria-describedby="profile-current-password-error" th:attr="aria-invalid=${#fields.hasErrors('currentPassword')}">
+                            <th:block th:replace="~{fragments/field-tools :: passwordEye}"></th:block>
+                        </div>
+                        <div id="profile-current-password-error" class="text-danger small mt-1" th:errors="*{currentPassword}"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="newPassword">Mật khẩu mới</label>
+                        <div class="ux u036">
+                            <input type="password" th:field="*{newPassword}" class="form-control" minlength="8" autocomplete="new-password" required aria-describedby="profile-new-password-help profile-new-password-error" th:attr="aria-invalid=${#fields.hasErrors('newPassword')}">
+                            <th:block th:replace="~{fragments/field-tools :: passwordEye}"></th:block>
+                        </div>
+                        <small id="profile-new-password-help">Tối thiểu 8 ký tự, khác mật khẩu hiện tại.</small>
+                        <div id="profile-new-password-error" class="text-danger small mt-1" th:errors="*{newPassword}"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="confirmPassword">Xác nhận mật khẩu mới</label>
+                        <div class="ux u036">
+                            <input type="password" th:field="*{confirmPassword}" class="form-control" autocomplete="new-password" required aria-describedby="profile-confirm-password-error" th:attr="aria-invalid=${#fields.hasErrors('confirmPassword')}">
+                            <th:block th:replace="~{fragments/field-tools :: passwordEye}"></th:block>
+                        </div>
+                        <div id="profile-confirm-password-error" class="text-danger small mt-1" th:errors="*{confirmPassword}"></div>
+                    </div>
+                    <div class="profile-form-footer"><button class="btn btn-brand" type="submit" data-busy-label="Đang cập nhật…">Đổi mật khẩu</button></div>
+                </form>
+            </section>
+        </div>
+    </section>
+    <dialog id="profile-avatar-dialog" class="profile-lightbox" aria-labelledby="profile-avatar-dialog-title">
+        <button type="button" class="profile-lightbox-close" data-avatar-close aria-label="Đóng ảnh đại diện" autofocus><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6"/></svg></button>
+        <figure class="profile-lightbox-content">
+            <img data-avatar-full alt="Ảnh đại diện phóng to">
+            <figcaption id="profile-avatar-dialog-title">Ảnh đại diện <span>Nhấn Esc hoặc chạm ra ngoài ảnh để đóng.</span></figcaption>
+        </figure>
+    </dialog>
 </main>
-
-<footer th:replace="~{fragments/footer :: footer}">
-</footer>
-
-<div th:replace="~{fragments/scripts :: scripts}">
-</div>
-
+<footer th:replace="~{member/fragments/layout :: footer}"></footer>
+<div th:replace="~{member/fragments/layout :: scripts}"></div>
+<script th:src="@{/js/utefit-member-profile.js(v=1)}"></script>
 </body>
 </html>

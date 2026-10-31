@@ -3,14 +3,19 @@
 <html lang="vi"
       xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments/head :: head('Lớp tập - UTEFit')}">
+<head th:replace="${#authorization.expression('hasRole(''MEMBER'')')} ? ~{member/fragments/layout :: head('Lớp tập - UTEFit')} : ~{fragments/head :: head('Lớp tập - UTEFit')}">
 </head>
 
-<body class="uf-theme uf-area-guest uf-page-guest-classes">
+<body class="uf-theme uf-area-guest uf-page-guest-classes" th:classappend="${#authorization.expression('hasRole(''MEMBER'')')} ? 'uf-member uf-member-discovery' : ''">
 
-<header th:replace="~{fragments/header :: header}">
+<header th:replace="${#authorization.expression('hasRole(''MEMBER'')')} ? ~{member/fragments/layout :: header} : ~{fragments/header :: header}">
 </header>
 
+<th:block th:if="${#authorization.expression('isAnonymous()')}">
+    <th:block th:replace="~{fragments/public-directory :: assets}"></th:block>
+    <main th:replace="~{fragments/public-directory :: classes}"></main>
+</th:block>
+<th:block th:unless="${#authorization.expression('isAnonymous()')}">
 <main class="container ut-page">
 
     <h1 class="ut-page-title">
@@ -19,7 +24,7 @@
 
     <p class="ut-subtitle">
         Xem các lớp tập đang mở hoặc đã đủ chỗ.
-        Đăng ký lịch lớp sẽ được triển khai ở giai đoạn 4.
+        Lịch buổi tập và đăng ký có trong khu vực hội viên, tùy điều kiện của từng buổi tập.
     </p>
 
     <form class="ut-search row g-3"
@@ -167,12 +172,16 @@
     </nav>
 
 </main>
+</th:block>
 
-<footer th:replace="~{fragments/footer :: footer}">
+<footer th:replace="${#authorization.expression('hasRole(''MEMBER'')')} ? ~{member/fragments/layout :: footer} : ~{fragments/footer :: footer}">
 </footer>
 
-<div th:replace="~{fragments/scripts :: scripts}">
+<div th:replace="${#authorization.expression('hasRole(''MEMBER'')')} ? ~{member/fragments/layout :: scripts} : ~{fragments/scripts :: scripts}">
 </div>
 
+<th:block th:unless="${#authorization.expression('isAnonymous()')}">
+<div th:replace="${#authorization.expression('hasRole(''MEMBER'')')} ? _ : ~{fragments/public-motion :: motion}"></div>
+</th:block>
 </body>
 </html>

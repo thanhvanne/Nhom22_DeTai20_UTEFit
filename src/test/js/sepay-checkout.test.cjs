@@ -5,11 +5,11 @@ const vm = require('node:vm');
 const path = require('node:path');
 const source = fs.readFileSync(path.resolve(__dirname, '../../main/resources/static/js/sepay-checkout.js'), 'utf8');
 
-async function harness(state, failed = false, renderedState = 'PENDING') {
+async function harness(state, failed = false, renderedState = 'PENDING', renderedMembership = {}) {
     const nodes = Object.fromEntries(['sepay-message', 'sepay-payment-status', 'sepay-membership-status', 'sepay-refresh', 'sepay-qr-image', 'sepay-expiry']
         .map(id => [id, {textContent: '', hidden: false, addEventListener() {}}]));
     nodes['sepay-checkout'] = {dataset: {statusUrl: '/owned/status', expiresAt: String(Date.now() + 60000), displayState: renderedState,
-        membershipStatus: renderedState === 'PAID' ? 'ACTIVE' : 'PENDING', periodState: renderedState === 'PAID' ? 'CURRENT' : 'PENDING'}};
+        membershipStatus: renderedMembership.status || (renderedState === 'PAID' ? 'ACTIVE' : 'PENDING'), periodState: renderedMembership.period || (renderedState === 'PAID' ? 'CURRENT' : 'PENDING')}};
     nodes['sepay-transfer'] = {hidden: false};
     nodes['sepay-payment-status'].textContent = renderedState;
     if (renderedState !== 'PENDING') { delete nodes['sepay-expiry']; delete nodes['sepay-qr-image']; }
@@ -83,3 +83,20 @@ test('polling error gives retry instructions, never marks payment paid', async (
     assert.match(page.nodes['sepay-message'].textContent, /kiểm tra lại/);
     assert.equal(page.nodes['sepay-payment-status'].textContent, 'PENDING');
 });
+
+for (const scenario of [
+    {status: 'PENDING', payment: 'PENDING', display: 'PENDING', period: 'PENDING', label: 'Chờ thanh toán'},
+    {status: 'ACTIVE', payment: 'PAID', display: 'PAID', period: 'CURRENT', label: 'Đang hoạt động'},
+    {status: 'EXPIRED', payment: 'PAID', display: 'PAID', period: 'EXPIRED', label: 'Đã hết hạn'},
+    {status: 'CANCELLED', payment: 'REFUNDED', display: 'REFUNDED', period: 'CANCELLED', label: 'Đã hủy'}
+]) {
+    test(`membership ${scenario.status} is translated without changing raw status or payment state`, async () => {
+        const state = {paymentStatus: scenario.payment, membershipStatus: scenario.status, displayState: scenario.display, periodState: scenario.period};
+        const page = await harness(state, false, scenario.display, {status: scenario.status, period: scenario.period});
+        assert.equal(page.nodes['sepay-membership-status'].textContent, scenario.label);
+        assert.equal(page.nodes['sepay-checkout'].dataset.membershipStatus, scenario.status);
+        assert.equal(state.paymentStatus, scenario.payment);
+        assert.equal(page.reloads.length, 0);
+        assert.equal(page.requests[0].options.method, undefined);
+    });
+}

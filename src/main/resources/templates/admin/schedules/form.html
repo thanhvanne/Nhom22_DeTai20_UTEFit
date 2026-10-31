@@ -1,82 +1,47 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments/layout :: head(${isEdit ? 'Cập nhật Lịch học' : 'Xếp Lịch học mới'})}"></head>
-<body class="uf-theme uf-area-admin uf-page-admin-schedules-form">
-<div class="d-flex">
-    <div th:replace="~{admin/fragments/layout :: sidebar}"></div>
-
-    <div class="flex-grow-1">
-        <div th:replace="~{admin/fragments/layout :: topbar(${isEdit ? 'Cập nhật Lịch lớp tập' : 'Xếp Lịch lớp tập mới'})}"></div>
-
-        <main class="container-fluid px-4 pb-5">
-            <div class="mb-3">
-                <a th:href="@{/admin/schedules}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
-                    <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách lịch học
-                </a>
-            </div>
-
-            <div class="surface-card col-lg-8 p-4">
-                <div th:if="${errorMessage}" class="alert alert-danger rounded-3">
-                    <i class="bi bi-exclamation-octagon-fill me-2"></i> <span th:text="${errorMessage}" data-uf-label></span>
+<head th:replace="~{admin/fragments/layout :: head(${isEdit ? 'Cập nhật lịch lớp' : 'Xếp lịch lớp tập'})}"></head>
+<body class="uf-theme uf-area-admin uf-page-admin-schedules-form uf-admin">
+<div class="admin-shell">
+    <aside th:replace="~{admin/fragments/layout :: sidebar}"></aside>
+    <div class="admin-workspace">
+        <nav th:replace="~{admin/fragments/layout :: topbar(${isEdit ? 'Cập nhật lịch lớp' : 'Xếp lịch lớp tập'})}"></nav>
+        <main class="admin-main" id="utefit-content" tabindex="-1">
+            <div class="admin-page-heading"><p>Kiểm tra lớp, thời gian và phòng tập trước khi lưu lịch học.</p></div>
+            <a th:href="@{/admin/schedules}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left" aria-hidden="true"></i>Quay lại danh sách lịch học</a>
+            <div class="admin-form-layout">
+                <div class="surface-card">
+                    <form th:action="${isEdit ? '/admin/schedules/' + scheduleForm.id + '/edit' : '/admin/schedules/create'}" th:object="${scheduleForm}" method="post" class="uf-edit-form">
+                        <section class="admin-form-section">
+                            <div th:if="${errorMessage}" role="alert" class="alert alert-danger"><i class="bi bi-exclamation-circle me-2" aria-hidden="true"></i><span th:text="${errorMessage}" data-uf-label></span></div>
+                            <h2>Lớp tập</h2>
+                            <label class="form-label" for="fitnessClassId">Chọn lớp tập <span class="text-danger">*</span></label>
+                            <select th:field="*{fitnessClassId}" class="form-select" th:classappend="${#fields.hasErrors('fitnessClassId')} ? 'is-invalid'" aria-describedby="fitnessClassId-error">
+                                <option value="">-- Chọn lớp tập cần xếp lịch --</option>
+                                <option th:each="fc : ${classes}" th:value="${fc.id}" th:text="${fc.name + ' | Chi nhánh: ' + fc.branch.name + ' | PT: ' + (fc.trainer != null ? fc.trainer.user.firstName + ' ' + fc.trainer.user.lastName : 'Chưa gán')}"></option>
+                            </select>
+                            <div id="fitnessClassId-error" class="text-danger small mt-1"><span th:if="${#fields.hasErrors('fitnessClassId')}" th:errors="*{fitnessClassId}"></span></div>
+                        </section>
+                        <section class="admin-form-section">
+                            <h2>Thời gian &amp; địa điểm</h2>
+                            <div class="admin-time-fields mb-4">
+                                <div><label class="form-label" for="scheduleDate">Ngày học <span class="text-danger">*</span></label><input type="date" th:field="*{scheduleDate}" class="form-control" th:classappend="${#fields.hasErrors('scheduleDate')} ? 'is-invalid'" aria-describedby="scheduleDate-error"><div id="scheduleDate-error" class="text-danger small mt-1"><span th:if="${#fields.hasErrors('scheduleDate')}" th:errors="*{scheduleDate}"></span></div></div>
+                                <div><label class="form-label" for="startTime">Giờ bắt đầu <span class="text-danger">*</span></label><input type="time" th:field="*{startTime}" class="form-control" th:classappend="${#fields.hasErrors('startTime')} ? 'is-invalid'" aria-describedby="startTime-error"><div id="startTime-error" class="text-danger small mt-1"><span th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}"></span></div></div>
+                                <div><label class="form-label" for="endTime">Giờ kết thúc <span class="text-danger">*</span></label><input type="time" th:field="*{endTime}" class="form-control" th:classappend="${#fields.hasErrors('endTime')} ? 'is-invalid'" aria-describedby="endTime-error"><div id="endTime-error" class="text-danger small mt-1"><span th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}"></span></div></div>
+                            </div>
+                            <label class="form-label" for="room">Phòng tập</label>
+                            <input type="text" th:field="*{room}" class="form-control" th:classappend="${#fields.hasErrors('room')} ? 'is-invalid'" placeholder="VD: Phòng Yoga Tầng 2, Sàn Boxing B1, Studio A..." aria-describedby="room-help room-error">
+                            <div id="room-error" class="text-danger small mt-1"><span th:if="${#fields.hasErrors('room')}" th:errors="*{room}"></span></div>
+                            <div id="room-help" class="form-text">Hệ thống sẽ tự động kiểm tra chống trùng lịch PT và chống trùng phòng tập trong cùng khung giờ.</div>
+                        </section>
+                        <section class="admin-form-section">
+                            <h2>Trạng thái đăng ký</h2>
+                            <div class="form-check form-switch"><input class="form-check-input" type="checkbox" th:field="*{active}" id="scheduleActiveSwitch"><label class="form-check-label" for="scheduleActiveSwitch">Mở đăng ký cho buổi học này</label></div>
+                        </section>
+                        <div class="admin-form-actions"><button type="submit" class="btn btn-utefit"><i class="bi bi-calendar-check" aria-hidden="true"></i><span th:text="${isEdit ? 'Lưu lịch học' : 'Tạo lịch học'}"></span></button><p><span class="text-danger">*</span> Thông tin bắt buộc</p></div>
+                    </form>
                 </div>
-
-                <form th:action="${isEdit ? '/admin/schedules/' + scheduleForm.id + '/edit' : '/admin/schedules/create'}"
-                      th:object="${scheduleForm}" method="post">
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Chọn Lớp tập <span class="text-danger">*</span></label>
-                        <select th:field="*{fitnessClassId}" class="form-select"
-                                th:classappend="${#fields.hasErrors('fitnessClassId')} ? 'is-invalid'">
-                            <option value="">-- Chọn lớp tập cần xếp lịch --</option>
-                            <option th:each="fc : ${classes}"
-                                    th:value="${fc.id}"
-                                    th:text="${fc.name + ' | Chi nhánh: ' + fc.branch.name + ' | PT: ' + (fc.trainer != null ? fc.trainer.user.firstName + ' ' + fc.trainer.user.lastName : 'Chưa gán')}">
-                            </option>
-                        </select>
-                        <div class="text-danger small mt-1" th:if="${#fields.hasErrors('fitnessClassId')}" th:errors="*{fitnessClassId}"></div>
-                    </div>
-
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">Ngày học <span class="text-danger">*</span></label>
-                            <input type="date" th:field="*{scheduleDate}" class="form-control"
-                                   th:classappend="${#fields.hasErrors('scheduleDate')} ? 'is-invalid'">
-                            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('scheduleDate')}" th:errors="*{scheduleDate}"></div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">Giờ bắt đầu <span class="text-danger">*</span></label>
-                            <input type="time" th:field="*{startTime}" class="form-control"
-                                   th:classappend="${#fields.hasErrors('startTime')} ? 'is-invalid'">
-                            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}"></div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">Giờ kết thúc <span class="text-danger">*</span></label>
-                            <input type="time" th:field="*{endTime}" class="form-control"
-                                   th:classappend="${#fields.hasErrors('endTime')} ? 'is-invalid'">
-                            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}"></div>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Phòng tập (Room)</label>
-                        <input type="text" th:field="*{room}" class="form-control"
-                               th:classappend="${#fields.hasErrors('room')} ? 'is-invalid'"
-                               placeholder="VD: Phòng Yoga Tầng 2, Sàn Boxing B1, Studio A...">
-                        <div class="text-danger small mt-1" th:if="${#fields.hasErrors('room')}" th:errors="*{room}"></div>
-                        <div class="form-text small">Hệ thống sẽ tự động kiểm tra chống trùng lịch PT và chống trùng phòng tập trong cùng khung giờ.</div>
-                    </div>
-
-                    <div class="form-check form-switch mb-4">
-                        <input class="form-check-input" type="checkbox" th:field="*{active}" id="scheduleActiveSwitch">
-                        <label class="form-check-label fw-medium" for="scheduleActiveSwitch">Mở đăng ký cho buổi học này</label>
-                    </div>
-
-                    <button type="submit" class="btn btn-utefit px-4 py-2 rounded-pill">
-                        <i class="bi bi-calendar-check me-1"></i> <span th:text="${isEdit ? 'Lưu lịch học' : 'Tạo lịch học'}"></span>
-                    </button>
-                </form>
+                <aside class="surface-card admin-guidance" aria-labelledby="schedule-guidance-title"><h2 id="schedule-guidance-title">Thông tin buổi học</h2><p>Thông tin rõ ràng giúp hội viên tìm đúng buổi tập.</p><ul><li>Lớp đã chọn xác định chi nhánh và huấn luyện viên của buổi học.</li><li>Kiểm tra ngày, giờ bắt đầu và giờ kết thúc trước khi lưu.</li><li>Nhập tên phòng cụ thể để hội viên biết địa điểm tập.</li></ul></aside>
             </div>
         </main>
     </div>

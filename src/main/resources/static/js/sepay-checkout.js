@@ -44,7 +44,7 @@
                 return;
             }
             paymentStatus.textContent = {PENDING: 'Chờ thanh toán', PAID: 'Đã thanh toán', FAILED: 'Không thành công', REFUNDED: 'Đã hoàn tiền', CANCEL_REQUESTED: 'Đang yêu cầu hủy', CANCELLED: 'Đã hủy đơn chờ'}[state.paymentStatus];
-            membershipStatus.textContent = state.membershipStatus;
+            membershipStatus.textContent = {PENDING: 'Chờ thanh toán', ACTIVE: 'Đang hoạt động', EXPIRED: 'Đã hết hạn', CANCELLED: 'Đã hủy'}[state.membershipStatus] || state.membershipStatus;
             failures = 0;
             if (state.paymentStatus === 'PAID') {
                 hideQr();

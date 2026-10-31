@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head('Chuyển khoản VietQR - UTEFit')}"></head>
-<body class="uf-theme uf-area-member uf-page-member-sepay-checkout">
-<link rel="stylesheet" th:href="@{/css/sepay-checkout.css}">
-<header th:replace="~{fragments/header :: header}"></header>
+<head th:replace="~{member/fragments/layout :: head('Chuyển khoản VietQR - UTEFit')}"></head>
+<body class="uf-theme uf-area-member uf-page-member-sepay-checkout uf-member">
+<header th:replace="~{member/fragments/layout :: header}"></header>
 <main class="container ut-page" id="sepay-checkout" th:attr="data-status-url=@{/member/payments/{id}/sepay/status(id=${order.id})},data-expires-at=${order.expiresAt},data-display-state=${order.displayState},data-period-state=${order.membership.periodState},data-membership-status=${order.membershipStatus}">
     <section th:if="${order.displayState == 'PAID'}" class="ut-panel sepay-success" id="sepay-success" aria-labelledby="sepay-success-title">
         <div class="sepay-success-icon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="m12 24 8 8 16-17" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <p class="sepay-eyebrow">UTEFIT · THANH TOÁN ĐÃ XÁC NHẬN</p>
         <h1 id="sepay-success-title">Thanh toán thành công!</h1>
         <p>Hệ thống đã ghi nhận khoản thanh toán của bạn. Không cần chuyển thêm tiền cho đơn này.</p>
+        <span class="sepay-amount-label">Số tiền đã thanh toán</span>
         <div class="sepay-paid-amount" th:text="${@membershipDisplay.money(order.amount)}"></div>
         <div class="sepay-period-note" th:switch="${order.membership.periodState}">
             <p th:case="'FUTURE'">Kỳ tập đã thanh toán, chưa bắt đầu. Quyền lợi có hiệu lực từ <strong th:text="${#temporals.format(order.membership.startDate, 'dd/MM/yyyy')}"></strong>; thời hạn đã thanh toán trước đó được bảo toàn.</p>
@@ -83,14 +83,14 @@
             <dt>Ngày bắt đầu</dt><dd th:text="${order.membership.startDate != null ? #temporals.format(order.membership.startDate, 'dd/MM/yyyy') : 'Chưa xác lập'}"></dd>
             <dt>Ngày hết hạn kỳ này</dt><dd th:text="${order.membership.endDate != null ? #temporals.format(order.membership.endDate, 'dd/MM/yyyy') : 'Chưa xác lập'}"></dd>
             <dt>Thanh toán</dt><dd id="sepay-payment-status" th:text="${@membershipDisplay.paymentStatus(order.status)}" data-uf-label></dd>
-            <dt>Gói tập</dt><dd id="sepay-membership-status" th:text="${order.membershipStatus}"></dd>
+            <dt>Gói tập</dt><dd id="sepay-membership-status" th:switch="${order.membershipStatus}"><span th:case="'PENDING'">Chờ thanh toán</span><span th:case="'ACTIVE'">Đang hoạt động</span><span th:case="'EXPIRED'">Đã hết hạn</span><span th:case="'CANCELLED'">Đã hủy</span><span th:case="*" th:text="${order.membershipStatus}"></span></dd>
         </dl>
         <p id="sepay-message" role="status">Trạng thái được xác định từ hệ thống. Kiểm tra trạng thái không xác nhận thanh toán hoặc gia hạn thêm.</p>
         <button id="sepay-refresh" class="btn btn-outline-light" type="button">Kiểm tra trạng thái</button>
     </section>
 </main>
-<footer th:replace="~{fragments/footer :: footer}"></footer>
-<div th:replace="~{fragments/scripts :: scripts}"></div>
-<script th:src="@{/js/sepay-checkout.js}" defer></script>
+<footer th:replace="~{member/fragments/layout :: footer}"></footer>
+<div th:replace="~{member/fragments/layout :: scripts}"></div>
+<script th:src="@{/js/sepay-checkout.js(v=2)}" defer></script>
 </body>
 </html>

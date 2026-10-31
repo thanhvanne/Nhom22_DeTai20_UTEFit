@@ -1,0 +1,151 @@
+body.uf-theme:is(.uf-area-auth, .uf-page-guest-promotions) {
+    --uf-canvas: #f0eee8;
+    --uf-surface: #faf9f5;
+    --uf-surface-raised: #e7e5df;
+    --uf-text: #192126;
+    --uf-muted: #526067;
+    --uf-border: #d2d5d1;
+    --uf-control: #7c8688;
+    --uf-accent: #f05a3f;
+    --uf-accent-hover: #ff765d;
+    --ux-accent: #a33320;
+    --uf-radius-sm: 8px;
+    background: var(--uf-canvas);
+    color: var(--uf-text);
+    color-scheme: light;
+}
+html:has(body.uf-area-auth), html:has(body.uf-page-guest-promotions) { background: #f0eee8; }
+body.uf-theme:is(.uf-area-auth, .uf-page-guest-promotions) .utefit-footer { background: #192126; color: #f0eee8; border-color: #35434a; }
+body.uf-theme:is(.uf-area-auth, .uf-page-guest-promotions) .utefit-footer :is(strong, p, a, span) { color: #d4dbdc; }
+body.uf-theme:is(.uf-area-auth, .uf-page-guest-promotions) :is(a, button, input):focus-visible { outline-color: #a33320; }
+body.uf-theme:is(.uf-area-auth, .uf-page-guest-promotions) .pc-nav :is(a, summary):focus-visible { outline-color: #f05a3f; }
+body.uf-theme:is(.uf-area-auth, .uf-page-guest-promotions) .pc-nav a { color: #f0eee8; }
+body.uf-theme:is(.uf-area-auth, .uf-page-guest-promotions) .pc-nav a:hover { color: #f05a3f; }
+body.uf-theme:is(.uf-area-auth, .uf-page-guest-promotions) .pc-nav .pc-join { color: #192126; }
+body.uf-theme:is(.uf-area-auth, .uf-page-guest-promotions) .btn {
+    min-height: 52px;
+    padding: 13px 22px;
+    border-radius: 4px;
+    font-size: 15px;
+    font-weight: 650;
+    transition: background-color .2s, color .2s, transform .2s;
+}
+body.uf-theme:is(.uf-area-auth, .uf-page-guest-promotions) :is(.btn-primary, .btn-success) { background: var(--uf-accent); color: #192126; border: 1px solid transparent; }
+body.uf-theme:is(.uf-area-auth, .uf-page-guest-promotions) :is(.btn-primary, .btn-success):hover { background: var(--uf-accent-hover); color: #192126; }
+body.uf-theme:is(.uf-area-auth, .uf-page-guest-promotions) .btn:active { transform: translateY(1px); }
+
+body.uf-theme.uf-area-auth .uf-auth-shell {
+    max-width: 1200px !important;
+    width: calc(100% - clamp(32px, 9vw, 144px));
+    margin-block: clamp(24px, 4vw, 56px) 64px;
+    grid-template-columns: 1fr 1fr;
+    background: var(--uf-surface);
+    border-radius: 8px;
+    box-shadow: 0 12px 36px #1921260a;
+}
+body.uf-theme.uf-area-auth .uf-auth-story { min-height: 590px; padding: clamp(28px, 4vw, 56px); background: #192126; color: #f0eee8; border-radius: 8px 0 0 8px; }
+body.uf-theme.uf-area-auth .uf-auth-story::before { background-image: linear-gradient(180deg, #19212659, #192126bf), url('/images/training-floor.jpg'); filter: none; opacity: .8; }
+body.uf-theme.uf-area-auth .uf-auth-brand { color: #f0eee8; font-size: 32px; }
+body.uf-theme.uf-area-auth .uf-auth-brand span { color: #f05a3f; }
+body.uf-theme.uf-area-auth .uf-auth-story p { color: #f0eee8; }
+body.uf-theme.uf-area-auth .uf-auth-statement { font-size: clamp(30px, 3.6vw, 48px); line-height: 1.2; font-weight: 750; }
+body.uf-theme.uf-area-auth .uf-auth-story p:not(.uf-auth-statement) { max-width: 36ch; color: #d4dbdc; font-size: 15px; }
+body.uf-theme.uf-area-auth .uf-auth-story-foot { color: #d4dbdc; border-top-color: #f05a3f; }
+body.uf-theme.uf-area-auth .uf-auth-form { padding: clamp(28px, 4vw, 56px); }
+body.uf-theme.uf-area-auth .uf-auth-form > h1 { margin-bottom: 30px !important; font-size: clamp(28px, 2.7vw, 36px); font-weight: 750; }
+body.uf-theme.uf-area-auth .uf-auth-form > p { color: var(--uf-muted); }
+body.uf-theme.uf-area-auth .uf-auth-form a { color: #9e3523; text-decoration-thickness: 1px; }
+body.uf-theme.uf-area-auth .uf-auth-form a:hover { color: #192126; text-decoration: underline; }
+body.uf-theme.uf-area-auth .form-label { color: #35434a; font-weight: 550; }
+body.uf-theme.uf-area-auth .form-control { min-height: 54px; padding: 13px 16px; background: var(--uf-surface); color: var(--uf-text); border: 1px solid var(--uf-control); border-radius: 8px; font-size: 16px; transition: border-color .2s, box-shadow .2s; }
+body.uf-theme.uf-area-auth .form-control:focus { border-color: #a33320; box-shadow: 0 0 0 3px #f05a3f1a; }
+body.uf-theme.uf-area-auth .form-control::placeholder { color: #526067; }
+body.uf-theme.uf-area-auth .u025-box { height: 54px; }
+body.uf-theme.uf-area-auth .u025-in { border: 0; border-radius: 8px; }
+body.uf-theme.uf-area-auth .u025-line { border-radius: 8px; }
+body.uf-theme.uf-area-auth .u025-line .l { border-radius: 8px 0 0 8px; }
+body.uf-theme.uf-area-auth .u025-line .r { border-radius: 0 8px 8px 0; }
+body.uf-theme.uf-area-auth .u025-lab { top: 16px; color: #526067; }
+body.uf-theme.uf-area-auth .u025-f.is-up .u025-lab { color: #35434a; }
+body.uf-theme.uf-area-auth .u025-f.is-focus .u025-lab { color: #a33320; }
+body.uf-theme.uf-area-auth .u025-f.is-up .u025-lab { transform: translateY(-25px) scale(.8); }
+body.uf-theme.uf-area-auth .u036 input { padding-right: 58px; }
+body.uf-theme.uf-area-auth .u036-eye { top: 5px; color: #526067; }
+body.uf-theme.uf-area-auth .uf-auth-form .text-danger { color: #a32334 !important; font-size: 13px; }
+body.uf-theme.uf-area-auth .alert-danger { background: #fbe7e5; color: #852a2d; border-color: #dbaaa7; }
+body.uf-theme.uf-area-auth .alert-success { background: #e2efe6; color: #225e3c; border-color: #aac9b5; }
+body.uf-theme.uf-page-auth-register .uf-auth-form form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 16px; }
+body.uf-theme.uf-page-auth-register .uf-auth-form form > * { grid-column: 1 / -1; margin: 0 !important; }
+body.uf-theme.uf-page-auth-register .uf-auth-form form > .mb-3:has(:is(#firstName, #lastName)) { grid-column: auto; }
+
+body.uf-theme .uf-promotions { padding: 0; background: var(--uf-canvas); }
+.uf-promotions :is(h1, h2, h3, p, figure, dl, dd) { margin: 0; }
+.uf-promotions .uf-promo-intro { display: grid; grid-template-columns: 1.2fr 1fr; align-items: center; gap: 32px; padding: 56px max(5%, calc((100% - 1200px) / 2)); background: #e4e7e1; }
+.uf-promotions .uf-promo-intro-copy { padding-block: 12px; }
+.uf-promotions .uf-public-kicker { margin-bottom: 22px; color: #526067; font-size: 12px; font-weight: 600; letter-spacing: .08em; }
+body.uf-theme .uf-promotions h1 { margin-bottom: 24px; font-size: clamp(44px, 5vw, 72px); font-weight: 800; line-height: 1.14; letter-spacing: -.055em; }
+.uf-promotions h1 em { color: #a83b29; font-style: normal; }
+.uf-promotions .uf-promo-intro-copy > p:not(.uf-public-kicker) { max-width: 44ch; margin-bottom: 22px; font-size: 16px; color: #43544c; }
+body.uf-theme .uf-promotions .uf-public-link { display: inline-flex; gap: 28px; align-items: center; min-height: 44px; color: #192126; font-weight: 600; text-decoration: underline; text-underline-offset: 6px; }
+.uf-promotions .uf-promo-visual { display: grid; place-items: center; }
+.uf-promotions .uf-promo-visual img { display: block; width: 100%; max-height: 350px; object-fit: contain; filter: drop-shadow(0 18px 24px #1921261a); }
+.uf-promotions .uf-promo-visual figcaption { margin-top: 12px; color: #526067; font-size: 13px; }
+.uf-promotions .uf-promo-directory { max-width: 1360px; margin: auto; padding: 48px clamp(20px, 4.5vw, 64px) 80px; scroll-margin-top: 104px; }
+.uf-promotions .uf-promo-heading { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; margin-bottom: 32px; }
+body.uf-theme .uf-promotions .uf-promo-heading h2 { font-size: clamp(26px, 2.6vw, 36px); line-height: 1.3; }
+.uf-promotions .uf-promo-heading p { color: #526067; font-size: 14px; line-height: 1.8; }
+.uf-promotions .uf-promo-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.uf-promotions .uf-promo-card:only-child { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); }
+.uf-promotions .uf-promo-card:only-child .uf-promo-discount { display: flex; flex-direction: column; justify-content: center; }
+.uf-promotions .uf-promo-card { min-width: 0; overflow: hidden; border: 1px solid #d2d5d1; border-radius: 8px; background: var(--uf-surface); transition: transform .22s, border-color .22s, box-shadow .22s; }
+.uf-promotions .uf-promo-discount { padding: 24px 28px; color: #192126; background: #f05a3f; }
+.uf-promotions .uf-promo-discount > span { font-size: 13px; font-weight: 550; }
+.uf-promotions .uf-promo-discount p { margin-top: 8px; display: flex; align-items: baseline; gap: 8px; font-size: 15px; }
+.uf-promotions .uf-promo-discount strong { font-size: 54px; font-weight: 750; letter-spacing: -.055em; line-height: 1.2; }
+.uf-promotions .uf-promo-discount p > span { font-size: 28px; }
+.uf-promotions .uf-promo-card-copy { padding: 28px; }
+.uf-promotions .uf-promo-code-label { color: #526067; font-size: 12px; }
+body.uf-theme .uf-promotions .uf-promo-card h3 { margin: 6px 0 22px; font-size: 24px; font-weight: 750; overflow-wrap: anywhere; }
+.uf-promotions .uf-promo-facts { display: grid; gap: 12px; margin-bottom: 24px; font-size: 13px; }
+.uf-promotions .uf-promo-facts > div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; }
+.uf-promotions .uf-promo-facts dt { color: #526067; font-weight: 400; }
+.uf-promotions .uf-promo-facts dd { font-variant-numeric: tabular-nums; font-weight: 600; }
+body.uf-theme .uf-promotions .uf-promo-card .btn { display: flex; justify-content: space-between; width: 100%; background: #192126; color: #f0eee8; }
+body.uf-theme .uf-promotions .uf-promo-card .btn:hover { background: #35434a; }
+.uf-promotions .uf-promo-empty { padding: 32px; border: 1px solid #d2d5d1; border-radius: 8px; background: var(--uf-surface); color: #526067; }
+@media (hover: hover) and (pointer: fine) {
+    .uf-promotions .uf-promo-card:hover { transform: translateY(-4px); border-color: #8d9a96; box-shadow: 0 12px 28px #1921260a; }
+}
+@keyframes uf-account-arrive { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: no-preference) {
+    .uf-area-auth .uf-auth-form { animation: uf-account-arrive .5s ease-out both; }
+    .uf-promotions .uf-promo-intro-copy { animation: uf-account-arrive .5s ease-out both; }
+    .uf-promotions .uf-promo-card.uf-studio-enter { animation: uf-account-arrive .45s ease-out both; }
+    .uf-promotions .uf-promo-card:focus-within { animation: none; }
+}
+@media (max-width: 1100px) {
+    body.uf-theme.uf-area-auth .uf-auth-shell { width: calc(100% - 48px); }
+    body.uf-theme.uf-area-auth :is(.uf-auth-story, .uf-auth-form) { padding: 32px; }
+    .uf-promotions .uf-promo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 767.98px) {
+    body.uf-theme.uf-area-auth .uf-auth-shell { width: calc(100% - 32px); grid-template-columns: 1fr; margin-block: 24px 40px; }
+    body.uf-theme.uf-area-auth .uf-auth-story { min-height: 0; border-radius: 8px 8px 0 0; gap: 24px; padding: 28px; }
+    body.uf-theme.uf-area-auth .uf-auth-statement { max-width: 18ch; font-size: 30px; margin-bottom: 10px; }
+    body.uf-theme.uf-area-auth .uf-auth-story p:not(.uf-auth-statement) { font-size: 14px; }
+    body.uf-theme.uf-area-auth .uf-auth-form { padding: 32px 24px; }
+    .uf-promotions .uf-promo-intro { grid-template-columns: 1fr; gap: 24px; padding: 36px 5%; }
+    .uf-promotions .uf-promo-visual { grid-template-columns: 1fr 1fr; gap: 24px; text-align: left; }
+    .uf-promotions .uf-promo-visual img { max-height: 180px; }
+    .uf-promotions .uf-promo-visual figcaption { max-width: 16ch; }
+    .uf-promotions .uf-promo-heading { grid-template-columns: 1fr; gap: 16px; }
+    .uf-promotions .uf-promo-directory { padding-top: 32px; }
+}
+@media (max-width: 575.98px) {
+    .uf-promotions .uf-promo-grid { grid-template-columns: 1fr; }
+    .uf-promotions .uf-promo-card:only-child { grid-template-columns: 1fr; }
+    body.uf-theme.uf-page-auth-register .uf-auth-form form { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+    body.uf-theme:is(.uf-area-auth, .uf-page-guest-promotions) :is(.btn, .form-control, .uf-promo-card) { transition: none; }
+}

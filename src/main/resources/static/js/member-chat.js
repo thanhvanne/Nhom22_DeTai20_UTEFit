@@ -68,8 +68,8 @@
                 bubble.style.maxWidth = '82%';
                 bubble.style.wordBreak = 'break-word';
                 bubble.style.whiteSpace = 'pre-wrap';
-                bubble.style.background = mine ? '#2563eb' : '#e2e8f0';
-                bubble.style.color = mine ? '#fff' : '#0f172a';
+                bubble.style.background = mine ? 'var(--member-chat-outgoing, #2563eb)' : 'var(--member-chat-incoming, #e2e8f0)';
+                bubble.style.color = mine ? 'var(--member-ink, #fff)' : 'var(--member-ink, #0f172a)';
                 const text = document.createElement('div');
                 text.textContent = m.content || '';
                 const time = document.createElement('small');
@@ -122,10 +122,14 @@
             try {
                 const response = await fetch(chat.dataset.sendUrl, {
                     method: 'POST', credentials: 'same-origin',
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'Accept': 'application/json'},
                     body: new URLSearchParams(new FormData(form))
                 });
-                if (!response.ok) throw new Error('Không gửi được tin nhắn (' + response.status + ').');
+                if (!response.ok) {
+                    const failure = await response.json().catch(() => ({}));
+                    window.UTEFitValidation?.applyErrors(form, failure.fieldErrors || {content: failure.message || failure.error || 'Không gửi được tin nhắn.'});
+                    throw new Error(failure.message || failure.error || 'Không gửi được tin nhắn (' + response.status + ').');
+                }
                 input.value = '';
                 await refresh();
             } catch (e) {

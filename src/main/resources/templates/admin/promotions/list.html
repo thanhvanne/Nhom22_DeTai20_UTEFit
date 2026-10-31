@@ -2,17 +2,19 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/layout :: head('Khuyến mãi')}"></head>
-<body class="uf-theme uf-area-admin uf-page-admin-promotions-list">
-<div class="d-flex">
+<body class="uf-theme uf-area-admin uf-page-admin-promotions-list uf-admin">
+<link rel="stylesheet" th:href="@{/css/utefit-admin-promotions.css}">
+<script defer th:src="@{/js/admin-promotion-programs.js}"></script>
+<div class="admin-shell">
     <aside th:replace="~{admin/fragments/layout :: sidebar}"></aside>
-    <div class="flex-grow-1 min-vh-100" style="min-width:0">
+    <div class="admin-workspace">
         <nav th:replace="~{admin/fragments/layout :: topbar('Quản lý khuyến mãi')}"></nav>
-        <main class="container-fluid px-4 pb-5">
+        <main class="admin-main" id="utefit-content" tabindex="-1">
 
-            <div class="admin-hero-banner mb-4">
-                <h2 class="fw-bold">Mã khuyến mãi</h2>
-                <p class="text-white-50 mb-0">
-                    Tạo và quản lý mã giảm giá cho hệ thống UTEFit.
+            <div class="admin-page-heading mb-4">
+                <h2 class="fw-bold">Khuyến mãi &amp; đặc quyền</h2>
+                <p class="text-muted mb-0">
+                    Điều chỉnh ưu đãi cho đơn mới. Giá và quyền lợi của đơn đã chốt luôn được giữ nguyên.
                 </p>
             </div>
 
@@ -21,61 +23,86 @@
             <div th:if="${error}" class="alert alert-danger"
                  th:text="${error}" data-uf-label></div>
 
+            <section class="surface-card promotion-programs mb-4" aria-labelledby="automatic-programs-title">
+                <div class="promotion-section-heading"><div><h2 id="automatic-programs-title">Chương trình tự động</h2><p>Mỗi đơn một ưu đãi. Backend chọn mức tiết kiệm tốt nhất trong các chương trình đủ điều kiện.</p></div><a href="#promotion-codes" class="btn btn-outline-secondary btn-sm">Quản lý mã</a></div>
+                <div class="table-responsive">
+                    <table class="table align-middle admin-data-table promotion-program-table">
+                        <thead><tr><th>Chương trình</th><th>Ưu đãi &amp; điều kiện</th><th class="text-end">Sử dụng</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+                        <tbody><tr th:each="program : ${programs}" th:with="rule=${programSettings[program.kind]},usage=${programUsage[program.kind]}" th:attr="data-program=${program.kind}">
+                            <td data-label="Chương trình"><strong th:text="${program.name}"></strong><small class="program-kind" th:text="${program.kind}"></small></td>
+                            <td data-label="Ưu đãi &amp; điều kiện"><strong class="program-benefit" th:text="${program.benefit}"></strong><p class="program-condition" th:text="${program.condition}"></p></td>
+                            <td data-label="Sử dụng" class="program-usage"><strong th:text="${usage.paid}"></strong><small>đơn đã PAID</small><small th:text="|${usage.pending} đơn đang giữ|"></small></td>
+                            <td data-label="Trạng thái"><span class="program-status" th:classappend="${rule.available ? 'is-active' : ''}" th:text="${rule.state()}"></span></td>
+                            <td data-label="Thao tác"><div class="program-actions"><a class="btn btn-outline-secondary btn-sm" th:href="@{/admin/promotions/programs/{kind}(kind=${program.kind})}" th:attr="aria-label=|Chỉnh sửa ${program.kind}|">Chỉnh sửa</a>
+                                <form th:action="@{/admin/promotions/programs/{kind}/state(kind=${program.kind})}" method="post" data-program-form th:attr="data-program-name=${program.kind},data-confirm-pause=${rule.active}">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><input type="hidden" name="version" th:value="${rule.version}"><input type="hidden" name="active" th:value="${!rule.active}">
+                                    <button type="submit" class="btn btn-sm" th:classappend="${rule.active ? 'btn-outline-secondary' : 'btn-program-enable'}" th:disabled="${!rule.persisted}" th:text="${rule.active ? 'Tạm dừng' : 'Bật'}" th:attr="aria-label=|${rule.active ? 'Tạm dừng' : 'Bật'} ${program.kind}|"></button>
+                                </form></div><small th:unless="${rule.persisted}" class="text-muted">Cần migration V717</small></td>
+                        </tr></tbody>
+                    </table>
+                </div>
+                <p class="program-footnote">Lượt sử dụng đếm theo đơn có snapshot ưu đãi và Payment PAID, không phải doanh thu. Đơn hoàn tiền không nằm trong số PAID; không cộng trùng callback.</p>
+            </section>
             <div class="surface-card p-4 mb-4">
-                <h5 class="fw-bold mb-3"
+                <h2 class="fw-bold mb-3" id="promotion-codes"
                     th:text="${editId == null ? 'Tạo khuyến mãi mới' :
-                                            'Chỉnh sửa khuyến mãi'}" data-uf-label></h5>
+                                            'Chỉnh sửa khuyến mãi'}" data-uf-label></h2>
 
                 <form th:action="@{/admin/promotions/save}"
                       th:object="${form}" method="post"
-                      class="row g-3">
+                      class="admin-promotion-fields">
                     <input type="hidden" th:name="${_csrf.parameterName}"
                            th:value="${_csrf.token}">
                     <input type="hidden" name="id" th:if="${editId != null}"
                            th:value="${editId}">
 
                     <div class="col-md-3">
-                        <label class="form-label">Mã khuyến mãi</label>
+                        <label class="form-label" for="code">Mã khuyến mãi</label>
                         <input th:field="*{code}" class="form-control"
                                maxlength="50" required
                                placeholder="UTEFIT20">
                     </div>
 
                     <div class="col-md-2">
-                        <label class="form-label">Giảm (%)</label>
+                        <label class="form-label" for="discountPercent">Giảm (%)</label>
                         <input type="number" th:field="*{discountPercent}"
                                class="form-control" min="0.01"
                                max="100" step="0.01" required>
                     </div>
 
                     <div class="col-md-2">
-                        <label class="form-label">Bắt đầu</label>
+                        <label class="form-label" for="startDate">Bắt đầu</label>
                         <input type="date" th:field="*{startDate}"
                                class="form-control" required>
                     </div>
 
                     <div class="col-md-2">
-                        <label class="form-label">Kết thúc</label>
+                        <label class="form-label" for="endDate">Kết thúc</label>
                         <input type="date" th:field="*{endDate}"
                                class="form-control" required>
                     </div>
 
                     <div class="col-md-2">
-                        <label class="form-label">Số lượng</label>
+                        <label class="form-label" for="quantity">Số lượng</label>
                         <input type="number" th:field="*{quantity}"
                                class="form-control" min="0" required>
                     </div>
 
                     <div class="col-md-1">
-                        <label class="form-label">Hoạt động</label>
+                        <label class="form-label" for="active">Hoạt động</label>
                         <select th:field="*{active}" class="form-select">
                             <option value="true">Có</option>
                             <option value="false">Không</option>
                         </select>
                     </div>
 
-                    <div class="col-12 d-flex gap-2">
-                        <button class="btn btn-success" type="submit">
+                    <div class="col-12 d-flex flex-wrap gap-2">
+                        <div><label for="minOrderAmount" class="form-label">Giá gốc tối thiểu (đ)</label><input type="number" th:field="*{minOrderAmount}" class="form-control" min="1" step="1" placeholder="Không giới hạn"></div>
+                        <div><label for="maxDiscountAmount" class="form-label">Giảm tối đa (đ)</label><input type="number" th:field="*{maxDiscountAmount}" class="form-control" min="1" step="1" placeholder="Không giới hạn"></div>
+                        <div><label for="perUserLimit" class="form-label">Lượt / hội viên</label><input type="number" th:field="*{perUserLimit}" class="form-control" min="1" step="1" placeholder="Không giới hạn"></div>
+                    </div>
+                    <div class="col-12 d-flex flex-wrap gap-2">
+                        <button class="btn btn-primary" type="submit">
                             Lưu khuyến mãi
                         </button>
                         <a th:if="${editId != null}" class="btn btn-secondary"
@@ -85,9 +112,9 @@
             </div>
 
             <div class="surface-card p-4">
-                <h5 class="fw-bold mb-3">Danh sách khuyến mãi</h5>
+                <h2 class="fw-bold mb-3">Danh sách khuyến mãi</h2>
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle">
+                    <table class="table table-hover align-middle admin-data-table">
                         <thead>
                         <tr>
                             <th>ID</th><th>Mã</th><th>Giảm</th>
@@ -97,24 +124,24 @@
                         </thead>
                         <tbody>
                         <tr th:each="p : ${promotions}">
-                            <td th:text="${p.id}"></td>
-                            <td class="fw-bold" th:text="${p.code}"></td>
-                            <td th:text="|${p.discountPercent}%|"></td>
-                            <td>
+                            <td th:text="${p.id}" data-label="ID"></td>
+                            <td class="fw-bold admin-record-primary" th:text="${p.code}" data-label="Mã"></td>
+                            <td data-label="Giảm / điều kiện" class="admin-number"><span th:text="|${p.discountPercent}%|"></span><small class="d-block text-muted" th:if="${p.minOrderAmount != null}" th:text="|Từ ${@membershipDisplay.money(p.minOrderAmount)}|"></small><small class="d-block text-muted" th:if="${p.maxDiscountAmount != null}" th:text="|Tối đa ${@membershipDisplay.money(p.maxDiscountAmount)}|"></small><small class="d-block text-muted" th:if="${p.perUserLimit != null}" th:text="|${p.perUserLimit} lượt / hội viên|"></small></td>
+                            <td data-label="Thời gian">
                                 <span th:text="${p.startDate}" data-uf-date></span>
                                 đến <span th:text="${p.endDate}" data-uf-date></span>
                             </td>
-                            <td th:text="${p.quantity}"></td>
-                            <td>
+                            <td data-label="Số lượng" class="admin-number"><span th:text="|Còn ${p.quantity}|"></span><small class="d-block text-muted" th:text="|Đã giữ/dùng: ${promotionUsage[p.id]}|"></small></td>
+                            <td data-label="Trạng thái">
                                 <span class="badge"
                                       th:classappend="${p.active ?
-                                          'text-bg-success' : 'text-bg-secondary'}"
-                                      th:text="${p.active ? 'ACTIVE' : 'INACTIVE'}">
+                                          'admin-badge-success' : 'admin-badge-neutral'}"
+                                      th:text="${p.active ? 'ACTIVE' : 'INACTIVE'}" data-uf-label>
                                 </span>
                             </td>
-                            <td>
+                            <td data-label="Thao tác" class="admin-record-actions">
                                 <div class="d-flex gap-2">
-                                    <a class="btn btn-primary btn-sm"
+                                    <a class="btn btn-outline-secondary btn-sm"
                                        th:href="@{/admin/promotions(editId=${p.id})}">
                                         Sửa
                                     </a>
@@ -132,7 +159,7 @@
                             </td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(promotions)}">
-                            <td colspan="7" class="text-center text-muted">
+                            <td colspan="7" class="text-center text-muted admin-empty">
                                 Chưa có khuyến mãi nào.
                             </td>
                         </tr>

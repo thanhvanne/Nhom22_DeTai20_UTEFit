@@ -14,6 +14,7 @@ public class TrainerSearchRequest {
     @Size(max = 100)
     private String keyword;
 
+    @com.utefit.validation.ValidInput("id")
     private Long branchId;
 
     @Min(value = 0)

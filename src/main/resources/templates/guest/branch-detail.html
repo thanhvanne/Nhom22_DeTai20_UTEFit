@@ -3,14 +3,21 @@
 <html lang="vi"
       xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments/head :: head('Chi tiết chi nhánh - UTEFit')}">
+<head th:replace="${#authorization.expression('hasRole(''MEMBER'')')} ? ~{member/fragments/layout :: head('Chi tiết chi nhánh - UTEFit')} : ~{fragments/head :: head('Chi tiết chi nhánh - UTEFit')}">
 </head>
 
-<body class="uf-theme uf-area-guest uf-page-guest-branch-detail">
+<body class="uf-theme uf-area-guest uf-page-guest-branch-detail" th:classappend="${#authorization.expression('hasRole(''MEMBER'')')} ? 'uf-member uf-member-discovery' : ''">
 
-<header th:replace="~{fragments/header :: header}">
+<header th:replace="${#authorization.expression('hasRole(''MEMBER'')')} ? ~{member/fragments/layout :: header} : ~{fragments/header :: header}">
 </header>
 
+<th:block th:replace="~{fragments/branch-media :: assets}"></th:block>
+
+<th:block th:if="${#authorization.expression('isAnonymous()')}">
+    <th:block th:replace="~{fragments/public-directory :: assets}"></th:block>
+    <main th:replace="~{fragments/public-directory :: branchDetail}"></main>
+</th:block>
+<th:block th:unless="${#authorization.expression('isAnonymous()')}">
 <main class="container ut-page">
 
     <a class="btn btn-outline-light mb-4"
@@ -22,27 +29,13 @@
 
         <div class="col-lg-6">
 
-            <img th:if="${branch.imageUrl != null}"
-                 th:src="${branch.imageUrl}"
-                 alt="Ảnh chi nhánh"
-                 class="img-fluid rounded-4 w-100"
-                 style="max-height:440px;object-fit:cover">
-
-            <div th:unless="${branch.imageUrl != null}"
-                 class="ut-empty-image rounded-4"
-                 style="height:360px">
-                UTEFIT Trung tâm thể hình
-            </div>
+            <div th:replace="~{fragments/branch-media :: publicMedia(${branch},'member-detail')}"></div>
 
         </div>
 
         <div class="col-lg-6">
 
             <div class="ut-panel h-100">
-
-                <span class="eyebrow">
-                    UTEFIT BRANCH
-                </span>
 
                 <div th:replace="~{fragments/favorite :: button('BRANCH',${branch.id},'/branches')}"></div>
                 <h1 class="ut-page-title mt-3"
@@ -123,12 +116,16 @@
         </div>
     </section>
 </main>
+</th:block>
 
-<footer th:replace="~{fragments/footer :: footer}">
+<footer th:replace="${#authorization.expression('hasRole(''MEMBER'')')} ? ~{member/fragments/layout :: footer} : ~{fragments/footer :: footer}">
 </footer>
 
-<div th:replace="~{fragments/scripts :: scripts}">
+<div th:replace="${#authorization.expression('hasRole(''MEMBER'')')} ? ~{member/fragments/layout :: scripts} : ~{fragments/scripts :: scripts}">
 </div>
 
+<th:block th:unless="${#authorization.expression('isAnonymous()')}">
+<div th:replace="${#authorization.expression('hasRole(''MEMBER'')')} ? _ : ~{fragments/public-motion :: motion}"></div>
+</th:block>
 </body>
 </html>

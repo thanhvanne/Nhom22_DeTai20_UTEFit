@@ -2,16 +2,16 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/layout :: head('Quản lý đánh giá')}"></head>
-<body class="uf-theme uf-area-admin uf-page-admin-reviews-list">
-<div class="d-flex">
+<body class="uf-theme uf-area-admin uf-page-admin-reviews-list uf-admin">
+<div class="admin-shell">
     <aside th:replace="~{admin/fragments/layout :: sidebar}"></aside>
-    <div class="flex-grow-1 min-vh-100" style="min-width:0">
+    <div class="admin-workspace">
         <nav th:replace="~{admin/fragments/layout :: topbar('Quản lý đánh giá')}"></nav>
 
-        <main class="container-fluid px-4 pb-5">
-            <div class="admin-hero-banner mb-4">
+        <main class="admin-main" id="utefit-content" tabindex="-1">
+            <div class="admin-page-heading mb-4">
                 <h2 class="fw-bold">Đánh giá từ hội viên</h2>
-                <p class="mb-0 text-white-50">
+                <p class="mb-0 text-muted">
                     Theo dõi đánh giá và ẩn những nội dung vi phạm.
                 </p>
             </div>
@@ -23,9 +23,9 @@
 
             <div class="surface-card p-4">
                 <form th:action="@{/admin/reviews}"
-                      method="get" class="row g-2 mb-4">
+                      method="get" class="admin-query admin-history-filter">
                     <div class="col-md-5">
-                        <select name="branchId" class="form-select">
+                        <select name="branchId" class="form-select" aria-label="Chi nhánh">
                             <option value="">Tất cả chi nhánh</option>
                             <option th:each="b : ${branches}"
                                     th:value="${b.id}"
@@ -35,7 +35,7 @@
                         </select>
                     </div>
                     <div class="col-md-5">
-                        <select name="rating" class="form-select">
+                        <select name="rating" class="form-select" aria-label="Đánh giá sao">
                             <option value="">Tất cả rating</option>
                             <option th:each="n : ${#numbers.sequence(1,5)}"
                                     th:value="${n}"
@@ -45,14 +45,14 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <button class="btn btn-primary w-100">
+                        <button class="btn btn-primary">
                             Lọc đánh giá
                         </button>
                     </div>
                 </form>
 
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle">
+                    <table class="table table-hover align-middle admin-data-table">
                         <thead>
                         <tr>
                             <th>ID</th><th>Hội viên</th><th>Chi nhánh / PT</th>
@@ -62,30 +62,30 @@
                         </thead>
                         <tbody>
                         <tr th:each="r : ${reviews.content}">
-                            <td th:text="${r.id}"></td>
-                            <td th:text="${r.memberEmail}"></td>
-                            <td>
+                            <td th:text="${r.id}" data-label="ID"></td>
+                            <td th:text="${r.memberEmail}" data-label="Hội viên" class="admin-record-primary"></td>
+                            <td data-label="Chi nhánh / PT">
                                 <div class="fw-semibold"
                                      th:text="${@membershipDisplay.name(r.branchName)}"></div>
                                 <small class="text-muted"
                                        th:text="${r.trainerName}"></small>
                             </td>
-                            <td>
-                                <span class="badge text-bg-warning"
+                            <td data-label="Rating">
+                                <span class="badge admin-badge-warning"
                                       th:text="|${r.rating} ★|"></span>
                             </td>
-                            <td style="max-width:280px;overflow-wrap:anywhere">
+                            <td style="max-width:280px;overflow-wrap:anywhere" data-label="Nội dung">
                                 <p style="white-space:pre-wrap" th:text="${r.comment}"></p>
                                 <video th:if="${r.videoUrl != null}" th:src="${r.videoUrl}" controls preload="none" style="max-width:240px;max-height:200px"></video>
                             </td>
-                            <td>
+                            <td data-label="Trạng thái">
                                 <span class="badge"
                                       th:classappend="${r.visible ?
-                                          'text-bg-success' : 'text-bg-secondary'}"
+                                          'admin-badge-success' : 'admin-badge-neutral'}"
                                       th:text="${r.visible ? 'Đang hiển thị' : 'Đã ẩn'}">
                                 </span>
                             </td>
-                            <td>
+                            <td data-label="Thao tác" class="admin-record-actions">
                                 <form th:action="@{/admin/reviews/{id}/toggle-visibility(id=${r.id})}"
                                       method="post">
                                     <input type="hidden"
@@ -102,7 +102,7 @@
                             </td>
                         </tr>
                         <tr th:if="${reviews.empty}">
-                            <td colspan="7" class="text-center text-muted py-4">
+                            <td colspan="7" class="text-center text-muted py-4 admin-empty">
                                 Chưa có đánh giá phù hợp.
                             </td>
                         </tr>

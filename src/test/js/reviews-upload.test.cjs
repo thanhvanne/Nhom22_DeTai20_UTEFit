@@ -12,14 +12,16 @@ function harness() {
     const form = {addEventListener(name, callback) { events.set(`form:${name}`, callback); }};
     const error = {textContent: ''};
     const video = {
-        dataset: {maxBytes: String(maxBytes)}, files: [], validity: '', reported: false,
+        dataset: {maxBytes: String(maxBytes)}, files: [], validity: '', reported: false, focused: false, inlineError: '',
         closest: () => form,
         setCustomValidity(message) { this.validity = message; },
         reportValidity() { this.reported = true; },
+        focus() { this.focused = true; },
         addEventListener(name, callback) { events.set(`video:${name}`, callback); }
     };
     const nodes = {video, 'review-video-error': error, branchId: {disabled: true}, trainerId: {disabled: true}};
-    vm.runInNewContext(source, {document: {getElementById: id => nodes[id]}});
+    vm.runInNewContext(source, {document: {getElementById: id => nodes[id]},
+        UTEFitValidation: {setFieldError(field, message) { field.inlineError = message; }}});
     return {
         video, error,
         select(file) { video.files = file ? [file] : []; events.get('video:change')(); },
@@ -41,7 +43,9 @@ test('one byte over fifty MiB is rejected with explicit message and submission p
     page.select({size: maxBytes + 1, type: 'video/mp4', name: 'large.mp4'});
     assert.match(page.error.textContent, /50 MiB/);
     assert.equal(page.submit(), true);
-    assert.equal(page.video.reported, true);
+    assert.equal(page.video.reported, false);
+    assert.equal(page.video.focused, true);
+    assert.match(page.video.inlineError, /50 MiB/);
 });
 
 test('mime or extension mismatches are rejected, WebM remains supported', () => {

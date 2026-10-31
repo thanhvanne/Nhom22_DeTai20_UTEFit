@@ -1,30 +1,31 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/layout :: head(${isEdit ? 'Cập nhật Gói tập' : 'Thêm Gói tập'})}"></head>
-<body class="uf-theme uf-area-admin uf-page-admin-plans-form">
+<body class="uf-theme uf-area-admin uf-page-admin-plans-form uf-admin">
 
-<div class="d-flex">
+<div class="admin-shell">
     <div th:replace="~{admin/fragments/layout :: sidebar}"></div>
 
-    <div class="flex-grow-1">
+    <div class="admin-workspace">
         <div th:replace="~{admin/fragments/layout :: topbar(${isEdit ? 'Cập nhật Gói tập' : 'Thêm Gói tập mới'})}"></div>
 
-        <main class="container-fluid px-4 pb-5">
+        <main class="admin-main" id="utefit-content" tabindex="-1">
             <div class="mb-3">
-                <a th:href="@{/admin/membership-plans}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <a th:href="@{/admin/membership-plans}" class="btn btn-outline-secondary btn-sm px-3">
                     <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
                 </a>
             </div>
 
-            <div class="surface-card col-lg-8 p-4">
-                <div th:if="${errorMessage}" class="alert alert-danger rounded-3">
+            <div class="surface-card admin-editor"><div class="admin-editor-body">
+                <div th:if="${errorMessage}" class="alert alert-danger">
                     <i class="bi bi-exclamation-octagon-fill me-2"></i> <span th:text="${errorMessage}" data-uf-label></span>
                 </div>
 
                 <form th:action="${isEdit ? '/admin/membership-plans/' + planForm.id + '/edit' : '/admin/membership-plans/create'}"
-                      th:object="${planForm}" method="post" id="membership-plan-form">
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6"><label class="form-label">Quyền lợi</label><select class="form-select" th:field="*{benefit}" required><option value="ALL">Tất cả dịch vụ</option><option value="GYM">Phòng gym</option><option value="YOGA">Yoga</option><option value="PT">Huấn luyện viên cá nhân</option></select></div>
+                      th:object="${planForm}" method="post" id="membership-plan-form" class="uf-edit-form admin-editor-fields">
+                        <h2 class="admin-field-heading">Quyền lợi & chi nhánh</h2>
+                    <div class="row g-3">
+                        <div class="col-md-6"><label class="form-label" for="benefit">Quyền lợi</label><select class="form-select" th:field="*{benefit}" required><option value="ALL">Tất cả dịch vụ</option><option value="GYM">Phòng gym</option><option value="YOGA">Yoga</option><option value="PT">Huấn luyện viên cá nhân</option></select></div>
                         <div class="col-md-6">
                             <label class="form-label" for="planBranch">Chi nhánh cố định</label>
                             <select id="planBranch" name="branchIds" class="form-select" required>
@@ -40,17 +41,17 @@
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Tên gói tập <span class="text-danger">*</span></label>
+                    <h2 class="admin-field-heading">Tên gói, thời hạn & giá bán</h2>
+                    <div class="admin-field-wide"><label class="form-label fw-semibold" for="name">Tên gói tập <span class="text-danger">*</span></label>
                         <input type="text" th:field="*{name}" class="form-control"
                                th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
                                placeholder="VD: Gói 3 tháng tặng 2 tuần">
                         <div class="invalid-feedback" th:errors="*{name}"></div>
                     </div>
 
-                    <div class="row g-3 mb-3">
+                    <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Thời gian cơ bản</label>
+                            <label class="form-label fw-semibold" for="durationQuantity">Thời gian cơ bản</label>
                             <div class="input-group">
                                 <input type="number" th:field="*{durationQuantity}" class="form-control" min="1" max="36600" required aria-label="Số lượng thời hạn">
                                 <select th:field="*{durationUnit}" class="form-select" required aria-label="Đơn vị thời hạn">
@@ -61,7 +62,7 @@
                             <div class="text-danger small" th:errors="*{durationUnit}"></div>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Thời gian thưởng</label>
+                            <label class="form-label fw-semibold" for="bonusQuantity">Thời gian thưởng</label>
                             <div class="input-group">
                                 <input type="number" th:field="*{bonusQuantity}" class="form-control" min="0" max="36600" required aria-label="Số lượng thời gian thưởng">
                                 <select th:field="*{bonusUnit}" class="form-select" required aria-label="Đơn vị thời gian thưởng">
@@ -73,7 +74,7 @@
                         </div>
                         <div class="col-12 small text-muted">Cộng thời gian cơ bản rồi cộng thưởng theo lịch; ngày hết hạn là ngày trước mốc kết thúc. Ngày không tồn tại ở cuối tháng/năm được chốt về cuối tháng (LocalDate). Không quy đổi tháng/năm thành số ngày cố định.</div>
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Giá gói tập (VNĐ) <span class="text-danger">*</span></label>
+                            <label class="form-label fw-semibold" for="price">Giá gói tập (VNĐ) <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <input type="number" step="any" min="0" th:field="*{price}" class="form-control"
                                        th:classappend="${#fields.hasErrors('price')} ? 'is-invalid'"
@@ -84,24 +85,25 @@
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Mô tả quyền lợi gói tập</label>
+                    <h2 class="admin-field-heading">Mô tả & mở bán</h2>
+                    <div>
+                        <label class="form-label fw-semibold" for="description">Mô tả quyền lợi gói tập</label>
                         <textarea th:field="*{description}" rows="4" class="form-control"
                                   th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"
                                   placeholder="Mô tả chi tiết quyền lợi: Sử dụng toàn bộ máy tập, xông hơi, khăn tập miễn phí..."></textarea>
                         <div class="invalid-feedback" th:errors="*{description}"></div>
                     </div>
 
-                    <div class="form-check form-switch mb-4">
+                    <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" th:field="*{active}" id="planActiveSwitch">
                         <label class="form-check-label fw-medium" for="planActiveSwitch">Kích hoạt mở bán gói tập này</label>
                     </div>
 
-                    <button type="submit" class="btn btn-utefit px-4 py-2 rounded-pill">
+                    <div class="admin-editor-actions"><button type="submit" class="btn btn-utefit px-4 py-2">
                         <i class="bi bi-save me-1"></i> <span th:text="${isEdit ? 'Lưu thay đổi' : 'Tạo gói tập'}"></span>
-                    </button>
+                    </button></div>
                 </form>
-            </div>
+            </div></div>
         </main>
     </div>
 </div>

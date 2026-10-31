@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<section th:fragment="finale" class="pf-story" aria-label="Chọn bước tiếp theo cùng UTEFit">
+    <div class="pf-stage">
+        <div class="pf-entry">
+            <section id="bang-gia" class="pf-panel pf-plans" aria-labelledby="pf-plans-title">
+                <header class="pf-heading"><div><h2 id="pf-plans-title">Chọn gói.<br>Bắt đầu.</h2></div><a class="pf-text-link" th:href="@{/membership-plans}">Xem bảng giá đầy đủ ↗</a></header>
+                <div class="pf-plan-list" th:unless="${#lists.isEmpty(featuredPlans)}">
+                    <article class="pf-plan" th:each="p : ${featuredPlans}">
+                        <div><h3 th:text="${@membershipDisplay.name(p.name)}" data-uf-label>Tên gói</h3><p th:text="${p.description}">Mô tả gói</p></div>
+                        <div class="pf-plan-price"><strong th:text="${@membershipDisplay.money(p.price)}" data-uf-label>Giá gói</strong><span th:text="${p.durationDescription}">Thời hạn</span></div>
+                        <a class="pf-button" th:href="@{/member/memberships(planId=${p.id})}" th:aria-label="|Đăng ký ${p.name}|">Đăng ký gói tập ↗</a>
+                    </article>
+                </div>
+                <p class="pf-empty" th:if="${#lists.isEmpty(featuredPlans)}">Chưa có gói tập hoạt động. Xem bảng giá để cập nhật thông tin.</p>
+            </section>
+            <section id="danh-gia" class="pf-panel pf-reviews" aria-labelledby="pf-reviews-title">
+                <header class="pf-heading"><div><h2 id="pf-reviews-title">Hội viên<br>đánh giá.</h2></div><a class="pf-text-link" th:href="@{/reviews}">Xem tất cả đánh giá ↗</a></header>
+                <div class="pf-review-list" th:unless="${#lists.isEmpty(featuredReviews)}">
+                    <article class="pf-review" th:each="r : ${featuredReviews}">
+                        <p class="pf-rating" th:text="|${r.rating} / 5 sao|">Đánh giá</p>
+                        <h3 th:text="${r.branch}" data-uf-label>Chi nhánh</h3>
+                        <p th:if="${r.trainer != null}" th:text="|PT: ${r.trainer}|"></p>
+                        <blockquote th:text="${r.comment ?: 'Không có nhận xét'}">Nhận xét</blockquote>
+                        <video th:if="${r.videoUrl != null}" th:src="${r.videoUrl}" controls playsinline preload="none" aria-label="Video đánh giá của hội viên"></video>
+                        <img th:if="${r.imageUrl != null}" th:src="${r.imageUrl}" alt="Ảnh đánh giá của hội viên" loading="lazy" decoding="async">
+                        <p class="pf-author" th:text="|Hội viên ${r.author}|"></p>
+                    </article>
+                </div>
+                <p class="pf-empty" th:if="${#lists.isEmpty(featuredReviews)}">Chưa có đánh giá nổi bật. Bạn có thể tìm hiểu trải nghiệm hội viên tại trang đánh giá.</p>
+            </section>
+            <section id="bat-dau" class="pf-panel pf-conversion" aria-labelledby="pf-conversion-title">
+                <h2 id="pf-conversion-title"><span>Đến lượt</span><span>bạn.</span></h2>
+                <div class="pf-conversion-bottom"><p>Chọn chi nhánh, tìm gói tập phù hợp.<br>Xây dựng nhịp luyện tập của riêng bạn.</p><a class="pf-button" th:href="@{/register}">Tham gia UTEFit ↗</a></div>
+            </section>
+            <nav class="pf-chapters" aria-label="Bước tiếp theo"><a href="#bang-gia">Gói tập</a><a href="#danh-gia">Đánh giá</a><a href="#bat-dau">Bắt đầu</a></nav>
+        </div>
+    </div>
+</section>
+</body>
+</html>

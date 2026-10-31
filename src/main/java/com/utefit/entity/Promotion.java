@@ -19,6 +19,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class Promotion {
+    @Column(name = "min_order_amount", precision = 15, scale = 2) private BigDecimal minOrderAmount;
+    @Column(name = "max_discount_amount", precision = 15, scale = 2) private BigDecimal maxDiscountAmount;
+    @Column(name = "per_user_limit") private Integer perUserLimit;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

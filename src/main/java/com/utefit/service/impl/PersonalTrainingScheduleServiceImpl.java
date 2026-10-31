@@ -52,6 +52,8 @@ public class PersonalTrainingScheduleServiceImpl implements PersonalTrainingSche
             String title,
             String note
     ) {
+        com.utefit.validation.InputRules.check("title",title);
+        com.utefit.validation.InputRules.check("note",note);
         if (scheduleDate == null || startTime == null || endTime == null) {
             throw new IllegalArgumentException("Ngày và thời gian không được để trống.");
         }

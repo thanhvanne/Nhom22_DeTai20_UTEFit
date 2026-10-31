@@ -1,17 +1,61 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head('Khuyến mãi - UTEFit')}"></head>
-<body class="uf-theme">
-<header th:replace="~{fragments/header :: header}"></header>
-<main class="container py-5">
-<h1>Khuyến mãi gói tập</h1>
-<p>Nhập mã khi tạo đơn mua gói. Giá sau giảm được giữ trên đơn; mỗi đơn dùng một mã. Lượt ưu đãi được giữ khi tạo đơn thành công.</p>
-<p th:if="${#lists.isEmpty(promotions)}">Hiện chưa có ưu đãi đang áp dụng.</p>
-<div class="row g-3"><article class="col-md-4" th:each="p : ${promotions}"><div class="card p-4 h-100">
-<h2 th:text="${p.code}"></h2><p>Giảm <strong th:text="${p.discountPercent}"></strong>%</p>
-<p>Đến ngày <span th:text="${p.endDate}"></span> · Còn <span th:text="${p.quantity}"></span> lượt</p>
-<a class="btn btn-primary" th:href="@{/member/memberships}">Chọn gói và áp mã</a>
-</div></article></div>
-</main><footer th:replace="~{fragments/footer :: footer}"></footer>
-<div th:replace="~{fragments/scripts :: scripts}"></div>
+<head th:replace="${personalized} ? ~{member/fragments/layout :: head('Khuyến mãi - UTEFit')} : ~{fragments/head :: head('Khuyến mãi - UTEFit')}"></head>
+<body th:class="${personalized} ? 'ut-member-layout uf-theme uf-area-member uf-page-member-promotions uf-member' : 'uf-theme uf-area-guest uf-page-guest-promotions'">
+<link rel="stylesheet" th:href="@{/css/utefit-loyalty.css(v=1)}">
+<link th:if="${personalized}" rel="stylesheet" th:href="@{/css/utefit-member-promotions.css(v=1)}">
+<header th:replace="${personalized} ? ~{member/fragments/layout :: header} : ~{fragments/header :: header}"></header>
+<main class="uf-promotions" id="utefit-content">
+    <section class="uf-promo-intro" aria-labelledby="uf-promo-title">
+        <div class="uf-promo-intro-copy">
+            <p class="uf-public-kicker">UTEFIT · ƯU ĐÃI TẬP LUYỆN</p>
+            <h1 id="uf-promo-title">Tập bền bỉ.<br><em>Nhận xứng đáng.</em></h1>
+            <p>Mỗi chặng tập luyện có một đặc quyền. Khám phá ưu đãi khởi đầu, gia hạn và quyền lợi hội viên UTEFit.</p>
+            <a class="uf-public-link" href="#uf-promo-list">Khám phá ưu đãi <span aria-hidden="true">↓</span></a>
+        </div>
+        <figure class="uf-promo-visual" aria-label="Đồ họa minh họa dụng cụ tập luyện">
+            <img th:src="@{/images/cinema-kettlebell-v2.webp}" width="896" height="1120" alt="Đồ họa minh họa tạ kettlebell graphite và vòng đồng" fetchpriority="high">
+            <figcaption>Mỗi buổi tập. Một bước tiến.</figcaption>
+        </figure>
+    </section>
+    <section class="uf-promo-directory uf-smart-offers" id="uf-promo-list" aria-labelledby="uf-smart-offers-title">
+        <p class="uf-promo-personalized" th:if="${personalized}">Dành riêng cho tài khoản của bạn</p>
+        <div class="uf-promo-heading"><h2 id="uf-smart-offers-title">Đặc quyền theo hành trình</h2><p th:text="${personalized ? 'Điều kiện được kiểm tra riêng cho tài khoản của bạn. Gói và giá cuối cùng được backend xác minh khi tạo đơn.' : 'Các chương trình công khai. Đăng nhập hội viên để xem điều kiện của riêng bạn.'}"></p></div>
+        <div class="uf-smart-offer-grid">
+            <article class="uf-smart-offer" th:each="program : ${programs}" th:classappend="|uf-offer-${program.kind.toLowerCase()} ${personalized and program.eligible ? 'is-personalized' : ''}|">
+                <div class="uf-smart-offer-top"><span th:text="${program.kind == 'WELCOME' ? 'Khách hàng mới' : program.kind == 'LOYAL' ? 'Khách hàng thân thiết' : program.kind == 'VALUE' ? 'Gói giá trị cao' : 'Đặc quyền hạng'}"></span><strong th:text="${program.benefit}"></strong></div>
+                <h3 th:text="${program.name}"></h3><p th:text="${program.condition}"></p>
+                <div class="uf-offer-state" th:classappend="${program.eligible ? 'is-eligible' : ''}" th:text="${program.status}"></div>
+                <a class="uf-public-link" th:href="@{/member/memberships}">Xem gói phù hợp <span aria-hidden="true">↗</span></a>
+            </article>
+        </div>
+        <div class="uf-offers-policy"><h3>Một đơn. Một ưu đãi tốt nhất.</h3><p>Tự động so sánh các ưu đãi theo tài khoản và giá gốc. Bạn vẫn có thể nhập mã khác để xem giá tương ứng. Không cộng dồn; giá đã chốt không đổi theo hạng mới.</p></div>
+    </section>
+    <section class="uf-promo-directory" aria-labelledby="uf-promo-list-title">
+        <div class="uf-promo-heading">
+            <h2 id="uf-promo-list-title">Mã khuyến mãi hiện hành</h2>
+            <p>Nhập mã khi tạo đơn mua gói. Giá sau giảm được giữ trên đơn; mỗi đơn dùng một mã. Lượt ưu đãi được giữ khi tạo đơn thành công.</p>
+        </div>
+        <p class="uf-promo-empty" th:if="${#lists.isEmpty(promotions)}">Hiện chưa có ưu đãi đang áp dụng.</p>
+        <div class="uf-promo-grid">
+            <article class="uf-promo-card" th:each="p : ${promotions}">
+                <div class="uf-promo-discount"><span>Ưu đãi gói tập</span><p>Giảm <strong th:text="${p.discountPercent}"></strong><span>%</span></p></div>
+                <div class="uf-promo-card-copy">
+                    <span class="uf-promo-code-label">Mã ưu đãi</span>
+                    <h3 th:text="${p.code}"></h3>
+                    <dl class="uf-promo-facts">
+                        <div><dt>Ngày hết hạn</dt><dd th:text="${p.endDate}"></dd></div>
+                        <div><dt>Lượt còn lại</dt><dd th:text="${p.quantity}"></dd></div>
+                        <div th:if="${p.minOrderAmount != null}"><dt>Giá gốc tối thiểu</dt><dd th:text="${@membershipDisplay.money(p.minOrderAmount)}"></dd></div>
+                        <div th:if="${p.maxDiscountAmount != null}"><dt>Giảm tối đa</dt><dd th:text="${@membershipDisplay.money(p.maxDiscountAmount)}"></dd></div>
+                        <div th:if="${p.perUserLimit != null}"><dt>Lượt / tài khoản</dt><dd th:text="${p.perUserLimit}"></dd></div>
+                    </dl>
+                    <p class="uf-offer-state" th:if="${personalized}" th:text="${p.perUserLimit != null and promotionUsage[p.id] >= p.perUserLimit ? 'Đã sử dụng hoặc giữ đủ lượt' : 'Chọn gói để kiểm tra điều kiện giá'}"></p>
+                    <a class="btn btn-primary" th:href="@{/member/memberships}">Chọn gói và áp mã <span aria-hidden="true">↗</span></a>
+                </div>
+            </article>
+        </div>
+    </section>
+</main><footer th:replace="${personalized} ? ~{member/fragments/layout :: footer} : ~{fragments/footer :: footer}"></footer>
+<div th:replace="${personalized} ? ~{member/fragments/layout :: scripts} : ~{fragments/scripts :: scripts}"></div>
 </body></html>

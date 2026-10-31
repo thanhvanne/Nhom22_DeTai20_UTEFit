@@ -1,0 +1,25 @@
+:root { --ut-validation-error: #b42318; }
+body.uf-area-member, body.uf-area-pt, body.uf-area-manager { --ut-validation-error: #ff9292; }
+.ut-field-error {
+    display: block;
+    width: 100%;
+    margin-top: .4rem;
+    color: var(--ut-validation-error) !important;
+    font-size: .875rem;
+    font-weight: 500;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+.ut-field-error[hidden] { display: none; }
+body input.is-invalid, body select.is-invalid, body textarea.is-invalid,
+body [aria-invalid="true"] {
+    border-color: var(--ut-validation-error) !important;
+    outline-color: var(--ut-validation-error);
+    background-image: none !important;
+}
+body input.is-invalid:focus, body select.is-invalid:focus, body textarea.is-invalid:focus {
+    box-shadow: 0 0 0 .18rem color-mix(in srgb, var(--ut-validation-error) 22%, transparent) !important;
+}
+.has-validation-error .u025-line i { border-color: var(--ut-validation-error) !important; }
+.has-validation-error .u025-lab { color: var(--ut-validation-error) !important; }
+body .ut-field-error + button { margin-top: .5rem; }

@@ -1,59 +1,60 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/layout :: head(${isEdit ? 'Cập nhật Chi nhánh' : 'Thêm Chi nhánh'})}"></head>
-<body class="uf-theme uf-area-admin uf-page-admin-branches-form">
-<div class="d-flex">
+<body class="uf-theme uf-area-admin uf-page-admin-branches-form uf-admin">
+<div class="admin-shell">
     <div th:replace="~{admin/fragments/layout :: sidebar}"></div>
 
-    <div class="flex-grow-1">
+    <div class="admin-workspace">
         <div th:replace="~{admin/fragments/layout :: topbar(${isEdit ? 'Cập nhật Chi nhánh' : 'Thêm Chi nhánh mới'})}"></div>
 
-        <main class="container-fluid px-4 pb-5">
+        <main class="admin-main" id="utefit-content" tabindex="-1">
             <div class="mb-3">
                 <a th:href="@{/admin/branches}" class="btn btn-outline-secondary btn-sm">
                     <i class="bi bi-arrow-left"></i> Quay lại danh sách
                 </a>
             </div>
 
-            <div class="card border-0 shadow-sm col-lg-8">
-                <div class="card-body p-4">
+            <div class="surface-card admin-editor">
+                <div class="admin-editor-body">
                     <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}" data-uf-label></div>
 
                     <form th:action="${isEdit ? '/admin/branches/' + branchForm.id + '/edit' : '/admin/branches/create'}"
-                          th:object="${branchForm}" method="post" enctype="multipart/form-data">
+                          th:object="${branchForm}" method="post" enctype="multipart/form-data" class="uf-edit-form admin-editor-fields">
+                        <h2 class="admin-field-heading">Thông tin chi nhánh</h2>
 
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Tên chi nhánh <span class="text-danger">*</span></label>
+                        <div>
+                            <label class="form-label fw-semibold" for="name">Tên chi nhánh <span class="text-danger">*</span></label>
                             <input type="text" th:field="*{name}" class="form-control"
                                    th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
                                    placeholder="VD: UTEFit Thủ Đức">
                             <div class="invalid-feedback" th:errors="*{name}"></div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Địa chỉ <span class="text-danger">*</span></label>
+                        <div>
+                            <label class="form-label fw-semibold" for="address">Địa chỉ <span class="text-danger">*</span></label>
                             <input type="text" th:field="*{address}" class="form-control"
                                    th:classappend="${#fields.hasErrors('address')} ? 'is-invalid'"
                                    placeholder="VD: 01 Võ Văn Ngân, TP. Thủ Đức">
                             <div class="invalid-feedback" th:errors="*{address}"></div>
                         </div>
 
-                        <div class="row g-3 mb-3">
+                        <div class="row g-3">
                             <div class="col-md-4">
-                                <label class="form-label fw-semibold">Số điện thoại</label>
+                                <label class="form-label fw-semibold" for="phone">Số điện thoại</label>
                                 <input type="text" th:field="*{phone}" class="form-control"
                                        th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid'"
                                        placeholder="0901234567">
                                 <div class="invalid-feedback" th:errors="*{phone}"></div>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label fw-semibold">Giờ mở cửa <span class="text-danger">*</span></label>
+                                <label class="form-label fw-semibold" for="openingTime">Giờ mở cửa <span class="text-danger">*</span></label>
                                 <input type="time" th:field="*{openingTime}" class="form-control"
                                        th:classappend="${#fields.hasErrors('openingTime')} ? 'is-invalid'">
                                 <div class="invalid-feedback" th:errors="*{openingTime}"></div>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label fw-semibold">Giờ đóng cửa <span class="text-danger">*</span></label>
+                                <label class="form-label fw-semibold" for="closingTime">Giờ đóng cửa <span class="text-danger">*</span></label>
                                 <input type="time" th:field="*{closingTime}" class="form-control"
                                        th:classappend="${#fields.hasErrors('closingTime')} ? 'is-invalid'">
                                 <div class="invalid-feedback" th:errors="*{closingTime}"></div>
@@ -61,10 +62,10 @@
                         </div>
 
                         <!-- Ô chọn file ảnh tích hợp Cloudinary -->
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Hình ảnh chi nhánh (Cloudinary)</label>
-                            <input type="file" name="imageFile" class="form-control" accept="image/*">
-                            <div class="form-text">Hỗ trợ định dạng JPG, PNG, WEBP (Tối đa 5MB).</div>
+                        <div>
+                            <label class="form-label fw-semibold" for="admin-branches-form-html-imageFile">Hình ảnh chi nhánh (Cloudinary)</label>
+                        <input type="file" name="imageFile" class="form-control" accept="image/jpeg,image/png,image/gif" id="admin-branches-form-html-imageFile">
+                        <div class="form-text">Hỗ trợ định dạng JPG, PNG, GIF (Tối đa 5MB). Dùng ảnh AI/demo mô phỏng UTEFit của bạn. Ảnh được hiển thị với nhãn “Ảnh minh họa”, không cần thêm bước duyệt.</div>
 
                             <!-- Giữ lại các giá trị ẩn để không bị mất ảnh cũ nếu không chọn file mới -->
                             <input type="hidden" th:field="*{imageUrl}" />
@@ -72,28 +73,27 @@
 
                             <!-- Hiển thị ảnh hiện tại nếu đã có ảnh -->
                             <div class="mt-3" th:if="${branchForm.imageUrl != null and !branchForm.imageUrl.isEmpty()}">
-                                <p class="text-muted small mb-1 fw-medium">Ảnh hiện tại trên hệ thống:</p>
-                                <img th:src="${branchForm.imageUrl}" alt="Branch Image"
-                                     style="width: 180px; height: 110px; object-fit: cover;"
-                                     class="rounded border shadow-sm">
+                                <th:block th:replace="~{fragments/branch-media :: assets}"></th:block>
+                                <p class="text-muted small mb-1 fw-medium">Ảnh đang lưu cho chi nhánh. Ảnh demo được dùng cùng URL ở Public và Hội viên; ảnh nguồn có thương hiệu gym khác cần được thay thế.</p>
+                                <figure th:replace="~{fragments/branch-media :: adminPreview(${branchForm})}"></figure>
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Mô tả chi nhánh</label>
+                        <div>
+                            <label class="form-label fw-semibold" for="description">Mô tả chi nhánh</label>
                             <textarea th:field="*{description}" rows="3" class="form-control"
                                       th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"></textarea>
                             <div class="invalid-feedback" th:errors="*{description}"></div>
                         </div>
 
-                        <div class="form-check form-switch mb-4">
+                        <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" th:field="*{active}" id="activeSwitch">
                             <label class="form-check-label" for="activeSwitch">Chi nhánh đang hoạt động</label>
                         </div>
 
-                        <button type="submit" class="btn btn-utefit px-4">
+                        <div class="admin-editor-actions"><button type="submit" class="btn btn-utefit px-4">
                             <i class="bi bi-save me-1"></i> <span th:text="${isEdit ? 'Lưu thay đổi' : 'Tạo chi nhánh'}"></span>
-                        </button>
+                        </button></div>
                     </form>
                 </div>
             </div>

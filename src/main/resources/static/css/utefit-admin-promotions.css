@@ -1,0 +1,63 @@
+.uf-admin .promotion-programs { overflow: hidden; }
+.uf-admin .promotion-section-heading { display: flex; align-items: start; justify-content: space-between; gap: 24px; padding: 24px 24px 8px; }
+.uf-admin .promotion-section-heading h2 { margin: 0 0 8px; font-size: 20px; font-weight: 700; }
+.uf-admin .promotion-section-heading p, .uf-admin .program-condition, .uf-admin .program-footnote { color: var(--admin-muted); font-size: 13px; line-height: 1.65; }
+.uf-admin .promotion-section-heading p { margin: 0; max-width: 65ch; }
+.uf-admin .promotion-section-heading > a { flex-shrink: 0; }
+.uf-admin .promotion-program-table { margin: 0; font-size: 13px; }
+.uf-admin .promotion-program-table :is(th, td) { padding: 18px 16px; }
+.uf-admin .promotion-program-table :is(th, td):first-child { padding-left: 24px; }
+.uf-admin .promotion-program-table :is(th, td):last-child { padding-right: 24px; }
+.uf-admin .promotion-program-table th { color: var(--admin-muted); font-weight: 500; }
+.uf-admin .promotion-program-table td:first-child { min-width: 155px; }
+.uf-admin .program-kind { display: block; color: var(--admin-muted); font-size: 12px; margin-top: 6px; }
+.uf-admin .program-benefit { display: block; font-size: 18px; font-variant-numeric: tabular-nums; margin-bottom: 6px; }
+.uf-admin .program-condition { margin: 0; min-width: 200px; max-width: 48ch; }
+.uf-admin .program-usage { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.uf-admin .program-usage strong { font-size: 18px; }
+.uf-admin .program-usage small { display: block; color: var(--admin-muted); font-size: 12px; }
+.uf-admin .program-status { display: inline-flex; align-items: center; gap: 6px; padding: 5px 8px; border-radius: 4px; color: #515964; background: #eef0f3; font-size: 12px; font-weight: 500; white-space: nowrap; }
+.uf-admin .program-status.is-active { background: #e7f5ed; color: #17633d; }
+.uf-admin .program-actions { display: flex; flex-wrap: wrap; gap: 8px; min-width: 104px; }
+.uf-admin .program-actions .btn { white-space: nowrap; min-height: 36px; }
+.uf-admin .btn-program-enable { color: #17633d; border: 1px solid #92b8a3; background: #fff; }
+.uf-admin .btn-program-enable:hover { color: #104c2d; background: #e7f5ed; border-color: #17633d; }
+.uf-admin .program-footnote { padding: 16px 24px; margin: 0; border-top: 1px solid var(--admin-border); }
+.uf-admin .program-back { display: inline-block; color: var(--admin-muted); text-decoration: none; margin-bottom: 20px; font-size: 13px; }
+.uf-admin .program-editor-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, .42fr); gap: 24px; align-items: start; }
+.uf-admin .program-editor, .uf-admin .program-editor-summary { padding: 24px; min-width: 0; }
+.uf-admin .program-field-section + .program-field-section { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--admin-border); }
+.uf-admin .program-field-section h3, .uf-admin .program-editor-summary h3 { font-size: 16px; font-weight: 600; margin-bottom: 20px; }
+.uf-admin .program-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.uf-admin .program-fields .form-label { display: block; font-size: 13px; margin-bottom: 8px; }
+.uf-admin .program-fields :is(input, select) { width: 100%; min-height: 42px; min-width: 0; }
+.uf-admin .program-fields input[readonly] { background: #f5f6f8; color: var(--admin-muted); }
+.uf-admin .program-fields small, .uf-admin .program-field-note { display: block; margin-top: 8px; color: var(--admin-muted); font-size: 12px; line-height: 1.65; }
+.uf-admin .program-field-note { margin-bottom: 0; }
+.uf-admin .program-save-row { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--admin-border); margin-top: 28px; padding-top: 24px; }
+.uf-admin .program-editor-summary { position: sticky; top: 104px; }
+.uf-admin .program-editor-summary p { color: var(--admin-muted); font-size: 13px; line-height: 1.8; margin-top: 16px; overflow-wrap: anywhere; }
+.uf-admin .program-editor-summary small { display: block; color: var(--admin-muted); font-size: 12px; margin-top: 10px; overflow-wrap: anywhere; }
+.uf-admin .program-editor-summary h3 { margin-top: 16px; margin-bottom: 12px; }
+.uf-admin .program-summary-benefit { display: block; font-size: 28px; margin-bottom: 16px; font-variant-numeric: tabular-nums; }
+.uf-admin [data-program-form][aria-busy="true"] { cursor: progress; }
+.uf-admin [data-program-form] .btn { transition: background-color 160ms ease, transform 160ms ease; }
+.uf-admin [data-program-form] .btn:active { transform: translateY(1px); }
+@media (max-width: 1100px) { .uf-admin .program-editor-grid { grid-template-columns: minmax(0, 1fr); } .uf-admin .program-editor-summary { position: static; } }
+@media (max-width: 767px) {
+    .uf-admin .promotion-section-heading { flex-direction: column; gap: 12px; padding: 20px; }
+    .uf-admin .promotion-program-table, .uf-admin .promotion-program-table :is(tbody, tr, td) { display: block; width: 100%; }
+    .uf-admin .promotion-program-table thead { display: none; }
+    .uf-admin .promotion-program-table.admin-data-table tbody tr { display: block; padding: 16px 20px; border-top: 1px solid var(--admin-border); }
+    .uf-admin .promotion-program-table td { padding: 8px 0 !important; border: 0; min-width: 0 !important; text-align: left; }
+    .uf-admin .promotion-program-table td::before { display: none; }
+    .uf-admin .program-condition { min-width: 0; max-width: none; }
+    .uf-admin .program-usage { display: flex !important; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .uf-admin .program-usage small { display: inline; }
+    .uf-admin .program-footnote { padding: 16px 20px; }
+    .uf-admin .program-editor, .uf-admin .program-editor-summary { padding: 20px; }
+    .uf-admin .program-fields { grid-template-columns: minmax(0, 1fr); }
+    .uf-admin .program-save-row { flex-direction: column-reverse; }
+    .uf-admin .program-save-row .btn { width: 100%; min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) { .uf-admin [data-program-form] .btn { transition: none; transform: none; } }

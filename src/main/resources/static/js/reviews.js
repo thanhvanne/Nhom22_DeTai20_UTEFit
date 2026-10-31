@@ -53,13 +53,14 @@
         }
         video.setCustomValidity(message);
         if (error) error.textContent = message;
+        globalThis.UTEFitValidation?.setFieldError(video, message);
         return !message;
     };
     video.addEventListener('change', validate);
     form?.addEventListener('submit', event => {
         if (!validate()) {
             event.preventDefault();
-            video.reportValidity();
+            video.focus();
         }
     });
 })();

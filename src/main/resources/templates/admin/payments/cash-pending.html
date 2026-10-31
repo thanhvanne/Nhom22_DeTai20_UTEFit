@@ -6,32 +6,27 @@
 <head th:replace="~{admin/fragments/layout :: head('Duyệt thanh toán CASH')}">
 </head>
 
-<body class="uf-theme uf-area-admin uf-page-admin-payments-cash-pending">
+<body class="uf-theme uf-area-admin uf-page-admin-payments-cash-pending uf-admin">
 
-<div class="d-flex">
+<div class="admin-shell">
 
     <aside th:replace="~{admin/fragments/layout :: sidebar}">
     </aside>
 
-    <div class="flex-grow-1 min-vh-100"
-         style="min-width:0">
+    <div class="admin-workspace">
 
         <nav th:replace="~{admin/fragments/layout :: topbar('Thanh toán tiền mặt')}">
         </nav>
 
-        <main class="container-fluid px-4 pb-5">
+        <main class="admin-main" id="utefit-content" tabindex="-1">
 
-            <div class="admin-hero-banner mb-4">
-
-                <span class="admin-eyebrow">
-                    UTEFIT PAYMENTS
-                </span>
+            <div class="admin-page-heading mb-4">
 
                 <h2 class="fw-bold mb-2">
                     Xác nhận thanh toán tiền mặt
                 </h2>
 
-                <p class="mb-0 text-white-50">
+                <p class="mb-0 text-muted">
                     Chỉ nhấn xác nhận khi nhân viên
                     đã thực sự nhận đủ tiền tại quầy.
                 </p>
@@ -50,12 +45,11 @@
 
             <div class="surface-card p-4">
 
-                <div class="d-flex justify-content-between
-                            align-items-center mb-4 flex-wrap gap-2">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
 
-                    <h4 class="fw-bold mb-0">
+                    <h2 class="fw-bold mb-0">
                         Giao dịch đang chờ
-                    </h4>
+                    </h2>
 
                     <a class="btn btn-outline-secondary btn-sm"
                        th:href="@{/admin/payments/cash-pending}">
@@ -66,7 +60,7 @@
 
                 <div class="table-responsive">
 
-                    <table class="table align-middle">
+                    <table class="table align-middle admin-data-table">
 
                         <thead>
                         <tr>
@@ -84,32 +78,32 @@
 
                         <tr th:each="p : ${payments}">
 
-                            <td th:text="${p.id}">
+                            <td th:text="${p.id}" data-label="Mã GD">
                                 1
                             </td>
 
-                            <td th:text="${p.memberEmail}">
-                                member@example.com
+                            <td th:text="${p.memberEmail}" data-label="Email Hội viên" class="admin-record-primary">
+                                Email hội viên
                             </td>
 
-                            <td th:text="${@membershipDisplay.name(p.planName)}">
+                            <td th:text="${@membershipDisplay.name(p.planName)}" data-label="Gói tập">
                                 Gói tập
                             </td>
 
-                            <td th:text="${@membershipDisplay.name(p.branchName)}">
+                            <td th:text="${@membershipDisplay.name(p.branchName)}" data-label="Chi nhánh">
                                 Chi nhánh
                             </td>
 
-                            <td class="fw-bold"
-                                th:text="${@membershipDisplay.money(p.amount)}">
+                            <td class="fw-bold admin-number"
+                                th:text="${@membershipDisplay.money(p.amount)}" data-label="Số tiền">
                                 0 VND
                             </td>
 
-                            <td th:text="${#temporals.format(p.createdAt, 'dd/MM/yyyy HH:mm')}">
+                            <td th:text="${#temporals.format(p.createdAt, 'dd/MM/yyyy HH:mm')}" data-label="Ngày tạo">
                                 01/01/2026
                             </td>
 
-                            <td>
+                            <td data-label="Xác nhận" class="admin-record-actions">
 
                                 <form th:action="@{/admin/payments/{id}/confirm-cash(id=${p.id})}"
                                       method="post">

@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head th:replace="~{fragments/head :: head('Thông báo - UTEFit')}"></head>
+<head th:replace="${#authorization.expression('hasRole(''MEMBER'')')} ? ~{member/fragments/layout :: head('Thông báo - UTEFit')} : ~{fragments/head :: head('Thông báo - UTEFit')}"></head>
 
-<body class="bg-dark uf-theme uf-area-notification uf-page-notification-list">
-<header th:replace="~{fragments/header :: header}"></header>
+<body class="bg-dark uf-theme uf-area-notification uf-page-notification-list" th:class="${#authorization.expression('hasRole(''MEMBER'')')} ? 'uf-theme uf-area-notification uf-page-notification-list uf-member' : 'bg-dark uf-theme uf-area-notification uf-page-notification-list'">
+<header th:replace="${#authorization.expression('hasRole(''MEMBER'')')} ? ~{member/fragments/layout :: header} : ~{fragments/header :: header}"></header>
 
-<main class="py-5">
+<main class="py-5" th:replace="${#authorization.expression('hasRole(''MEMBER'')')} ? ~{member/fragments/notifications :: content} : _">
     <style>
         .uf-page-notification-list .notify-page-bg{
             background: var(--uf-canvas);
@@ -43,7 +43,7 @@
 
             <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                 <div class="notify-hero">
-                    <h2 class="mb-1 text-white">Thông báo</h2>
+                    <h2 class="mb-1 text-white" th:replace="${#authorization.expression('hasRole(''PT'')')} ? ~{pt/fragments/layout :: notificationTitle} : _">Thông báo</h2>
                     <div class="small notify-muted">Theo dõi thông báo về PT, lịch tập và các lớp đã đăng ký.</div>
                 </div>
 
@@ -108,7 +108,7 @@
     </div>
 </main>
 
-<footer th:replace="~{fragments/footer :: footer}"></footer>
-<div th:replace="~{fragments/scripts :: scripts}"></div>
+<footer th:replace="${#authorization.expression('hasRole(''MEMBER'')')} ? ~{member/fragments/layout :: footer} : ~{fragments/footer :: footer}"></footer>
+<div th:replace="${#authorization.expression('hasRole(''MEMBER'')')} ? ~{member/fragments/layout :: scripts} : ~{fragments/scripts :: scripts}"></div>
 </body>
 </html>

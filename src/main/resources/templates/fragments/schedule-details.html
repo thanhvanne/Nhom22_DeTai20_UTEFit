@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="assets">
+    <link rel="stylesheet" th:href="@{/css/utefit-schedule-details.css(v=1)}">
+    <script defer th:src="@{/js/utefit-schedule-details.js(v=1)}"></script>
+</th:block>
+<th:block th:fragment="details(slot, date, dialogId)">
+    <button class="ut-session-trigger" type="button" data-session-open th:attr="aria-controls=${dialogId}" aria-haspopup="dialog">Chi tiết</button>
+    <dialog class="ut-session-dialog" th:id="${dialogId}" th:attr="aria-labelledby=${dialogId + '-title'}">
+        <div class="ut-session-content">
+            <div class="ut-session-heading">
+                <div>
+                    <p class="ut-session-kicker" th:text="${slot.kind == 'PT' ? 'HUẤN LUYỆN · PT 1:1' : 'TẬP LUYỆN · LỚP NHÓM'}"></p>
+                    <h2 th:id="${dialogId + '-title'}" th:text="${slot.title}"></h2>
+                </div>
+                <button class="ut-session-close" type="button" data-session-close aria-label="Đóng chi tiết buổi tập" autofocus>×</button>
+            </div>
+            <dl class="ut-session-facts">
+                <div>
+                    <dt><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 11h18"/></svg>Ngày tập</dt>
+                    <dd th:text="${#temporals.format(date, 'dd/MM/yyyy')}"></dd>
+                </div>
+                <div>
+                    <dt><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Thời gian</dt>
+                    <dd th:text="|${#temporals.format(slot.start, 'HH:mm')} – ${#temporals.format(slot.end, 'HH:mm')}|"></dd>
+                </div>
+                <div th:if="${not #strings.isEmpty(slot.branchName)}">
+                    <dt><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>Chi nhánh</dt>
+                    <dd th:text="${slot.branchName}"></dd>
+                </div>
+                <div th:if="${not #strings.isEmpty(slot.room)}"><dt>Phòng tập</dt><dd th:text="${slot.room}"></dd></div>
+                <div th:if="${not #strings.isEmpty(slot.trainerName)}">
+                    <dt><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg>Huấn luyện viên</dt>
+                    <dd th:text="${slot.trainerName}"></dd>
+                </div>
+                <div th:if="${not #strings.isEmpty(slot.memberName)}"><dt>Hội viên</dt><dd th:text="${slot.memberName}"></dd></div>
+                <div>
+                    <dt><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>Trạng thái</dt>
+                    <dd><span class="ut-session-status" th:text="${slot.status}" data-session-status></span></dd>
+                </div>
+                <div class="ut-session-note" th:if="${not #strings.isEmpty(slot.note)}"><dt>Ghi chú</dt><dd th:text="${slot.note}"></dd></div>
+            </dl>
+            <div class="ut-session-footer"><button type="button" data-session-close>Đóng chi tiết</button></div>
+        </div>
+    </dialog>
+</th:block>
+</body>
+</html>

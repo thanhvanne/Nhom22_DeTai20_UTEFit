@@ -113,7 +113,7 @@
 
                 <!-- Header gradient -->
                 <div class="schedule-header">
-                    <h2>Tạo lịch tập cá nhân</h2>
+                    <h1>Tạo lịch tập cá nhân</h1>
                     <p>Thiết lập buổi tập 1–1 cho hội viên đã được bạn chấp nhận yêu cầu.</p>
                 </div>
 
@@ -139,7 +139,7 @@
                     </div>
 
                     <!-- Form tạo lịch -->
-                    <form th:action="@{/pt/personal-schedules/create}" method="post">
+                    <form th:action="@{/pt/personal-schedules/create}" method="post" data-staff-submit>
                         <input type="hidden" name="memberId" th:value="${member.id}"/>
 
                         <div class="row g-3 mb-3">

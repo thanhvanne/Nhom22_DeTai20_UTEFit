@@ -36,6 +36,10 @@ public class PtProfileService {
     @Transactional
     public void updateMyProfile(String email, String specialization, Integer years,
                                 String bio, MultipartFile avatar) {
+        com.utefit.validation.InputRules.require("specialization",specialization);
+        com.utefit.validation.InputRules.require("yearsExperience",years == null ? null : years.toString());
+        String bioError = com.utefit.validation.InputRules.error("bio",bio);
+        if (bioError != null) throw new com.utefit.validation.InputViolationException(java.util.Map.of("bio",bioError));
         Trainer trainer = myProfile(email);
         if (specialization == null || specialization.trim().length() > 255
                 || years == null || years < 0 || years > 70

@@ -35,12 +35,12 @@
                     <small th:text="${slot.status}" data-uf-label>Trạng thái</small>
                     <div class="ut-week-actions">
                         <a th:if="${slot.detailUrl != null}" th:href="${slot.detailUrl}">Chi tiết</a>
-                        <form th:if="${slot.cancelUrl != null}" method="post" th:action="${slot.cancelUrl}"
+                        <form th:if="${slot.cancelUrl != null}" method="post" th:action="${slot.cancelUrl}" data-staff-submit
                               onsubmit="return confirm('Bạn chắc chắn muốn hủy lịch này?')">
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                             <input type="hidden" name="weekStart" th:value="${week.start}">
                             <button type="submit">Hủy</button></form>
-                        <form th:if="${slot.completeUrl != null}" method="post" th:action="${slot.completeUrl}"
+                        <form th:if="${slot.completeUrl != null}" method="post" th:action="${slot.completeUrl}" data-staff-submit
                               onsubmit="return confirm('Xác nhận hoàn thành buổi PT theo điều kiện check-in?')">
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                             <input type="hidden" name="weekStart" th:value="${week.start}">

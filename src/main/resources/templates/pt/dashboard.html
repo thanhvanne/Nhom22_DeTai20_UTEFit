@@ -1,289 +1,69 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/head :: head('PT Dashboard - UTEFit')}"></head>
-
-<body class="bg-dark uf-theme uf-area-pt uf-page-pt-dashboard">
+<body class="uf-theme uf-area-pt uf-page-pt-dashboard">
 <header th:replace="~{fragments/header :: header}"></header>
-
-<main class="py-5">
-
-    <!-- HERO FULL-WIDTH -->
-    <section class="pt-hero" data-uf-surface>
-        <div class="container position-relative py-5">
-
-            <div class="row g-4 align-items-center">
-                <!-- Left content -->
-                <div class="col-12 col-lg-8">
-                    <div class="pt-kicker mb-2">UTEFit • Huấn luyện viên</div>
-
-                    <h1 class="pt-hero-title mb-3">
-                        Khu vực huấn luyện viên<br class="d-none d-lg-block">
-                        UTEFit
-                    </h1>
-
-                    <p class="pt-hero-desc mb-3">
-                        Đây là không gian làm việc dành riêng cho huấn luyện viên cá nhân. Tại đây, bạn có thể theo dõi yêu cầu từ học viên,
-                        chủ động sắp xếp lịch tập 1–1 và quản lý các lớp được phân công một cách trực quan.
-                    </p>
-
-                    <p class="pt-hero-desc mb-0">
-                        Hãy dùng <strong>“Yêu cầu từ Hội viên”</strong> để phản hồi kịp thời, và <strong>“Lịch PT 1:1”</strong>
-                        để xây dựng lộ trình tập luyện phù hợp cho từng người.
-                    </p>
-
-                    <!-- Quick actions (gọn, hữu dụng) -->
-                    <div class="d-flex flex-wrap gap-2 mt-4">
-                        <a class="btn btn-primary" th:href="@{/pt/trainer-requests}">Yêu cầu Hội viên</a>
-                        <a class="btn btn-outline-light" th:href="@{/pt/personal-schedules}">Lịch PT 1:1</a>
-                        <a class="btn btn-outline-light" th:href="@{/pt/classes}">Lớp được phân công</a>
-                        <a class="btn btn-outline-light" th:href="@{/pt/chats}">Tin nhắn</a>
-                    </div>
-                </div>
-
-                <!-- Right profile -->
-                <div class="col-12 col-lg-4">
-                    <div class="pt-profile">
-                        <div class="pt-avatar">
-                            <img th:if="${dashboard.avatarUrl != null}"
-                                 th:src="${dashboard.avatarUrl}"
-                                 alt="Ảnh huấn luyện viên">
-                            <div th:if="${dashboard.avatarUrl == null}"
-                                 class="pt-avatar-fallback"
-                                 th:text="${#strings.isEmpty(dashboard.trainerName) ? 'PT' : #strings.substring(dashboard.trainerName,0,1)}">
-                                PT
-                            </div>
-                        </div>
-
-                        <div class="pt-profile-name"
-                             th:text="${#strings.isEmpty(dashboard.trainerName) ? 'Huấn luyện viên UTEFit' : dashboard.trainerName}">
-                            Huấn luyện viên UTEFit
-                        </div>
-
-                        <!-- Optional: nếu sau này bạn có branchName thì mở lại -->
-                        <div class="pt-profile-sub text-white-50">
-                            UTEFit
-                        </div>
-
-                        <!-- Optional mini stats (không phải card) -->
-                        <div class="pt-mini-stats mt-3">
-                            <div class="pt-mini-stat">
-                                <div class="pt-mini-stat-label">Tin nhắn</div>
-                                <div class="pt-mini-stat-value"
-                                     th:text="${dashboard.unreadMessageCount}">
-                                    0
-                                </div>
-                            </div>
-                            <div class="pt-mini-stat">
-                                <div class="pt-mini-stat-label">Thông báo</div>
-                                <div class="pt-mini-stat-value"
-                                     th:text="${dashboard.unreadNotificationCount}">
-                                    0
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mt-3 d-flex gap-2 justify-content-center">
-                            <a class="btn btn-sm btn-outline-light" th:href="@{/pt/profile}">Hồ sơ</a>
-                            <a class="btn btn-sm btn-outline-light" th:href="@{/notifications}">Thông báo</a>
-                        </div>
-                    </div>
-                </div>
+<main class="pt-dashboard">
+    <section class="pt-command-hero" data-uf-surface aria-labelledby="pt-command-title">
+        <div class="pt-command-copy">
+            <p class="pt-overline"><span aria-hidden="true"></span> UTEFIT / COACH CONTROL CENTER</p>
+            <h1 id="pt-command-title">Chủ động dẫn dắt.<br><em>Tạo nên bước tiến.</em></h1>
+            <p class="pt-command-description">Mỗi học viên, một mục tiêu. Quản lý lịch huấn luyện, kết nối và đồng hành cùng học viên — trong không gian làm việc của riêng bạn.</p>
+            <div class="pt-command-actions">
+                <a class="btn btn-primary" th:href="@{/pt/trainer-requests}">Yêu cầu Hội viên <span aria-hidden="true">↗</span></a>
+                <a class="btn btn-outline-light" th:href="@{/pt/personal-schedules}">Lịch PT 1:1 <span aria-hidden="true">→</span></a>
             </div>
-
+            <p class="pt-command-foot">Huấn luyện cá nhân <span aria-hidden="true">/</span> Lớp nhóm <span aria-hidden="true">/</span> Kết nối học viên</p>
         </div>
-    </section>
-
-    <!-- CONTENT (bên dưới) -->
-    <section class="container mt-5">
-        <div class="row g-4 align-items-stretch">
-
-            <!-- Panel trái -->
-            <div class="col-12 col-lg-7">
-                <div class="pt-panel h-100">
-                    <h3 class="pt-panel-title mb-3">Lịch tập cá nhân & lớp tại UTEFit</h3>
-
-                    <p class="pt-panel-text mb-3">
-                        Mỗi buổi tập là một cơ hội để bạn đồng hành cùng học viên: lắng nghe mục tiêu,
-                        đánh giá thể trạng và thiết kế bài tập phù hợp. Lịch PT 1–1 hiển thị theo tuần,
-                        giúp bạn quan sát nhanh toàn bộ lịch làm việc.
-                    </p>
-
-                    <p class="pt-panel-text mb-0">
-                        Kết hợp giữa buổi PT 1–1 và lớp nhóm, UTEFit hỗ trợ bạn tối ưu hiệu quả huấn luyện
-                        mà vẫn đảm bảo sự cân bằng thời gian.
-                    </p>
-                </div>
+        <aside class="pt-coach-card" aria-label="Không gian huấn luyện viên">
+            <div class="pt-coach-heading"><span>HỒ SƠ HUẤN LUYỆN</span><svg viewBox="0 0 40 24" aria-hidden="true"><path d="m2 20 9-16 9 16L30 4l8 8"/></svg></div>
+            <div class="pt-coach-identity">
+                <a class="pt-coach-avatar" th:href="@{/pt/profile}" aria-label="Mở hồ sơ huấn luyện viên">
+                    <img th:if="${dashboard.avatarUrl != null}" th:src="${dashboard.avatarUrl}" alt="Ảnh huấn luyện viên">
+                    <span th:if="${dashboard.avatarUrl == null}" th:text="${#strings.isEmpty(dashboard.trainerName) ? 'PT' : #strings.substring(dashboard.trainerName,0,1)}">PT</span>
+                </a>
+                <div><h2 th:text="${#strings.isEmpty(dashboard.trainerName) ? 'Huấn luyện viên UTEFit' : dashboard.trainerName}">Huấn luyện viên UTEFit</h2><p class="pt-coach-role">Huấn luyện viên cá nhân</p></div>
             </div>
-
-            <!-- Panel phải (tips) -->
-            <div class="col-12 col-lg-5">
-                <div class="pt-panel pt-panel-accent h-100">
-                    <div class="pt-panel-kicker mb-2">Gợi ý thao tác nhanh</div>
-
-                    <ul class="pt-list mb-0">
-                        <li>Vào <strong>“Lịch PT 1:1”</strong> để xem lịch theo thời khóa biểu tuần.</li>
-                        <li>Dùng <strong>“Yêu cầu từ Hội viên”</strong> để chấp nhận hoặc từ chối yêu cầu PT đang chờ.</li>
-                        <li>Kiểm tra <strong>Tin nhắn</strong> & <strong>Thông báo</strong> trên thanh điều hướng để phản hồi kịp thời.</li>
-                    </ul>
-
-                    <div class="d-flex flex-wrap gap-2 mt-4">
-                        <a class="btn btn-sm btn-outline-light" th:href="@{/pt/trainer-requests}">Mở yêu cầu</a>
-                        <a class="btn btn-sm btn-outline-light" th:href="@{/pt/personal-schedules}">Mở lịch PT</a>
-                    </div>
-                </div>
+            <div class="pt-coach-stats">
+                <a th:href="@{/pt/chats}"><span>Tin nhắn chưa đọc</span><strong th:text="${dashboard.unreadMessageCount}">0</strong><span aria-hidden="true">↗</span></a>
+                <a th:href="@{/notifications}"><span>Thông báo mới</span><strong th:text="${dashboard.unreadNotificationCount}">0</strong><span aria-hidden="true">↗</span></a>
             </div>
-
-        </div>
+            <div class="pt-coach-actions"><a class="btn btn-outline-light" th:href="@{/pt/profile}">Hồ sơ</a><a class="btn pt-ghost" th:href="@{/notifications}">Thông báo <span aria-hidden="true">↗</span></a></div>
+        </aside>
     </section>
-
+    <section class="pt-workload" aria-label="Tóm tắt công việc">
+        <div><span>Yêu cầu gần đây</span><strong th:text="${dashboard.pendingRequests == null ? '—' : #lists.size(dashboard.pendingRequests)}">—</strong><small>Tối đa 5 yêu cầu chờ phản hồi</small></div>
+        <div><span>Lịch huấn luyện sắp tới</span><strong th:text="${dashboard.upcomingSchedules == null ? '—' : #lists.size(dashboard.upcomingSchedules)}">—</strong><small>Lớp nhóm &amp; buổi PT trong 7 ngày tới</small></div>
+        <a th:href="@{/pt/classes}"><svg aria-hidden="true"><use href="/images/utefit-icons.svg#calendar"></use></svg><span>Lớp được phân công<small>Xem thời khóa biểu lớp nhóm</small></span><span aria-hidden="true">↗</span></a>
+        <a th:href="@{/pt/chats}"><svg aria-hidden="true"><use href="/images/utefit-icons.svg#message"></use></svg><span>Tin nhắn<small>Đồng hành cùng học viên</small></span><span aria-hidden="true">↗</span></a>
+    </section>
+    <div class="pt-dashboard-grid">
+        <section class="pt-work-panel" aria-labelledby="pt-upcoming-title">
+            <div class="pt-panel-heading"><div><p class="pt-overline">KẾ HOẠCH HUẤN LUYỆN</p><h2 id="pt-upcoming-title">Lịch tập cá nhân &amp; lớp nhóm</h2></div><a th:href="@{/pt/personal-schedules}">Mở lịch PT <span aria-hidden="true">↗</span></a></div>
+            <div class="pt-schedule-list">
+                <article class="pt-upcoming-row" th:each="slot, slotIndex : ${dashboard.upcomingSchedules}" th:if="${slotIndex.index < 3}">
+                    <div class="pt-date-tile"><strong th:text="${#temporals.format(slot.date,'dd')}"></strong><span th:text="${#temporals.format(slot.date,'MM/yyyy')}"></span></div>
+                    <div class="pt-upcoming-copy"><span class="pt-kind" th:text="${slot.type == 'PERSONAL' ? 'PT 1:1' : 'Lớp nhóm'}"></span><h3 th:text="${slot.title}"></h3><p><time th:text="|${#temporals.format(slot.startTime,'HH:mm')} – ${#temporals.format(slot.endTime,'HH:mm')}|"></time><span th:if="${slot.memberName != null}" th:text="| · ${slot.memberName}|"></span></p></div>
+                </article>
+                <div class="pt-empty" th:if="${#lists.isEmpty(dashboard.upcomingSchedules)}"><svg aria-hidden="true"><use href="/images/utefit-icons.svg#calendar"></use></svg><h3>Chưa có lịch tập sắp tới</h3><p>Xem thời khóa biểu hoặc sắp xếp buổi 1:1 cho học viên đã được chấp nhận.</p><a class="btn btn-outline-light" th:href="@{/pt/personal-schedules}">Xem lịch PT 1:1</a></div>
+            </div>
+            <a class="pt-panel-footer-link" th:href="@{/pt/classes}">Lớp được phân công <span aria-hidden="true">→</span></a>
+        </section>
+        <section class="pt-work-panel" aria-labelledby="pt-requests-title">
+            <div class="pt-panel-heading"><div><p class="pt-overline">KẾT NỐI HỌC VIÊN</p><h2 id="pt-requests-title">Yêu cầu hội viên</h2></div><a th:href="@{/pt/trainer-requests}">Mở yêu cầu <span aria-hidden="true">↗</span></a></div>
+            <div class="pt-request-list">
+                <article class="pt-request-row" th:each="request, requestIndex : ${dashboard.pendingRequests}" th:if="${requestIndex.index < 3}">
+                    <span class="pt-request-initial" aria-hidden="true" th:text="${#strings.isEmpty(request.memberName) ? 'HV' : #strings.substring(request.memberName,0,1)}"></span>
+                    <div><h3 th:text="${request.memberName}"></h3><p th:text="${request.requestedAt != null ? #temporals.format(request.requestedAt,'dd/MM/yyyy HH:mm') : '—'}"></p></div>
+                    <span class="badge pt-request-status" th:text="${request.status}" data-uf-label></span>
+                </article>
+                <div class="pt-empty" th:if="${#lists.isEmpty(dashboard.pendingRequests)}"><h3>Không có yêu cầu chờ phản hồi</h3><p>Yêu cầu huấn luyện mới từ hội viên sẽ xuất hiện tại đây.</p></div>
+            </div>
+            <div class="pt-coaching-note"><svg aria-hidden="true"><use href="/images/utefit-icons.svg#person"></use></svg><p>Gợi ý thao tác nhanh<strong>Phản hồi yêu cầu, rồi chủ động xây dựng lịch tập phù hợp với học viên.</strong></p></div>
+        </section>
+    </div>
 </main>
-
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 <div th:replace="~{fragments/scripts :: scripts}"></div>
-
-<style>
-    /* ====== HERO full width ====== */
-    .uf-page-pt-dashboard .pt-hero{
-        /* full-width rectangle */
-        width: 100%;
-        background: var(--uf-canvas);
-        border-top: 1px solid var(--uf-surface-raised);
-        border-bottom: 1px solid var(--uf-surface-raised);
-    }
-
-    .uf-page-pt-dashboard .pt-kicker{
-        letter-spacing: normal;
-        text-transform: none;
-        font-size: 12px;
-        color: rgba(255,255,255,.60);
-    }
-
-    .uf-page-pt-dashboard .pt-hero-title{
-        font-weight: 800;
-        line-height: 1.05;
-        font-size: clamp(34px, 4vw, 64px);
-        color: #fff;
-    }
-
-    .uf-page-pt-dashboard .pt-hero-desc{
-        color: var(--uf-muted);
-        font-size: 16px;
-        line-height: 1.7;
-        max-width: 760px;
-    }
-
-    /* ====== Profile block (không dùng card) ====== */
-    .uf-page-pt-dashboard .pt-profile{
-        background: var(--uf-surface-raised);
-        border: 1px solid var(--uf-border);
-        border-radius: 18px;
-        padding: 22px;
-        text-align: center;
-        box-shadow: 0 14px 30px rgba(0,0,0,.35);
-    }
-
-    .uf-page-pt-dashboard .pt-avatar{
-        width: 118px;
-        height: 118px;
-        margin: 0 auto 10px auto;
-        border-radius: 999px;
-        overflow: hidden;
-        position: relative;
-        background: var(--uf-surface-raised);
-        box-shadow: 0 0 0 2px var(--uf-accent);
-    }
-    .uf-page-pt-dashboard .pt-avatar img{
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-    }
-    .uf-page-pt-dashboard .pt-avatar-fallback{
-        width:100%;
-        height:100%;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        color:#fff;
-        font-size: 42px;
-        font-weight: 800;
-    }
-
-    .uf-page-pt-dashboard .pt-profile-name{
-        color: #fff;
-        font-weight: 700;
-        font-size: 16px;
-        margin-top: 6px;
-    }
-    .uf-page-pt-dashboard .pt-profile-sub{
-        font-size: 13px;
-    }
-
-    .uf-page-pt-dashboard .pt-mini-stats{
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-    }
-    .uf-page-pt-dashboard .pt-mini-stat{
-        background: var(--uf-surface-raised);
-        border: 1px solid var(--uf-border);
-        border-radius: 14px;
-        padding: 10px 12px;
-    }
-    .uf-page-pt-dashboard .pt-mini-stat-label{
-        color: var(--uf-muted);
-        font-size: 12px;
-    }
-    .uf-page-pt-dashboard .pt-mini-stat-value{
-        color: #fff;
-        font-weight: 800;
-        font-size: 18px;
-        line-height: 1.2;
-        margin-top: 2px;
-    }
-
-    /* ====== Panels (bớt card) ====== */
-    .uf-page-pt-dashboard .pt-panel{
-        background: var(--uf-surface);
-        border: 1px solid var(--uf-border);
-        border-radius: 18px;
-        padding: 24px;
-        box-shadow: 0 12px 26px rgba(0,0,0,.25);
-    }
-    .uf-page-pt-dashboard .pt-panel-title{
-        color: #fff;
-        font-weight: 700;
-    }
-    .uf-page-pt-dashboard .pt-panel-text{
-        color: var(--uf-muted);
-        line-height: 1.7;
-    }
-
-    .uf-page-pt-dashboard .pt-panel-accent{
-        background: var(--uf-surface-raised);
-        border-color: rgba(255,255,255,.14);
-    }
-    .uf-page-pt-dashboard .pt-panel-kicker{
-        color: var(--uf-muted);
-        font-size: 13px;
-        font-weight: 600;
-    }
-
-    .uf-page-pt-dashboard .pt-list{
-        color: rgba(255,255,255,.78);
-        line-height: 1.8;
-        padding-left: 18px;
-        margin: 0;
-    }
-
-    /* Responsive */
-    @media (max-width: 992px){
-        .uf-page-pt-dashboard .pt-profile{ text-align: center; }
-        .uf-page-pt-dashboard .pt-hero-desc{ max-width: 100%; }
-    }
-
-    .uf-page-pt-dashboard :is(.pt-profile-name, .pt-hero-title) { overflow-wrap: anywhere; }
-</style>
-
 </body>
 </html>

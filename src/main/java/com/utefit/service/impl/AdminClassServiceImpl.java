@@ -100,6 +100,7 @@ public class AdminClassServiceImpl implements AdminClassService {
     @Override
     @Transactional
     public void createClass(FitnessClassFormDto dto) {
+        com.utefit.validation.FormChecks.validate(dto);
         validateCapacity(dto.getCapacity());
 
         Branch branch = requireActiveBranch(dto.getBranchId());
@@ -130,6 +131,7 @@ public class AdminClassServiceImpl implements AdminClassService {
     @Override
     @Transactional
     public void updateClass(Long id, FitnessClassFormDto dto) {
+        com.utefit.validation.FormChecks.validate(dto);
         FitnessClass fitnessClass = getClassById(id);
 
         validateCapacity(dto.getCapacity());

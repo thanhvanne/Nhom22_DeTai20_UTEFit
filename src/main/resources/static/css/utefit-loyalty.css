@@ -1,0 +1,53 @@
+.uf-smart-offer-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 24px; }
+.uf-smart-offer-grid > .uf-smart-offer { grid-column: span 2; }
+.uf-smart-offer-grid > .uf-smart-offer:nth-child(n+4) { grid-column: span 3; }
+.uf-smart-offer { --offer-accent: #ff9aab; display: flex; flex-direction: column; align-items: flex-start; padding: 32px; border-radius: 22px; background: linear-gradient(135deg, #243b51, #182b3d); border: 1px solid #7eacbd38; color: #f3f7fa; transition: transform .25s, border-color .25s; }
+.uf-smart-offer:hover { transform: translateY(-4px); border-color: var(--offer-accent); }
+.uf-smart-offer-top { width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 28px; }
+.uf-smart-offer-top > span { color: #c1d1df; font-size: 13px; }
+.uf-smart-offer-top > strong { color: var(--offer-accent); font-size: clamp(28px, 3vw, 42px); font-weight: 500; letter-spacing: -.04em; white-space: nowrap; }
+.uf-smart-offer h3 { color: #f5f8ff; font-size: 23px; margin-bottom: 18px; line-height: 1.3; }
+.uf-smart-offer > p { color: #c2d1df; font-size: 14px; line-height: 1.9; margin-bottom: 24px; }
+.uf-offer-silver { --offer-accent: #bce2f6; }
+.uf-offer-gold { --offer-accent: #f2d184; }
+.uf-smart-offer .uf-public-link { margin-top: 22px; color: #fff; }
+.uf-offer-state { color: #c6d8e9; font-size: 12px; line-height: 1.7; margin-top: auto; }
+.uf-offer-state.is-eligible { color: #b2f3d9; }
+.uf-offers-policy { display: grid; grid-template-columns: 1fr 1.5fr; gap: 40px; align-items: baseline; margin-top: 48px; padding: 32px 0; }
+.uf-offers-policy h3 { font-size: 26px; color: inherit; line-height: 1.35; }
+.uf-offers-policy p { color: #b9ccd9; line-height: 1.9; margin: 0; }
+.uf-page-guest-promotions .uf-promo-intro { background: radial-gradient(ellipse at 15% 10%, #254d61, #122a39 70%); }
+.uf-page-guest-promotions .uf-promo-intro h1 { font-size: clamp(38px, 5.8vw, 80px); }
+.uf-page-guest-promotions .uf-promo-intro h1 em { color: #edb4a0; }
+.uf-page-guest-promotions .uf-promo-intro h1 { color: #f5f8fa; }
+body.uf-page-guest-promotions .uf-promotions .uf-promo-intro h1 { font-size: clamp(32px, 5.4vw, 80px); }
+body.uf-page-guest-promotions .uf-promotions .uf-promo-intro-copy > p:not(.uf-public-kicker) { color: #c3d5e1; }
+body.uf-page-guest-promotions .uf-promotions .uf-promo-intro .uf-public-link { color: #ffccb8; }
+.uf-page-guest-promotions .uf-promo-visual figcaption { color: #b5c9d6; }
+.uf-page-guest-promotions .uf-smart-offer h3 { color: #f5f8ff; }
+body.uf-page-guest-promotions .uf-promotions .uf-smart-offer .uf-public-link { color: #fff; }
+.uf-page-guest-promotions .uf-offers-policy p { color: #536877; }
+.uf-page-guest-promotions .uf-promo-directory { scroll-margin-top: 100px; }
+.uf-page-guest-promotions .uf-promo-card .uf-offer-state { color: inherit; margin-top: 12px; }
+.uf-member .membership-offer-quote { background: #243d5e; border-radius: 12px; padding: 16px; margin: 0 0 16px; }
+.uf-member .membership-offer-quote > strong { display: block; color: #ffc2cb; margin-bottom: 12px; }
+.uf-member .membership-offer-quote dl { margin: 0; }
+.uf-member .membership-offer-quote dl > div { display: flex; justify-content: space-between; gap: 12px; margin-top: 8px; }
+.uf-member .membership-offer-quote dt { font-weight: 400; color: var(--member-muted); }
+.uf-member .membership-offer-quote dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.uf-member .membership-offer-quote dl > div:last-child { margin-top: 14px; color: #fff; font-weight: 600; }
+.uf-member .membership-offer-help { font-size: 12px; color: var(--member-muted); line-height: 1.8; }
+.uf-member [data-offer-error] { color: #ffbdc7; font-size: 13px; line-height: 1.7; }
+.uf-member .membership-offer-snapshot { color: #c7d8ec; line-height: 1.8; font-size: 12px; margin-bottom: 18px; }
+.uf-member .membership-offer-snapshot > span { display: block; color: #ffb1bd; font-weight: 500; margin-bottom: 5px; }
+@media (max-width: 1100px) {
+    .uf-smart-offer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .uf-smart-offer-grid > .uf-smart-offer, .uf-smart-offer-grid > .uf-smart-offer:nth-child(n+4) { grid-column: auto; }
+}
+@media (max-width: 650px) {
+    .uf-smart-offer-grid { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+    .uf-smart-offer { padding: 26px; }
+    .uf-offers-policy { grid-template-columns: minmax(0, 1fr); gap: 18px; margin-top: 26px; }
+}
+@media (prefers-reduced-motion: no-preference) { .uf-smart-offer { animation: uf-offer-enter .45s ease both; } @keyframes uf-offer-enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } } }
+@media (prefers-reduced-motion: reduce) { .uf-smart-offer { transition: none; } }

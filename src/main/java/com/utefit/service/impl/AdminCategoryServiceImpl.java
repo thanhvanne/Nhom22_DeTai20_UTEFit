@@ -56,6 +56,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
     @Override
     @Transactional
     public void createCategory(ClassCategoryFormDto dto) {
+        com.utefit.validation.FormChecks.validate(dto);
         validateUniqueCategoryName(dto.getName(), null);
 
         ClassCategory category = ClassCategory.builder()
@@ -71,6 +72,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
     @Override
     @Transactional
     public void updateCategory(Long id, ClassCategoryFormDto dto) {
+        com.utefit.validation.FormChecks.validate(dto);
         ClassCategory category = getCategoryById(id);
         validateUniqueCategoryName(dto.getName(), id);
         if (category.getRequiredBenefit() != dto.getRequiredBenefit() || !java.util.Objects.equals(category.getActive(), dto.getActive())) requireUnused(id);

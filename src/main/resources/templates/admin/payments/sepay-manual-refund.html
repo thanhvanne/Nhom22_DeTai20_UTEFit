@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/layout :: head('Xác minh ngân hàng SePay')}"></head>
-<body class="uf-theme uf-area-admin uf-page-admin-payments-sepay-manual-refund"><div class="d-flex">
+<body class="uf-theme uf-area-admin uf-page-admin-payments-sepay-manual-refund uf-admin"><div class="admin-shell">
 <aside th:replace="~{admin/fragments/layout :: sidebar}"></aside>
-<div class="flex-grow-1 min-vh-100" style="min-width:0">
+<div class="admin-workspace">
 <nav th:replace="~{admin/fragments/layout :: topbar('Xác minh ngân hàng SePay')}"></nav>
-<main class="container-fluid px-3 pb-5" th:with="order=${caseView.order},payment=${caseView.order.payment}">
+<main class="admin-main admin-refund" id="utefit-content" tabindex="-1" th:with="order=${caseView.order},payment=${caseView.order.payment}">
     <a th:href="@{/admin/payments/sepay-reconciliation}" class="btn btn-outline-secondary mb-3">Về đối soát SePay</a>
-    <h1 class="h3" th:text="|Xử lý riêng / hoàn tiền Payment #${payment.id}|" data-uf-label></h1>
+    <h2 class="admin-section-title" th:text="|Xử lý riêng / hoàn tiền Payment #${payment.id}|" data-uf-label></h2>
     <a th:href="@{/admin/payments/sepay-reconciliation/{id}(id=${payment.id})}" class="btn btn-outline-primary mb-3">Về xác nhận đơn giản</a>
     <p class="alert alert-warning">Chỉ quản trị viên đang hoạt động và đã được bật tài khoản được xác nhận khi chức năng đối soát được bật. Kiểm tra trực tiếp ngân hàng nhận hoặc sao kê chính thức; ảnh người chuyển không đủ. Không có thao tác nào tại đây tự chuyển/hoàn tiền. Không nhập mật khẩu, OTP, khóa API vào bằng chứng.</p>
     <div class="alert alert-success" role="status" th:if="${manualSuccess}" th:text="${manualSuccess}"></div>
     <div class="alert alert-danger" role="alert" th:if="${manualError}" th:text="${manualError}"></div>
-    <section class="surface-card p-3 mb-3" style="overflow-wrap:anywhere">
+    <section class="surface-card admin-panel mb-4" style="overflow-wrap:anywhere">
         <h2 class="h5">Thông tin đã ghi nhận đơn hàng (không thay đổi)</h2>
         <p>Môi trường: <strong th:text="${order.environment}"></strong>. Đơn TEST chỉ xem lịch sử, không đối soát thủ công.</p>
         <p>Trạng thái: <strong th:text="${payment.status}" data-uf-label></strong> — Gói tập #<span th:text="${payment.membership.id}"></span></p>
@@ -22,24 +22,24 @@
         <p th:if="${caseView.webhooks.empty}">Chưa có webhook liên kết: cần kiểm tra ngân hàng nhận, không được suy ra tiền chưa nhận.</p>
         <ul><li th:each="receipt : ${caseView.webhooks}" th:text="|${receipt.receivedAt}: ${receipt.outcome} / ${receipt.reason} / ${receipt.bankReference} / ${@membershipDisplay.money(receipt.amount)}|"></li></ul>
     </section>
-    <section class="surface-card p-3 mb-3" th:if="${order.environment == 'LIVE' and (payment.status.name() == 'PENDING' or payment.status.name() == 'CANCEL_REQUESTED' or payment.status.name() == 'CANCELLED') and caseView.records.empty}">
-        <h2 class="h5">1. Xác minh tiền đã nhận (chưa kích hoạt)</h2>
+    <section class="surface-card admin-panel mb-4" th:if="${order.environment == 'LIVE' and (payment.status.name() == 'PENDING' or payment.status.name() == 'CANCEL_REQUESTED' or payment.status.name() == 'CANCELLED') and caseView.records.empty}">
+        <h2 class="h5">Xác minh tiền đã nhận (chưa kích hoạt)</h2>
         <form th:action="@{/admin/payments/sepay-reconciliation/{id}/verify(id=${payment.id})}" method="post" class="row g-3">
-            <div class="col-md-4"><label class="form-label">Ngân hàng nhận</label><input class="form-control" name="gateway" required maxlength="100"></div>
-            <div class="col-md-4"><label class="form-label">Tài khoản chính nhận tiền</label><input class="form-control" name="accountNumber" required maxlength="50"></div>
-            <div class="col-md-4"><label class="form-label">VA nhận tiền (để trống nếu snapshot không có)</label><input class="form-control" name="subAccount" maxlength="50"></div>
-            <div class="col-md-6"><label class="form-label">Mã đơn trong giao dịch ngân hàng</label><input class="form-control" name="paymentReference" required maxlength="35"></div>
-            <div class="col-md-6"><label class="form-label">Số tiền đã nhận (VND)</label><input class="form-control" name="amount" type="number" min="1" step="1" required></div>
-            <div class="col-md-6"><label class="form-label">Mã giao dịch duy nhất do ngân hàng cấp (không phải ID tự đặt)</label><input class="form-control" name="bankReference" required minlength="3" maxlength="100"></div>
-            <div class="col-md-6"><label class="form-label">Thời điểm ngân hàng nhận tiền (giờ Việt Nam)</label><input class="form-control" name="bankDate" type="datetime-local" step="1" required></div>
-            <div class="col-12"><label class="form-label">Nguồn đối chiếu</label><select class="form-select" name="source" required><option value="RECEIVING_BANK_PORTAL">Trực tiếp ngân hàng nhận</option><option value="OFFICIAL_BANK_STATEMENT">Sao kê chính thức ngân hàng nhận</option></select></div>
-            <div class="col-12"><label class="form-label">Bằng chứng: mã sao kê/tài liệu lưu nội bộ, ngày, dòng giao dịch, nội dung đã kiểm tra</label><textarea class="form-control" name="evidence" required minlength="30" maxlength="1500"></textarea></div>
-            <div class="col-12"><label class="form-label">Lý do không đối soát tự động / kết luận đối chiếu</label><textarea class="form-control" name="reason" required minlength="20" maxlength="1000"></textarea></div>
+            <div class="col-md-4"><label class="form-label" for="admin-payments-sepay-manual-refund-html-gateway">Ngân hàng nhận</label><input class="form-control" name="gateway" required maxlength="100" id="admin-payments-sepay-manual-refund-html-gateway"></div>
+            <div class="col-md-4"><label class="form-label" for="admin-payments-sepay-manual-refund-html-accountNumber">Tài khoản chính nhận tiền</label><input class="form-control" name="accountNumber" required maxlength="50" id="admin-payments-sepay-manual-refund-html-accountNumber"></div>
+            <div class="col-md-4"><label class="form-label" for="admin-payments-sepay-manual-refund-html-subAccount">VA nhận tiền (để trống nếu snapshot không có)</label><input class="form-control" name="subAccount" maxlength="50" id="admin-payments-sepay-manual-refund-html-subAccount"></div>
+            <div class="col-md-6"><label class="form-label" for="admin-payments-sepay-manual-refund-html-paymentReference">Mã đơn trong giao dịch ngân hàng</label><input class="form-control" name="paymentReference" required maxlength="35" id="admin-payments-sepay-manual-refund-html-paymentReference"></div>
+            <div class="col-md-6"><label class="form-label" for="admin-payments-sepay-manual-refund-html-amount">Số tiền đã nhận (VND)</label><input class="form-control" name="amount" type="number" min="1" step="1" required id="admin-payments-sepay-manual-refund-html-amount"></div>
+            <div class="col-md-6"><label class="form-label" for="admin-payments-sepay-manual-refund-html-bankReference">Mã giao dịch duy nhất do ngân hàng cấp (không phải ID tự đặt)</label><input class="form-control" name="bankReference" required minlength="3" maxlength="100" id="admin-payments-sepay-manual-refund-html-bankReference"></div>
+            <div class="col-md-6"><label class="form-label" for="admin-payments-sepay-manual-refund-html-bankDate">Thời điểm ngân hàng nhận tiền (giờ Việt Nam)</label><input class="form-control" name="bankDate" type="datetime-local" step="1" required id="admin-payments-sepay-manual-refund-html-bankDate"></div>
+            <div class="col-12"><label class="form-label" for="admin-payments-sepay-manual-refund-html-source">Nguồn đối chiếu</label><select class="form-select" name="source" required id="admin-payments-sepay-manual-refund-html-source"><option value="RECEIVING_BANK_PORTAL">Trực tiếp ngân hàng nhận</option><option value="OFFICIAL_BANK_STATEMENT">Sao kê chính thức ngân hàng nhận</option></select></div>
+            <div class="col-12"><label class="form-label" for="admin-payments-sepay-manual-refund-html-evidence">Bằng chứng: mã sao kê/tài liệu lưu nội bộ, ngày, dòng giao dịch, nội dung đã kiểm tra</label><textarea class="form-control" name="evidence" required minlength="30" maxlength="1500" id="admin-payments-sepay-manual-refund-html-evidence"></textarea></div>
+            <div class="col-12"><label class="form-label" for="admin-payments-sepay-manual-refund-html-reason">Lý do không đối soát tự động / kết luận đối chiếu</label><textarea class="form-control" name="reason" required minlength="20" maxlength="1000" id="admin-payments-sepay-manual-refund-html-reason"></textarea></div>
             <div class="col-12"><label><input type="checkbox" name="independentlyVerified" value="true" required> Tôi đã kiểm tra tiền thực nhận trực tiếp tại ngân hàng nhận, đúng đơn và không chỉ dựa vào ảnh người chuyển.</label></div>
             <div class="col-12"><button class="btn btn-primary">Lưu xác minh tiền nhận</button></div>
         </form>
     </section>
-    <section class="surface-card p-3 mb-3" th:each="record : ${caseView.records}" style="overflow-wrap:anywhere">
+    <section class="surface-card admin-panel mb-4" th:each="record : ${caseView.records}" style="overflow-wrap:anywhere">
         <h2 class="h5" th:text="|Bản ghi #${record.id}: ${record.outcome}|" data-uf-label></h2>
         <p th:text="|${record.method} — ${record.bankReference} — ${@membershipDisplay.money(record.amount)} — thời điểm dùng để ghi nhận: ${record.bankDate}|" data-uf-label></p>
         <p>quản trị viên xác minh ID: <span th:text="${record.verifiedBy?.id}"></span>; lúc <span th:text="${record.verifiedAt}"></span></p>
@@ -50,13 +50,13 @@
             <details open><summary>Đã hoàn đủ tiền thực tế — xác nhận và thu hồi kỳ Gói tập (không chuyển tiền)</summary>
                 <form th:action="@{/admin/payments/sepay-reconciliation/{id}/refund(id=${payment.id})}" method="post" class="row g-3 mt-1">
                     <input type="hidden" name="recordId" th:value="${record.id}">
-                    <div class="col-md-4"><label class="form-label">Mã giao dịch hoàn tiền ngân hàng</label><input class="form-control" name="bankReference" required minlength="3" maxlength="100"></div>
-                    <div class="col-md-4"><label class="form-label">Số tiền đã hoàn đủ (VND)</label><input class="form-control" type="number" min="1" step="1" name="amount" required></div>
-                    <div class="col-md-4"><label class="form-label">Thời điểm hoàn thực tế (giờ Việt Nam)</label><input class="form-control" type="datetime-local" step="1" name="bankDate" required></div>
-                    <div class="col-12"><label class="form-label">Nguồn</label><select name="source" class="form-select"><option value="RECEIVING_BANK_PORTAL">Trực tiếp ngân hàng / giao dịch tiền ra</option><option value="OFFICIAL_BANK_STATEMENT">Sao kê ngân hàng chính thức</option></select></div>
-                    <div class="col-12"><label class="form-label">Bằng chứng giao dịch hoàn đã hoàn tất</label><textarea class="form-control" name="evidence" required minlength="30" maxlength="1500"></textarea></div>
-                    <div class="col-12"><label class="form-label">Đối chiếu đúng người chuyển gốc / người nhận hoàn tiền (ghi mã đối chiếu nội bộ, không ghi dữ liệu nhạy cảm)</label><textarea class="form-control" name="recipientVerification" required minlength="20" maxlength="500"></textarea></div>
-                    <div class="col-12"><label class="form-label">Lý do hoàn tiền và hủy đơn</label><textarea class="form-control" name="reason" required minlength="20" maxlength="500"></textarea></div>
+                    <div class="col-md-4"><label class="form-label" th:for="|admin-refund-${record.id}-bankReference|">Mã giao dịch hoàn tiền ngân hàng</label><input class="form-control" name="bankReference" required minlength="3" maxlength="100" th:id="|admin-refund-${record.id}-bankReference|"></div>
+                    <div class="col-md-4"><label class="form-label" th:for="|admin-refund-${record.id}-amount|">Số tiền đã hoàn đủ (VND)</label><input class="form-control" type="number" min="1" step="1" name="amount" required th:id="|admin-refund-${record.id}-amount|"></div>
+                    <div class="col-md-4"><label class="form-label" th:for="|admin-refund-${record.id}-bankDate|">Thời điểm hoàn thực tế (giờ Việt Nam)</label><input class="form-control" type="datetime-local" step="1" name="bankDate" required th:id="|admin-refund-${record.id}-bankDate|"></div>
+                    <div class="col-12"><label class="form-label" th:for="|admin-refund-${record.id}-source|">Nguồn</label><select name="source" class="form-select" th:id="|admin-refund-${record.id}-source|"><option value="RECEIVING_BANK_PORTAL">Trực tiếp ngân hàng / giao dịch tiền ra</option><option value="OFFICIAL_BANK_STATEMENT">Sao kê ngân hàng chính thức</option></select></div>
+                    <div class="col-12"><label class="form-label" th:for="|admin-refund-${record.id}-evidence|">Bằng chứng giao dịch hoàn đã hoàn tất</label><textarea class="form-control" name="evidence" required minlength="30" maxlength="1500" th:id="|admin-refund-${record.id}-evidence|"></textarea></div>
+                    <div class="col-12"><label class="form-label" th:for="|admin-refund-${record.id}-recipientVerification|">Đối chiếu đúng người chuyển gốc / người nhận hoàn tiền (ghi mã đối chiếu nội bộ, không ghi dữ liệu nhạy cảm)</label><textarea class="form-control" name="recipientVerification" required minlength="20" maxlength="500" th:id="|admin-refund-${record.id}-recipientVerification|"></textarea></div>
+                    <div class="col-12"><label class="form-label" th:for="|admin-refund-${record.id}-reason|">Lý do hoàn tiền và hủy đơn</label><textarea class="form-control" name="reason" required minlength="20" maxlength="500" th:id="|admin-refund-${record.id}-reason|"></textarea></div>
                     <div class="col-12"><label><input type="checkbox" name="independentlyVerified" value="true" required> Đã đối chiếu khoản hoàn tất thực tế, không phải yêu cầu hoàn đang chờ.</label></div>
                     <div class="col-12"><button class="btn btn-outline-danger">Ghi nhận đã hoàn tiền và thu hồi kỳ Gói tập</button></div>
                 </form>

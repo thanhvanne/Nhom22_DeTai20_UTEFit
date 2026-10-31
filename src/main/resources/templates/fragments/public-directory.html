@@ -1,0 +1,138 @@
+<!-- Lucian UX/UI Prompt #025 · MIT License (c) 2026 Seokwoooo · https://lucianlabs.dev/uxui-prompt/#025 -->
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="assets">
+    <link rel="stylesheet" th:href="@{/css/utefit-public-directory.css(v=1)}">
+    <script defer th:src="@{/vendor/gsap/gsap-3.13.0.min.js}"></script>
+    <script defer th:src="@{/js/utefit-public-directory.js(v=1)}"></script>
+</th:block>
+
+<div th:fragment="searchField(fieldId,value,label,placeholder)" class="ux pd-search-field u025-f is-up">
+    <div class="u025-box">
+        <input class="u025-in" type="search" name="keyword" th:id="${fieldId}" th:value="${value}" th:placeholder="${placeholder}" maxlength="100">
+        <span class="u025-line" aria-hidden="true"><i class="l"></i><i class="g"></i><i class="r"></i></span>
+        <label class="u025-lab" th:for="${fieldId}" th:text="${label}"></label>
+    </div>
+</div>
+
+<figure th:fragment="photo(kind,alt)" class="pd-photo">
+    <picture><source media="(max-width: 600px)" th:srcset="@{'/images/journey-' + ${kind} + '-mobile.webp'}"><img th:src="@{'/images/journey-' + ${kind} + '.webp'}" width="1200" height="800" th:alt="${alt}" fetchpriority="high"></picture>
+    <figcaption>Ảnh minh họa tập luyện · Unsplash, không phải cơ sở UTEFit</figcaption>
+</figure>
+
+<div th:fragment="portrait(trainer)" class="pd-portrait">
+    <div class="pd-portrait-fallback"><span aria-hidden="true" th:text="${#strings.substring(trainer.fullName,trainer.fullName.lastIndexOf(' ') + 1)}"></span><p>Chưa có ảnh chân dung</p></div>
+    <img th:if="${!#strings.isEmpty(trainer.avatarUrl)}" th:src="${trainer.avatarUrl}" th:alt="|Chân dung ${trainer.fullName}|" width="640" height="720" loading="lazy">
+</div>
+
+<th:block th:fragment="clubMedia(branch)"><th:block th:replace="~{fragments/branch-media :: publicMedia(${branch},'directory')}"></th:block></th:block>
+
+<div th:fragment="empty(route)" class="pd-empty" role="status">
+    <h2>Chưa tìm thấy kết quả.</h2><p>Thử một từ khóa khác hoặc bỏ bộ lọc để xem lại danh sách.</p><a class="pd-link" th:href="${route}">Xóa bộ lọc <span aria-hidden="true">↗</span></a>
+</div>
+
+<nav th:fragment="pages(result,route,keyword,branchId)" th:if="${result.totalPages > 1}" class="pd-pagination" aria-label="Phân trang kết quả">
+    <a th:if="${result.hasPrevious()}" th:href="@{${route}(page=${result.number - 1},keyword=${keyword},branchId=${branchId})}">← Trước</a>
+    <span th:unless="${result.hasPrevious()}" aria-disabled="true">← Trước</span>
+    <div><th:block th:each="number : ${#numbers.sequence(0,result.totalPages - 1)}"><span th:if="${number == result.number}" aria-current="page" th:text="${number + 1}"></span><a th:unless="${number == result.number}" th:href="@{${route}(page=${number},keyword=${keyword},branchId=${branchId})}" th:aria-label="|Trang ${number + 1}|" th:text="${number + 1}"></a></th:block></div>
+    <a th:if="${result.hasNext()}" th:href="@{${route}(page=${result.number + 1},keyword=${keyword},branchId=${branchId})}">Sau →</a>
+    <span th:unless="${result.hasNext()}" aria-disabled="true">Sau →</span>
+</nav>
+
+<main th:fragment="trainers" id="utefit-content" class="pd-page pd-trainers" tabindex="-1">
+    <section class="pd-intro pd-intro--trainers" aria-labelledby="pd-title">
+        <div class="pd-intro-copy"><h1 id="pd-title">Tìm người<br><em>đồng hành.</em></h1><p>Khám phá huấn luyện viên UTEFit theo chuyên môn và chi nhánh. Xem hồ sơ để hiểu thêm về cách họ tập luyện cùng bạn.</p><span class="pd-intro-context">Huấn luyện cá nhân tại UTEFit</span></div>
+        <figure th:replace="~{fragments/public-directory :: photo('personal','Ảnh minh họa một buổi huấn luyện, không phải hồ sơ PT UTEFit')}"></figure>
+    </section>
+    <section class="pd-directory" aria-labelledby="pd-results-title">
+        <form class="pd-filters" th:action="@{/trainers}" method="get">
+            <div th:replace="~{fragments/public-directory :: searchField('keyword',${search.keyword},'Tên hoặc chuyên môn','Tên, chuyên môn...')}"></div>
+            <label class="pd-select" for="branchId"><span>Chi nhánh</span><select id="branchId" name="branchId"><option value="">Tất cả chi nhánh</option><option th:each="branch : ${branches}" th:value="${branch.id}" th:text="${@membershipDisplay.name(branch.name)}" th:selected="${search.branchId != null and search.branchId == branch.id}"></option></select></label>
+            <button class="pd-button" type="submit">Tìm huấn luyện viên <span aria-hidden="true">↗</span></button><a class="pd-reset" th:href="@{/trainers}">Đặt lại</a>
+        </form>
+        <div class="pd-results-heading"><h2 id="pd-results-title">Đội ngũ huấn luyện viên</h2><p th:text="|${trainerPage.totalElements} hồ sơ phù hợp|"></p></div>
+        <div class="pd-trainer-grid" th:if="${trainerPage.hasContent()}">
+            <article class="pd-trainer" th:each="trainer : ${trainerPage.content}">
+                <div th:replace="~{fragments/public-directory :: portrait(${trainer})}"></div>
+                <div class="pd-trainer-copy"><p class="pd-specialty" th:text="${!#strings.isEmpty(trainer.specialization) ? trainer.specialization : 'Chưa cập nhật chuyên môn'}"></p><h3 th:text="${trainer.fullName}"></h3><p class="pd-muted" th:text="${trainer.yearsExperience != null ? trainer.yearsExperience + ' năm kinh nghiệm' : 'Kinh nghiệm đang cập nhật'}"></p><p th:text="${trainer.branchName ?: 'Chưa cập nhật chi nhánh'}"></p><a class="pd-link" th:href="@{/trainers/{id}(id=${trainer.id})}" th:aria-label="|Xem hồ sơ ${trainer.fullName}|">Xem hồ sơ <span aria-hidden="true">↗</span></a></div>
+            </article>
+        </div>
+        <div th:unless="${trainerPage.hasContent()}" th:insert="~{fragments/public-directory :: empty('/trainers')}"></div>
+        <nav th:replace="~{fragments/public-directory :: pages(${trainerPage},'/trainers',${search.keyword},${search.branchId})}"></nav>
+    </section>
+</main>
+
+<main th:fragment="classes" id="utefit-content" class="pd-page pd-classes" tabindex="-1">
+    <section class="pd-intro pd-intro--classes" aria-labelledby="pd-title">
+        <div class="pd-intro-copy"><h1 id="pd-title">Tập cùng nhau.<br><em>Tiến xa hơn.</em></h1><p>Khám phá danh mục lớp và huấn luyện viên phụ trách tại từng chi nhánh. Lịch cụ thể và điều kiện đăng ký được hiển thị trong khu vực hội viên.</p><a class="pd-button" th:href="@{/member/classes}">Xem lịch &amp; đăng ký <span aria-hidden="true">↗</span></a><span class="pd-intro-context">Cần đăng nhập tài khoản hội viên</span></div>
+        <figure class="pd-photo"><picture><source media="(max-width: 600px)" th:srcset="@{/images/public-classes-editorial-mobile.jpg}"><img th:src="@{/images/public-classes-editorial.jpg}" width="1200" height="801" alt="Minh họa một lớp giãn cơ nhóm, không phải lớp học hoặc hội viên UTEFit" fetchpriority="high"></picture><figcaption>Ảnh minh họa lớp nhóm · <a href="https://www.pexels.com/photo/personal-trainer-hosting-a-class-6339323/" target="_blank" rel="noopener noreferrer">Pavel Danilyuk / Pexels</a></figcaption></figure>
+    </section>
+    <section class="pd-directory" aria-labelledby="pd-results-title">
+        <form class="pd-filters" th:action="@{/classes}" method="get">
+            <div th:replace="~{fragments/public-directory :: searchField('class-keyword',${keyword},'Tên lớp hoặc danh mục','Gym, Yoga, tên lớp...')}"></div>
+            <label class="pd-select" for="class-branch"><span>Chi nhánh</span><select id="class-branch" name="branchId"><option value="">Tất cả chi nhánh</option><option th:each="b : ${branches}" th:value="${b.id}" th:text="${b.name}" th:selected="${branchId != null and branchId == b.id}"></option></select></label>
+            <button class="pd-button" type="submit">Tìm lớp tập <span aria-hidden="true">↗</span></button><a class="pd-reset" th:href="@{/classes}">Đặt lại</a>
+        </form>
+        <div class="pd-results-heading"><h2 id="pd-results-title">Chọn nhịp tập của bạn</h2><p th:text="|${classPage.totalElements} lớp phù hợp|"></p></div>
+        <p class="pd-catalog-note">Đây là danh mục lớp, không phải lịch buổi tập. Sức chứa không biểu thị số chỗ còn lại.</p>
+        <div class="pd-class-list">
+            <article class="pd-class" th:each="c : ${classPage.content}">
+                <div class="pd-class-title"><p class="pd-category" th:text="${c.categoryName}"></p><h3 th:text="${c.name}"></h3><span class="pd-status" th:classappend="${c.status == 'FULL'} ? 'pd-status--full' : ''" th:text="${c.status == 'OPEN' ? 'Đang mở' : (c.status == 'FULL' ? 'Đã đủ chỗ' : c.status)}"></span></div>
+                <dl class="pd-class-facts"><div><dt>Chi nhánh</dt><dd th:text="${@membershipDisplay.name(c.branchName)}"></dd></div><div><dt>Huấn luyện viên</dt><dd th:text="${c.trainerName ?: 'Đang cập nhật'}"></dd></div><div><dt>Sức chứa</dt><dd th:text="${c.capacity != null ? c.capacity + ' người' : 'Đang cập nhật'}"></dd></div></dl>
+                <details class="pd-details"><summary>Mô tả lớp <span aria-hidden="true">+</span></summary><p th:text="${!#strings.isEmpty(c.description) ? c.description : 'Chưa có mô tả lớp.'}"></p></details>
+            </article>
+        </div>
+        <div th:if="${classPage.empty}" th:insert="~{fragments/public-directory :: empty('/classes')}"></div>
+        <nav th:replace="~{fragments/public-directory :: pages(${classPage},'/classes',${keyword},${branchId})}"></nav>
+    </section>
+</main>
+
+<main th:fragment="branches" id="utefit-content" class="pd-page pd-branches" tabindex="-1">
+    <section class="pd-intro pd-intro--branches" aria-labelledby="pd-title"><div class="pd-intro-copy"><h1 id="pd-title">Gần bạn.<br><em>Đúng nhịp bạn.</em></h1><p>Tìm chi nhánh UTEFit theo tên hoặc địa chỉ. Xem thông tin liên hệ, giờ hoạt động và gói tập áp dụng trước khi bắt đầu.</p></div><div class="pd-location-mark" aria-hidden="true"><svg viewBox="0 0 240 240" fill="none"><circle cx="120" cy="100" r="36"/><path d="M120 218S40 147 40 100a80 80 0 0 1 160 0c0 47-80 118-80 118Z"/><path d="M15 218h210M15 232h210"/></svg><span>Không gian cho nhịp tập của bạn.</span></div></section>
+    <section class="pd-directory" aria-labelledby="pd-results-title">
+        <form class="pd-filters pd-filters--simple" th:action="@{/branches}" method="get"><div th:replace="~{fragments/public-directory :: searchField('branch-search',${keyword},'Tìm chi nhánh','Tên hoặc địa chỉ chi nhánh...')}"></div><button class="pd-button" type="submit">Tìm chi nhánh <span aria-hidden="true">↗</span></button><a class="pd-reset" th:href="@{/branches}">Đặt lại</a></form>
+        <div class="pd-results-heading"><h2 id="pd-results-title">Hệ thống chi nhánh</h2><p th:text="|${branchPage.totalElements} chi nhánh phù hợp|"></p></div>
+        <div class="pd-branch-list">
+            <article class="pd-branch" th:each="b : ${branchPage.content}">
+                <div th:replace="~{fragments/public-directory :: clubMedia(${b})}"></div>
+                <div class="pd-branch-copy"><h3 th:text="${@membershipDisplay.name(b.name)}"></h3><dl><div><dt>Địa chỉ</dt><dd th:text="${b.address ?: 'Đang cập nhật'}"></dd></div><div th:if="${!#strings.isEmpty(b.phone)}"><dt>Điện thoại</dt><dd><a th:href="|tel:${b.phone}|" th:text="${b.phone}"></a></dd></div></dl><a class="pd-button pd-button--dark" th:href="@{/branches/{id}(id=${b.id})}" th:aria-label="|Xem chi tiết ${b.name}|">Khám phá chi nhánh <span aria-hidden="true">↗</span></a></div>
+            </article>
+        </div>
+        <div th:if="${branchPage.empty}" th:insert="~{fragments/public-directory :: empty('/branches')}"></div>
+        <nav th:replace="~{fragments/public-directory :: pages(${branchPage},'/branches',${keyword},${null})}"></nav>
+    </section>
+</main>
+
+<main th:fragment="plans" id="utefit-content" class="pd-page pd-plans" tabindex="-1">
+    <section class="pd-intro pd-intro--plans" aria-labelledby="pd-title"><div class="pd-intro-copy"><h1 id="pd-title">Đầu tư cho<br><em>nhịp tập của bạn.</em></h1><p>So sánh thời hạn, quyền lợi và chi nhánh áp dụng. Chọn gói phù hợp rồi tiếp tục trong khu vực hội viên.</p><span class="pd-intro-context">Giá và thời hạn theo danh mục đang mở bán</span></div><figure class="pd-plan-art"><img th:src="@{/images/cinema-kettlebell-v2-mobile.webp}" width="512" height="640" alt="Đồ họa sản phẩm kettlebell minh họa, không phải quyền lợi tặng kèm" fetchpriority="high"><figcaption>Đồ họa sản phẩm minh họa</figcaption></figure></section>
+    <section class="pd-directory" aria-labelledby="pd-results-title">
+        <form class="pd-filters pd-filters--simple" th:action="@{/membership-plans}" method="get"><div th:replace="~{fragments/public-directory :: searchField('plan-keyword',${keyword},'Tìm gói tập','Tên hoặc mô tả gói...')}"></div><button class="pd-button" type="submit">Tìm gói tập <span aria-hidden="true">↗</span></button><a class="pd-reset" th:href="@{/membership-plans}">Đặt lại</a></form>
+        <div class="pd-results-heading"><h2 id="pd-results-title">Chọn thời hạn. Giữ nhịp tập.</h2><p th:text="|${planPage.totalElements} gói phù hợp · Trang ${planPage.number + 1}/${planPage.totalPages > 0 ? planPage.totalPages : 1}|"></p></div>
+        <p class="pd-catalog-note">Tất cả gói được giữ trong các trang kết quả bên dưới. Kiểm tra chi nhánh áp dụng của từng gói trước khi chọn.</p>
+        <div class="pd-plan-grid">
+            <article class="pd-plan" th:each="p : ${planPage.content}">
+                <div><p class="pd-plan-term" th:text="${p.durationDescription}"></p><h3 th:text="${@membershipDisplay.name(p.name)}"></h3><p class="pd-price" th:text="${@membershipDisplay.money(p.price)}"></p></div>
+                <p class="pd-plan-description" th:text="${p.description}"></p>
+                <dl class="pd-plan-facts"><div><dt>Quyền lợi</dt><dd th:text="${!#strings.isEmpty(p.benefit) ? @membershipDisplay.benefit(p.benefit) : 'Xem khi chọn gói'}"></dd></div><div><dt>Phạm vi</dt><dd th:text="${p.accessScope == 'SINGLE_BRANCH' ? 'Một chi nhánh cố định' : (p.accessScope == 'MULTI_BRANCH' ? 'Nhiều chi nhánh' : (p.accessScope == 'ALL_BRANCHES' ? 'Tất cả chi nhánh' : 'Xem khi chọn gói'))}"></dd></div></dl>
+                <div class="pd-plan-branches" th:if="${!#sets.isEmpty(p.branchIds)}"><span>Chi nhánh áp dụng</span><a th:each="branchId : ${p.branchIds}" th:href="@{/branches/{id}(id=${branchId})}" th:text="|Xem chi nhánh #${branchId} ↗|"></a></div>
+                <a class="pd-button pd-button--dark" th:href="@{/member/memberships(planId=${p.id})}" th:aria-label="|Chọn ${p.name}|">Chọn gói này <span aria-hidden="true">↗</span></a>
+            </article>
+        </div>
+        <div th:if="${planPage.empty}" th:insert="~{fragments/public-directory :: empty('/membership-plans')}"></div>
+        <nav th:replace="~{fragments/public-directory :: pages(${planPage},'/membership-plans',${keyword},${null})}"></nav>
+        <p class="pd-catalog-note">Cần đăng nhập để tiếp tục chọn gói. Chưa có thanh toán nào được thực hiện tại trang này.</p>
+    </section>
+</main>
+
+<main th:fragment="trainerDetail" id="utefit-content" class="pd-page pd-trainer-detail" tabindex="-1">
+    <div class="pd-detail-wrap"><a class="pd-link pd-back" th:href="@{/trainers}">← Huấn luyện viên</a><article class="pd-profile"><div th:replace="~{fragments/public-directory :: portrait(${trainer})}"></div><div><h1 th:text="${trainer.fullName}"></h1><p class="pd-profile-specialty" th:text="${!#strings.isEmpty(trainer.specialization) ? trainer.specialization : 'Chưa cập nhật chuyên môn'}"></p><p class="pd-experience" th:text="${trainer.yearsExperience != null ? trainer.yearsExperience + ' năm kinh nghiệm' : 'Kinh nghiệm đang cập nhật'}"></p><section><h2>Giới thiệu</h2><p th:text="${!#strings.isEmpty(trainer.bio) ? trainer.bio : 'Huấn luyện viên chưa cập nhật phần giới thiệu.'}"></p></section><section><h2>Chi nhánh làm việc</h2><p th:text="${trainer.branchName ?: 'Chưa cập nhật chi nhánh'}"></p><p class="pd-muted" th:text="${trainer.branchAddress ?: 'Địa chỉ đang được cập nhật'}"></p></section><p class="pd-catalog-note">Đăng nhập tài khoản hội viên để gửi yêu cầu huấn luyện theo quy trình hiện có.</p><a class="pd-button" th:href="@{/member/trainer-requests/new(trainerId=${trainer.id})}">Gửi yêu cầu huấn luyện <span aria-hidden="true">↗</span></a></div></article></div>
+</main>
+
+<main th:fragment="branchDetail" id="utefit-content" class="pd-page pd-branch-detail" tabindex="-1">
+    <div class="pd-detail-wrap"><a class="pd-link pd-back" th:href="@{/branches}">← Tất cả chi nhánh</a><article class="pd-location-detail"><div th:replace="~{fragments/public-directory :: clubMedia(${branch})}"></div><div><h1 th:text="${@membershipDisplay.name(branch.name)}"></h1><p th:text="${branch.description}"></p><dl class="pd-location-facts"><div><dt>Địa chỉ</dt><dd th:text="${branch.address}"></dd></div><div><dt>Điện thoại</dt><dd><a th:if="${!#strings.isEmpty(branch.phone)}" th:href="|tel:${branch.phone}|" th:text="${branch.phone}"></a><span th:if="${#strings.isEmpty(branch.phone)}">Đang cập nhật</span></dd></div><div><dt>Giờ mở cửa</dt><dd th:text="${branch.openingTime ?: 'Đang cập nhật'}"></dd></div><div><dt>Giờ đóng cửa</dt><dd th:text="${branch.closingTime ?: 'Đang cập nhật'}"></dd></div></dl><a class="pd-button" th:href="@{/member/memberships(branchId=${branch.id})}">Chọn gói tại chi nhánh <span aria-hidden="true">↗</span></a><p class="pd-catalog-note">Tiếp tục qua đăng nhập hội viên.</p></div></article>
+        <section id="branch-reviews" class="pd-location-reviews" aria-labelledby="branch-reviews-title"><div class="pd-results-heading"><h2 id="branch-reviews-title">Đánh giá hội viên</h2><a class="pd-link" th:href="@{/reviews(branchId=${branch.id})}">Xem tất cả đánh giá ↗</a></div><p th:if="${branchReviews.totalReviews > 0}" th:text="|${#numbers.formatDecimal(branchReviews.averageRating,1,1)} / 5 · ${branchReviews.totalReviews} đánh giá công khai|"></p><p th:if="${branchReviews.totalReviews == 0}" class="pd-catalog-note">Chưa có đánh giá công khai tại chi nhánh này.</p><div class="pd-review-list"><article th:each="review : ${branchReviews.latest}"><p class="pd-category" th:text="|${review.rating} / 5 sao|"></p><h3 th:text="${review.author}"></h3><p th:if="${review.trainer != null}" th:text="|PT: ${review.trainer}|"></p><p th:text="${review.comment ?: 'Không có nhận xét'}"></p><img th:if="${review.imageUrl != null}" th:src="${review.imageUrl}" alt="Ảnh trải nghiệm do hội viên cung cấp" loading="lazy"><video th:if="${review.videoUrl != null}" th:src="${review.videoUrl}" controls playsinline preload="none">Trình duyệt không hỗ trợ phát video.</video><time th:text="${#temporals.format(review.createdAt,'dd/MM/yyyy')}"></time></article></div></section>
+    </div>
+</main>
+</body>
+</html>

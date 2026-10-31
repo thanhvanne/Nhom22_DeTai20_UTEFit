@@ -1,0 +1,77 @@
+.uf-member.uf-page-member-promotions > .uf-promotions { padding-top: 32px; }
+.uf-page-member-promotions .uf-promotions :where(h1, h2, h3, p, figure, dl, dd) { margin: 0; }
+.uf-page-member-promotions .uf-promo-intro { display: grid; grid-template-columns: 1.25fr 1fr; align-items: center; gap: 32px; padding: clamp(28px, 4vw, 56px); border-radius: var(--member-radius); background: var(--member-inset); }
+.uf-page-member-promotions .uf-public-kicker { margin-bottom: 22px; color: var(--member-action-hover); font-size: 12px; font-weight: 600; letter-spacing: .08em; }
+.uf-page-member-promotions .uf-promo-intro h1 { margin-bottom: 24px; font-size: clamp(32px, 4.8vw, 68px); font-weight: 800; line-height: 1.16; letter-spacing: -.055em; }
+.uf-page-member-promotions .uf-promo-intro h1 em { color: var(--member-action-hover); font-style: normal; }
+.uf-page-member-promotions .uf-promo-intro-copy > p:not(.uf-public-kicker) { max-width: 44ch; margin-bottom: 22px; color: var(--member-muted); font-size: 16px; line-height: 1.9; }
+.uf-page-member-promotions .uf-public-link { display: inline-flex; align-items: center; gap: 22px; min-height: 44px; color: var(--member-action-hover); font-weight: 600; text-decoration: underline; text-underline-offset: 6px; transition: color .2s; }
+.uf-page-member-promotions .uf-public-link:hover { color: var(--member-ink); }
+.uf-page-member-promotions .uf-public-link > span { transition: transform .2s; }
+.uf-page-member-promotions .uf-public-link:hover > span { transform: translate(2px, -2px); }
+.uf-page-member-promotions .uf-promo-visual { display: grid; place-items: center; min-width: 0; }
+.uf-page-member-promotions .uf-promo-visual img { display: block; width: 100%; max-height: 350px; object-fit: contain; }
+.uf-page-member-promotions .uf-promo-visual figcaption { margin-top: 12px; color: var(--member-muted); font-size: 13px; }
+.uf-page-member-promotions .uf-promo-directory { padding-top: clamp(48px, 6vw, 80px); }
+.uf-page-member-promotions .uf-promo-heading { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; margin-bottom: 32px; }
+.uf-page-member-promotions .uf-promo-heading h2 { font-size: clamp(24px, 2.6vw, 34px); }
+.uf-page-member-promotions .uf-promo-heading p { color: var(--member-muted); font-size: 14px; line-height: 1.9; }
+.uf-page-member-promotions .uf-promotions .uf-promo-personalized { display: inline-flex; margin-bottom: 18px; padding: 7px 14px; border-radius: 24px; background: var(--member-surface-raised); color: var(--member-action-hover); font-size: 12px; font-weight: 600; }
+.uf-page-member-promotions .uf-smart-offer { min-width: 0; border-color: var(--member-line); border-radius: var(--member-radius); background: var(--member-surface); }
+.uf-page-member-promotions .uf-smart-offer h3 { margin-bottom: 18px; }
+.uf-page-member-promotions .uf-smart-offer > p { margin-bottom: 24px; color: var(--member-muted); }
+.uf-page-member-promotions .uf-smart-offer-top > strong { white-space: normal; overflow-wrap: anywhere; }
+.uf-page-member-promotions .uf-smart-offer-top > span { color: var(--member-muted); }
+.uf-page-member-promotions .uf-smart-offer.is-personalized { border-color: var(--member-action); box-shadow: inset 0 3px var(--member-action); }
+.uf-page-member-promotions .uf-offer-bronze { --offer-accent: #e5b08c; }
+.uf-page-member-promotions .uf-offer-silver { --offer-accent: #bce2f6; }
+.uf-page-member-promotions .uf-offer-gold { --offer-accent: #f2d184; }
+.uf-page-member-promotions :is(.uf-offer-bronze, .uf-offer-silver, .uf-offer-gold) .uf-smart-offer-top > span { padding: 5px 12px; border: 1px solid currentColor; border-radius: 24px; color: var(--offer-accent); }
+.uf-page-member-promotions .uf-offer-state.is-eligible { padding: 8px 12px; border-radius: 10px; background: var(--member-success-surface); color: var(--member-success); }
+.uf-page-member-promotions .uf-smart-offer .uf-public-link { margin-top: 22px; }
+.uf-page-member-promotions .uf-offers-policy { margin-top: 32px; padding: 28px; border-radius: var(--member-radius); background: var(--member-inset); }
+.uf-page-member-promotions .uf-offers-policy h3 { font-size: 24px; }
+.uf-page-member-promotions .uf-offers-policy p { color: var(--member-muted); }
+.uf-page-member-promotions .uf-promo-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.uf-page-member-promotions .uf-promo-card { min-width: 0; overflow: hidden; border: 1px solid var(--member-line); border-radius: var(--member-radius); background: var(--member-surface); transition: transform .22s, border-color .22s; }
+.uf-page-member-promotions .uf-promo-card:only-child { grid-column: 1 / -1; display: grid; grid-template-columns: .8fr 1.2fr; }
+.uf-page-member-promotions .uf-promo-discount { display: flex; flex-direction: column; justify-content: center; padding: 28px; background: var(--member-surface-raised); color: var(--member-action-hover); }
+.uf-page-member-promotions .uf-promo-discount > span { color: var(--member-muted); font-size: 13px; }
+.uf-page-member-promotions .uf-promo-discount p { display: flex; align-items: baseline; gap: 8px; margin-top: 8px; }
+.uf-page-member-promotions .uf-promo-discount strong { font-size: 54px; line-height: 1.2; letter-spacing: -.055em; }
+.uf-page-member-promotions .uf-promo-discount p > span { font-size: 28px; }
+.uf-page-member-promotions .uf-promo-card-copy { display: flex; flex-direction: column; align-items: stretch; padding: 28px; }
+.uf-page-member-promotions .uf-promo-code-label { color: var(--member-muted); font-size: 12px; }
+.uf-page-member-promotions .uf-promo-card h3 { margin: 6px 0 22px; font-size: 24px; overflow-wrap: anywhere; }
+.uf-page-member-promotions .uf-promo-facts { display: grid; gap: 12px; margin-bottom: 24px; font-size: 13px; }
+.uf-page-member-promotions .uf-promo-facts > div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; }
+.uf-page-member-promotions .uf-promo-facts dt { color: var(--member-muted); font-weight: 400; }
+.uf-page-member-promotions .uf-promo-facts dd { font-variant-numeric: tabular-nums; font-weight: 600; }
+.uf-page-member-promotions .uf-promo-card .uf-offer-state { margin-bottom: 18px; }
+.uf-page-member-promotions .uf-promo-card .btn { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; margin-top: auto; }
+.uf-page-member-promotions .uf-promo-empty { padding: 28px; border-radius: var(--member-radius); background: var(--member-surface); color: var(--member-muted); }
+@media (hover: hover) and (pointer: fine) {
+    .uf-page-member-promotions :is(.uf-smart-offer, .uf-promo-card):hover { transform: translateY(-4px); border-color: var(--member-action-hover); }
+}
+@media (max-width: 1100px) {
+    .uf-page-member-promotions .uf-promo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 767.98px) {
+    .uf-page-member-promotions .uf-promo-intro { grid-template-columns: minmax(0, 1fr); gap: 24px; padding: 28px 22px; }
+    .uf-page-member-promotions .uf-promo-intro h1 { font-size: clamp(28px, 6.5vw, 48px); }
+    .uf-page-member-promotions .uf-promo-visual { grid-template-columns: 1fr 1fr; gap: 16px; }
+    .uf-page-member-promotions .uf-promo-visual img { max-height: 160px; }
+    .uf-page-member-promotions .uf-promo-heading { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+    .uf-page-member-promotions .uf-smart-offer:hover { transform: none; }
+}
+@media (max-width: 575.98px) {
+    .uf-page-member-promotions .uf-promo-grid, .uf-page-member-promotions .uf-promo-card:only-child { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: no-preference) {
+    .uf-page-member-promotions .uf-promo-intro-copy, .uf-page-member-promotions .uf-promo-card { animation: uf-member-promo-arrive .45s ease-out backwards; }
+    .uf-page-member-promotions .uf-smart-offer { animation-fill-mode: backwards; }
+    @keyframes uf-member-promo-arrive { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+}
+@media (prefers-reduced-motion: reduce) {
+    .uf-page-member-promotions :is(.uf-smart-offer, .uf-promo-card, .uf-public-link, .uf-public-link > span) { animation: none; transition: none; transform: none; }
+}

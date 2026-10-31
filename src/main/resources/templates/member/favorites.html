@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head('Yêu thích - UTEFit')}"></head>
-<body class="uf-theme uf-area-member uf-page-member-favorites">
-<header th:replace="~{fragments/header :: header}"></header>
+<head th:replace="~{member/fragments/layout :: head('Yêu thích - UTEFit')}"></head>
+<body class="uf-theme uf-area-member uf-page-member-favorites uf-member">
+<header th:replace="~{member/fragments/layout :: header}"></header>
 <main class="container ut-page">
     <h1 class="ut-page-title">Yêu thích của tôi</h1>
     <p class="ut-subtitle">Lưu để tìm lại nhanh. Yêu thích không phải đăng ký lớp hoặc gửi yêu cầu PT.</p>
@@ -24,7 +24,7 @@
     </div>
     <div class="mt-4"><a th:href="@{/trainers}">Khám phá PT</a> · <a th:href="@{/classes}">Lớp tập</a> · <a th:href="@{/branches}">Chi nhánh</a></div>
 </main>
-<footer th:replace="~{fragments/footer :: footer}"></footer>
-<div th:replace="~{fragments/scripts :: scripts}"></div>
+<footer th:replace="~{member/fragments/layout :: footer}"></footer>
+<div th:replace="~{member/fragments/layout :: scripts}"></div>
 </body>
 </html>

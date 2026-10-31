@@ -1,39 +1,39 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/layout :: head(${isEdit ? 'Cập nhật Lớp tập' : 'Tạo Lớp tập mới'})}"></head>
-<body class="uf-theme uf-area-admin uf-page-admin-classes-form">
-<div class="d-flex">
+<body class="uf-theme uf-area-admin uf-page-admin-classes-form uf-admin">
+<div class="admin-shell">
     <div th:replace="~{admin/fragments/layout :: sidebar}"></div>
 
-    <div class="flex-grow-1">
+    <div class="admin-workspace">
         <div th:replace="~{admin/fragments/layout :: topbar(${isEdit ? 'Cập nhật Lớp tập' : 'Khởi tạo Lớp tập mới'})}"></div>
 
-        <main class="container-fluid px-4 pb-5">
+        <main class="admin-main" id="utefit-content" tabindex="-1">
             <div class="mb-3">
-                <a th:href="@{/admin/classes}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <a th:href="@{/admin/classes}" class="btn btn-outline-secondary btn-sm px-3">
                     <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách lớp tập
                 </a>
             </div>
 
-            <div class="surface-card col-lg-8 p-4">
-                <div th:if="${errorMessage}" class="alert alert-danger rounded-3">
+            <div class="surface-card admin-editor"><div class="admin-editor-body">
+                <div th:if="${errorMessage}" class="alert alert-danger">
                     <i class="bi bi-exclamation-octagon-fill me-2"></i> <span th:text="${errorMessage}" data-uf-label></span>
                 </div>
 
                 <form th:action="${isEdit ? '/admin/classes/' + classForm.id + '/edit' : '/admin/classes/create'}"
-                      th:object="${classForm}" method="post">
+                      th:object="${classForm}" method="post" class="uf-edit-form admin-editor-fields">
+                        <h2 class="admin-field-heading">Thông tin lớp tập</h2>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Tên lớp tập <span class="text-danger">*</span></label>
+                    <div class="admin-field-wide"><label class="form-label fw-semibold" for="name">Tên lớp tập <span class="text-danger">*</span></label>
                         <input type="text" th:field="*{name}" class="form-control"
                                th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
                                placeholder="VD: Yoga Hatha Sáng, Boxing Đốt Mỡ Chuyên Sâu...">
                         <div class="text-danger small mt-1" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
                     </div>
 
-                    <div class="row g-3 mb-3">
+                    <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Chi nhánh tổ chức (đang hoạt động) <span class="text-danger">*</span></label>
+                            <label class="form-label fw-semibold" for="branchId">Chi nhánh tổ chức (đang hoạt động) <span class="text-danger">*</span></label>
                             <select th:field="*{branchId}" id="branchId" class="form-select"
                                     th:classappend="${#fields.hasErrors('branchId')} ? 'is-invalid'">
                                 <option value="">-- Chọn chi nhánh --</option>
@@ -43,7 +43,7 @@
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Danh mục Loại lớp (đang hoạt động) <span class="text-danger">*</span></label>
+                            <label class="form-label fw-semibold" for="categoryId">Danh mục Loại lớp (đang hoạt động) <span class="text-danger">*</span></label>
                             <select th:field="*{categoryId}" id="categoryId" class="form-select"
                                     th:classappend="${#fields.hasErrors('categoryId')} ? 'is-invalid'">
                                 <option value="">-- Chọn loại lớp --</option>
@@ -53,9 +53,9 @@
                         </div>
                     </div>
 
-                    <div class="row g-3 mb-3">
+                    <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Huấn luyện viên phụ trách (PT đang hoạt động)</label>
+                            <label class="form-label fw-semibold" for="trainerSelect">Huấn luyện viên phụ trách (PT đang hoạt động)</label>
                             <select th:field="*{trainerId}" id="trainerSelect" class="form-select">
                                 <option value="">-- Chưa phân công / Chọn PT --</option>
                                 <option th:each="t : ${trainers}"
@@ -69,7 +69,7 @@
                         </div>
 
                         <div class="col-md-3">
-                            <label class="form-label fw-semibold">Sức chứa tối đa <span class="text-danger">*</span></label>
+                            <label class="form-label fw-semibold" for="capacity">Sức chứa tối đa <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <input type="number" th:field="*{capacity}" min="0" class="form-control"
                                        th:classappend="${#fields.hasErrors('capacity')} ? 'is-invalid'"
@@ -80,26 +80,27 @@
                         </div>
 
                         <div class="col-md-3">
-                            <label class="form-label fw-semibold">Trạng thái lớp</label>
+                            <label class="form-label fw-semibold" for="status">Trạng thái lớp</label>
                             <select th:field="*{status}" class="form-select">
                                 <option th:each="st : ${statuses}" th:value="${st}" th:text="${st}" data-uf-label></option>
                             </select>
                         </div>
                     </div>
 
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">Mô tả nội dung lớp tập</label>
+                    <h2 class="admin-field-heading">Nội dung lớp tập</h2>
+                    <div>
+                        <label class="form-label fw-semibold" for="description">Mô tả nội dung lớp tập</label>
                         <textarea th:field="*{description}" rows="4" class="form-control"
                                   th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"
                                   placeholder="Mô tả mục tiêu buổi tập, dụng cụ chuẩn bị, đối tượng phù hợp..."></textarea>
                         <div class="text-danger small mt-1" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
                     </div>
 
-                    <button type="submit" class="btn btn-utefit px-4 py-2 rounded-pill">
+                    <div class="admin-editor-actions"><button type="submit" class="btn btn-utefit px-4 py-2">
                         <i class="bi bi-save me-1"></i> <span th:text="${isEdit ? 'Lưu thay đổi' : 'Tạo lớp tập'}"></span>
-                    </button>
+                    </button></div>
                 </form>
-            </div>
+            </div></div>
         </main>
     </div>
 </div>

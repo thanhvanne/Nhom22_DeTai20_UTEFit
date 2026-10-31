@@ -20,6 +20,7 @@ public interface PromotionRepository
             java.time.LocalDate start, java.time.LocalDate end, Integer quantity);
 
     boolean existsByCodeIgnoreCase(String code);
+    java.util.Optional<Promotion> findByCodeIgnoreCase(String code);
 
     boolean existsByCodeIgnoreCaseAndIdNot(
             String code, Long id);

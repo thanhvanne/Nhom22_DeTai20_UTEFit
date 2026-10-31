@@ -3,12 +3,12 @@
 <html lang="vi"
       xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments/head :: head('Lịch sử thanh toán - UTEFit')}">
+<head th:replace="~{member/fragments/layout :: head('Lịch sử thanh toán - UTEFit')}">
 </head>
 
-<body class="uf-theme uf-area-member uf-page-member-payments">
+<body class="uf-theme uf-area-member uf-page-member-payments uf-member">
 
-<header th:replace="~{fragments/header :: header}">
+<header th:replace="~{member/fragments/layout :: header}">
 </header>
 
 <main class="container ut-page">
@@ -37,40 +37,40 @@
 
         <div class="table-responsive">
 
-            <table class="table ut-table align-middle">
+            <table role="table" class="table ut-table align-middle">
 
-                <thead>
-                <tr>
-                    <th>Mã GD</th>
-                    <th>Gói tập</th>
-                    <th>Số tiền</th>
-                    <th>Phương thức</th>
-                    <th>Trạng thái</th>
-                    <th>Ngày tạo</th>
-                    <th>Ngày thanh toán</th>
-                    <th>Mã giao dịch</th>
+                <thead role="rowgroup">
+                <tr role="row">
+                    <th role="columnheader" scope="col">Mã GD</th>
+                    <th role="columnheader" scope="col">Gói tập</th>
+                    <th role="columnheader" scope="col">Số tiền</th>
+                    <th role="columnheader" scope="col">Phương thức</th>
+                    <th role="columnheader" scope="col">Trạng thái</th>
+                    <th role="columnheader" scope="col">Ngày tạo</th>
+                    <th role="columnheader" scope="col">Ngày thanh toán</th>
+                    <th role="columnheader" scope="col">Mã giao dịch</th>
                 </tr>
                 </thead>
 
-                <tbody>
+                <tbody role="rowgroup">
 
-                <tr th:each="p : ${payments}">
+                <tr role="row" th:each="p : ${payments}">
 
-                    <td th:text="${p.id}">1</td>
+                    <td role="cell" data-label="Mã GD" th:text="${p.id}">1</td>
 
-                    <td th:text="${@membershipDisplay.name(p.planName)}">
+                    <td role="cell" data-label="Gói tập" th:text="${@membershipDisplay.name(p.planName)}">
                         Gói tập
                     </td>
 
-                    <td th:text="${@membershipDisplay.money(p.amount)}">
+                    <td role="cell" data-label="Số tiền" th:text="${@membershipDisplay.money(p.amount)}">
                         0 VND
                     </td>
 
-                    <td th:text="${p.method}" data-uf-label>
+                    <td role="cell" data-label="Phương thức" th:text="${p.method}" data-uf-label>
                         tiền mặt
                     </td>
 
-                    <td>
+                    <td role="cell" data-label="Trạng thái">
                         <span class="ut-status"
                               th:classappend="${p.status}"
                               th:text="${@membershipDisplay.paymentStatus(p.status)}" data-uf-label>
@@ -78,11 +78,11 @@
                         </span>
                     </td>
 
-                    <td th:text="${#temporals.format(p.createdAt, 'dd/MM/yyyy HH:mm')}">
+                    <td role="cell" data-label="Ngày tạo" th:text="${#temporals.format(p.createdAt, 'dd/MM/yyyy HH:mm')}">
                         01/01/2026
                     </td>
 
-                    <td>
+                    <td role="cell" data-label="Ngày thanh toán">
                         <span th:if="${p.paidAt != null}"
                               th:text="${#temporals.format(p.paidAt, 'dd/MM/yyyy HH:mm')}">
                         </span>
@@ -92,7 +92,7 @@
                         </span>
                     </td>
 
-                    <td>
+                    <td role="cell" data-label="Mã giao dịch">
                         <span th:text="${p.transactionCode ?: '-'}">-</span>
                         <a th:if="${p.method == 'SEPAY'}" class="btn btn-outline-warning btn-sm d-block mt-1" th:href="@{/member/payments/{id}/sepay(id=${p.id})}">Xem VietQR / trạng thái</a>
                     </td>
@@ -114,10 +114,10 @@
 
 </main>
 
-<footer th:replace="~{fragments/footer :: footer}">
+<footer th:replace="~{member/fragments/layout :: footer}">
 </footer>
 
-<div th:replace="~{fragments/scripts :: scripts}">
+<div th:replace="~{member/fragments/layout :: scripts}">
 </div>
 
 </body>

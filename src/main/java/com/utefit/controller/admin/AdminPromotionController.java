@@ -15,6 +15,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AdminPromotionController {
 
     private final AdminPromotionService service;
+    private final com.utefit.service.PromotionCatalogService catalog;
+    private final com.utefit.repository.MembershipRepository memberships;
+    private final com.utefit.service.AutomaticPromotionService automatic;
 
     @GetMapping
     public String index(
@@ -22,6 +25,15 @@ public class AdminPromotionController {
             Model model
     ) {
         model.addAttribute("activeMenu", "promotions");
+        model.addAttribute("programs", catalog.programs(null));
+        model.addAttribute("loyaltyEnabled", catalog.enabled());
+        var settings = new java.util.LinkedHashMap<String, com.utefit.service.AutomaticPromotionService.Rule>();
+        var programUsage = new java.util.LinkedHashMap<String, com.utefit.service.AutomaticPromotionService.Usage>();
+        automatic.settings().rules().forEach((kind, rule) -> { settings.put(kind.name(), rule); programUsage.put(kind.name(), automatic.usage(kind)); });
+        model.addAttribute("programSettings", settings); model.addAttribute("programUsage", programUsage);
+        java.util.Map<Long, Long> usage = new java.util.HashMap<>();
+        service.findAll().forEach(promotion -> usage.put(promotion.getId(), memberships.promotionReservations(promotion.getCode())));
+        model.addAttribute("promotionUsage", usage);
         model.addAttribute("promotions", service.findAll());
         model.addAttribute("form", editId == null
                 ? new Promotion() : service.findById(editId));

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments/head :: head('Lịch sử hội viên - UTEFit')}"></head>
+<head th:replace="~{member/fragments/layout :: head('Lịch sử hội viên - UTEFit')}"></head>
 
-<body class="uf-theme uf-area-member uf-page-member-history">
-<header th:replace="~{fragments/header :: header}"></header>
+<body class="uf-theme uf-area-member uf-page-member-history uf-member">
+<header th:replace="~{member/fragments/layout :: header}"></header>
 
 <main class="container ut-page">
 
@@ -24,24 +24,24 @@
         </h2>
 
         <div class="table-responsive">
-            <table class="table table-dark table-striped align-middle">
-                <thead>
-                <tr>
-                    <th>Chi nhánh</th>
-                    <th>Gói</th>
-                    <th>Trạng thái</th>
-                    <th>Bắt đầu</th>
-                    <th>Kết thúc</th>
+            <table role="table" class="table   align-middle">
+                <thead role="rowgroup">
+                <tr role="row">
+                    <th role="columnheader" scope="col">Chi nhánh</th>
+                    <th role="columnheader" scope="col">Gói</th>
+                    <th role="columnheader" scope="col">Trạng thái</th>
+                    <th role="columnheader" scope="col">Bắt đầu</th>
+                    <th role="columnheader" scope="col">Kết thúc</th>
                 </tr>
                 </thead>
 
-                <tbody>
-                <tr th:each="m : ${history.memberships}">
-                    <td th:text="${@membershipDisplay.name(m.branchName)}"></td>
-                    <td th:text="${@membershipDisplay.name(m.planName)}"></td>
-                    <td th:text="${m.status}" data-uf-label></td>
-                    <td th:text="${m.startDate ?: '-'}" data-uf-date></td>
-                    <td th:text="${m.endDate ?: '-'}" data-uf-date></td>
+                <tbody role="rowgroup">
+                <tr role="row" th:each="m : ${history.memberships}">
+                    <td role="cell" data-label="Chi nhánh" th:text="${@membershipDisplay.name(m.branchName)}"></td>
+                    <td role="cell" data-label="Gói" th:text="${@membershipDisplay.name(m.planName)}"></td>
+                    <td role="cell" data-label="Trạng thái" th:text="${m.status}" data-uf-label></td>
+                    <td role="cell" data-label="Bắt đầu" th:text="${m.startDate ?: '-'}" data-uf-date></td>
+                    <td role="cell" data-label="Kết thúc" th:text="${m.endDate ?: '-'}" data-uf-date></td>
                 </tr>
                 </tbody>
             </table>
@@ -61,24 +61,24 @@
         </h2>
 
         <div class="table-responsive">
-            <table class="table table-dark table-striped align-middle">
-                <thead>
-                <tr>
-                    <th>Gói</th>
-                    <th>Số tiền</th>
-                    <th>Phương thức</th>
-                    <th>Trạng thái</th>
-                    <th>Ngày tạo</th>
+            <table role="table" class="table   align-middle">
+                <thead role="rowgroup">
+                <tr role="row">
+                    <th role="columnheader" scope="col">Gói</th>
+                    <th role="columnheader" scope="col">Số tiền</th>
+                    <th role="columnheader" scope="col">Phương thức</th>
+                    <th role="columnheader" scope="col">Trạng thái</th>
+                    <th role="columnheader" scope="col">Ngày tạo</th>
                 </tr>
                 </thead>
 
-                <tbody>
-                <tr th:each="p : ${history.payments}">
-                    <td th:text="${@membershipDisplay.name(p.planName)}"></td>
-                    <td th:text="${p.amount}" data-uf-money></td>
-                    <td th:text="${p.method}" data-uf-label></td>
-                    <td th:text="${p.status}" data-uf-label></td>
-                    <td th:text="${#temporals.format(
+                <tbody role="rowgroup">
+                <tr role="row" th:each="p : ${history.payments}">
+                    <td role="cell" data-label="Gói" th:text="${@membershipDisplay.name(p.planName)}"></td>
+                    <td role="cell" data-label="Số tiền" th:text="${p.amount}" data-uf-money></td>
+                    <td role="cell" data-label="Phương thức" th:text="${p.method}" data-uf-label></td>
+                    <td role="cell" data-label="Trạng thái" th:text="${p.status}" data-uf-label></td>
+                    <td role="cell" data-label="Ngày tạo" th:text="${#temporals.format(
                             p.createdAt,
                             'dd/MM/yyyy HH:mm'
                         )}">
@@ -102,24 +102,24 @@
         </h2>
 
         <div class="table-responsive">
-            <table class="table table-dark table-striped align-middle">
-                <thead>
-                <tr>
-                    <th>Lớp</th>
-                    <th>Chi nhánh</th>
-                    <th>Ngày</th>
-                    <th>Giờ</th>
-                    <th>Trạng thái</th>
+            <table role="table" class="table   align-middle">
+                <thead role="rowgroup">
+                <tr role="row">
+                    <th role="columnheader" scope="col">Lớp</th>
+                    <th role="columnheader" scope="col">Chi nhánh</th>
+                    <th role="columnheader" scope="col">Ngày</th>
+                    <th role="columnheader" scope="col">Giờ</th>
+                    <th role="columnheader" scope="col">Trạng thái</th>
                 </tr>
                 </thead>
 
-                <tbody>
-                <tr th:each="c : ${history.classes}">
-                    <td th:text="${c.className}"></td>
-                    <td th:text="${@membershipDisplay.name(c.branchName)}"></td>
-                    <td th:text="${c.date}"></td>
-                    <td th:text="|${c.startTime} - ${c.endTime}|"></td>
-                    <td th:text="${c.status}" data-uf-label></td>
+                <tbody role="rowgroup">
+                <tr role="row" th:each="c : ${history.classes}">
+                    <td role="cell" data-label="Lớp" th:text="${c.className}"></td>
+                    <td role="cell" data-label="Chi nhánh" th:text="${@membershipDisplay.name(c.branchName)}"></td>
+                    <td role="cell" data-label="Ngày" th:text="${c.date}"></td>
+                    <td role="cell" data-label="Giờ" th:text="|${c.startTime} - ${c.endTime}|"></td>
+                    <td role="cell" data-label="Trạng thái" th:text="${c.status}" data-uf-label></td>
                 </tr>
                 </tbody>
             </table>
@@ -139,22 +139,22 @@
         </h2>
 
         <div class="table-responsive">
-            <table class="table table-dark table-striped align-middle">
-                <thead>
-                <tr>
-                    <th>Chi nhánh</th>
-                    <th>PT</th>
-                    <th>Sao</th>
-                    <th>Trạng thái</th>
+            <table role="table" class="table   align-middle">
+                <thead role="rowgroup">
+                <tr role="row">
+                    <th role="columnheader" scope="col">Chi nhánh</th>
+                    <th role="columnheader" scope="col">PT</th>
+                    <th role="columnheader" scope="col">Sao</th>
+                    <th role="columnheader" scope="col">Trạng thái</th>
                 </tr>
                 </thead>
 
-                <tbody>
-                <tr th:each="r : ${history.reviews}">
-                    <td th:text="${@membershipDisplay.name(r.branchName)}"></td>
-                    <td th:text="${r.trainerName ?: '-'}"></td>
-                    <td th:text="|${r.rating}/5|"></td>
-                    <td th:text="${r.visible
+                <tbody role="rowgroup">
+                <tr role="row" th:each="r : ${history.reviews}">
+                    <td role="cell" data-label="Chi nhánh" th:text="${@membershipDisplay.name(r.branchName)}"></td>
+                    <td role="cell" data-label="PT" th:text="${r.trainerName ?: '-'}"></td>
+                    <td role="cell" data-label="Sao" th:text="|${r.rating}/5|"></td>
+                    <td role="cell" data-label="Trạng thái" th:text="${r.visible
                             ? 'Đang hiển thị'
                             : 'Đã ẩn'}"></td>
                 </tr>
@@ -171,28 +171,28 @@
 
     <section class="ut-panel mt-4">
         <h2 class="h4">Lịch sử Vào tập / Ra về</h2>
-        <div class="table-responsive"><table class="table table-dark table-striped">
-            <thead><tr><th>Chi nhánh</th><th>Vào</th><th>Ra</th></tr></thead>
-            <tbody><tr th:each="c : ${history.checkins}">
-                <td th:text="${c.branch}"></td>
-                <td th:text="${#temporals.format(c.inAt, 'dd/MM/yyyy HH:mm')}"></td>
-                <td th:text="${c.outAt == null ? 'Đang ở phòng tập' : #temporals.format(c.outAt, 'dd/MM/yyyy HH:mm')}"></td>
+        <div class="table-responsive"><table role="table" class="table  ">
+            <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">Chi nhánh</th><th role="columnheader" scope="col">Vào</th><th role="columnheader" scope="col">Ra</th></tr></thead>
+            <tbody role="rowgroup"><tr role="row" th:each="c : ${history.checkins}">
+                <td role="cell" data-label="Chi nhánh" th:text="${c.branch}"></td>
+                <td role="cell" data-label="Vào" th:text="${#temporals.format(c.inAt, 'dd/MM/yyyy HH:mm')}"></td>
+                <td role="cell" data-label="Ra" th:text="${c.outAt == null ? 'Đang ở phòng tập' : #temporals.format(c.outAt, 'dd/MM/yyyy HH:mm')}"></td>
             </tr></tbody></table></div>
     </section>
     <section class="ut-panel mt-4">
         <h2 class="h4">Lịch sử buổi PT 1:1</h2>
-        <div class="table-responsive"><table class="table table-dark table-striped">
-            <thead><tr><th>PT</th><th>Ngày</th><th>Giờ</th><th>Chi nhánh</th><th>Trạng thái</th></tr></thead>
-            <tbody><tr th:each="p : ${history.personalSchedules}">
-                <td th:text="${p.trainerName}"></td><td th:text="${p.scheduleDate}" data-uf-date></td>
-                <td th:text="|${p.startTime} - ${p.endTime}|"></td>
-                <td th:text="${@membershipDisplay.name(p.branchName)}"></td><td th:text="${p.status}" data-uf-label></td>
+        <div class="table-responsive"><table role="table" class="table  ">
+            <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">PT</th><th role="columnheader" scope="col">Ngày</th><th role="columnheader" scope="col">Giờ</th><th role="columnheader" scope="col">Chi nhánh</th><th role="columnheader" scope="col">Trạng thái</th></tr></thead>
+            <tbody role="rowgroup"><tr role="row" th:each="p : ${history.personalSchedules}">
+                <td role="cell" data-label="PT" th:text="${p.trainerName}"></td><td role="cell" data-label="Ngày" th:text="${p.scheduleDate}" data-uf-date></td>
+                <td role="cell" data-label="Giờ" th:text="|${p.startTime} - ${p.endTime}|"></td>
+                <td role="cell" data-label="Chi nhánh" th:text="${@membershipDisplay.name(p.branchName)}"></td><td role="cell" data-label="Trạng thái" th:text="${p.status}" data-uf-label></td>
             </tr></tbody></table></div>
     </section>
 </main>
 
-<footer th:replace="~{fragments/footer :: footer}"></footer>
-<div th:replace="~{fragments/scripts :: scripts}"></div>
+<footer th:replace="~{member/fragments/layout :: footer}"></footer>
+<div th:replace="~{member/fragments/layout :: scripts}"></div>
 
 </body>
 </html>

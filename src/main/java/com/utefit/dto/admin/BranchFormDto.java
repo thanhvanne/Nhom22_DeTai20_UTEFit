@@ -15,6 +15,7 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@com.utefit.validation.ConsistentForm
 public class BranchFormDto {
 
     private Long id;
@@ -30,7 +31,7 @@ public class BranchFormDto {
     @Size(max = 255, message = "Địa chỉ tối đa 255 ký tự")
     private String address;
 
-    @Pattern(regexp = "^(|0[0-9]{9,10})$", message = "Số điện thoại không hợp lệ (10-11 số, bắt đầu bằng 0)")
+    @com.utefit.validation.ValidInput("hotline")
     private String phone;
 
     @Size(max = 1000, message = "Mô tả tối đa 1000 ký tự")

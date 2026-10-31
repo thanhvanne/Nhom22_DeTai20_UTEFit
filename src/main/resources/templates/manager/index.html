@@ -3,71 +3,73 @@
 <head th:replace="~{fragments/head :: head('Manager chi nhánh - UTEFit')}"></head>
 <body class="uf-theme uf-area-manager uf-page-manager-index">
 <header th:replace="~{fragments/header :: header}"></header>
-<main class="container ut-page">
-    <h1 class="ut-page-title">Quản lý chi nhánh</h1>
-    <p class="ut-subtitle">Lịch lớp và vào tập trong phạm vi quản trị viên phân công. Không có quyền quản trị toàn hệ thống.</p>
+<main class="container ut-page manager-dashboard" id="utefit-content" tabindex="-1">
+    <section class="manager-intro" data-staff-reveal><div><p class="staff-kicker">UTEFIT / BRANCH OPERATIONS</p><h1>Điều hành chi nhánh</h1><p>Lịch lớp, lượt vào tập và kết nối vận hành trong một không gian.</p></div><div class="manager-branch-identity" th:if="${branches != null}"><span>CHI NHÁNH ĐANG CHỌN</span><strong th:each="branch : ${branches}" th:if="${branch.id == branchId}" th:text="${@membershipDisplay.name(branch.name)}"></strong><small th:if="${branchId == null}">Chưa được phân công chi nhánh</small></div></section>
     <div class="alert alert-success" th:if="${success}" th:text="${success}" data-uf-label></div>
     <div class="alert alert-danger" th:if="${error}" th:text="${error}" data-uf-label></div>
-    <p th:if="${branches.empty}" class="alert alert-info">Bạn chưa được giao chi nhánh. Liên hệ quản trị viên.</p>
-    <form th:if="${!branches.empty}" th:action="@{/manager}" method="get" class="d-flex gap-2 mb-4">
-        <select name="branchId" class="form-select" aria-label="Chi nhánh của tôi"><option th:each="branch : ${branches}" th:value="${branch.id}" th:text="${@membershipDisplay.name(branch.name)}" th:selected="${branch.id == branchId}"></option></select>
+    <section th:if="${branches.empty}" class="manager-empty ut-panel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5h16v16M9 21v-6h6v6M8 9h2m4 0h2"/></svg><h2>Chưa có chi nhánh được giao</h2><p>Liên hệ quản trị viên để được phân công. Các công cụ vận hành sẽ xuất hiện tại đây.</p></section>
+    <form th:if="${!branches.empty}" th:action="@{/manager}" method="get" class="manager-control-bar">
+        <div><label for="manager-branch-select">Chi nhánh của tôi</label><select id="manager-branch-select" name="branchId" class="form-select" aria-label="Chi nhánh của tôi"><option th:each="branch : ${branches}" th:value="${branch.id}" th:text="${@membershipDisplay.name(branch.name)}" th:selected="${branch.id == branchId}"></option></select></div>
         <button class="btn btn-brand" type="submit">Xem chi nhánh</button>
+        <p>Chỉ hiển thị phạm vi bạn được phân công.</p>
     </form>
-    <div th:if="${branchId != null}">
-        <section class="ut-panel mb-4">
-            <h2 class="h4">Vào tập thủ công</h2>
-            <form th:action="@{/manager/checkins}" method="post" class="d-flex gap-2">
+    <div class="manager-operations" th:if="${branchId != null}">
+        <div class="manager-workflow">
+        <section class="ut-panel manager-manual" id="manager-checkin" data-staff-reveal>
+            <p class="staff-kicker">THAO TÁC TẠI QUẦY</p><h2>Vào tập thủ công</h2><p class="staff-help">Nhập email hội viên. Hệ thống kiểm tra gói tập và quyền sử dụng tại chi nhánh đang chọn.</p>
+            <form th:action="@{/manager/checkins}" method="post" data-staff-submit>
                 <input name="branchId" type="hidden" th:value="${branchId}">
-                <input name="email" type="email" class="form-control" placeholder="Email Hội viên tại chi nhánh" aria-label="Email Hội viên" required>
+                <label for="manager-member-email">Email hội viên</label><input id="manager-member-email" name="email" type="email" class="form-control" placeholder="Email hội viên" aria-label="Email Hội viên" autocomplete="email" required>
                 <button class="btn btn-brand text-nowrap" type="submit">Vào tập</button>
             </form>
+            <div class="manager-counter-note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 4v5c0 5-8 9-8 9S4 17 4 12V7Zm-4 9 3 3 5-6"/></svg><strong>Xác nhận đúng hội viên</strong><p>Kết quả chỉ được xác nhận sau khi backend kiểm tra. Nếu có lỗi, đối chiếu thông báo trước khi thao tác lại.</p></div>
+            <a class="manager-text-link" href="#manager-history">Xem lịch sử tại chi nhánh <span aria-hidden="true">↗</span></a>
         </section>
-        <section class="ut-panel mb-4">
-            <h2 class="h4">Quét QR vào tập / ra về</h2>
-            <form id="qr-checkin-form" th:action="@{/manager/checkins/qr}" method="post">
+        <section class="ut-panel manager-scanner" id="manager-qr" data-staff-reveal>
+            <div class="manager-panel-heading"><div><p class="staff-kicker">QR ACCESS / TẠI CHI NHÁNH</p><h2>Quét QR vào tập / ra về</h2></div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9V3h6m6 0h6v6m0 6v6h-6m-6 0H3v-6M7 7h3v3H7Zm7 0h3v3h-3ZM7 14h3v3H7Zm7 0v3h3v-3Z"/></svg></div>
+            <form id="qr-checkin-form" th:action="@{/manager/checkins/qr}" method="post" data-staff-submit>
                 <input id="qr-branch" name="branchId" type="hidden" th:value="${branchId}">
                 <label for="qr-token">Mã QR do Hội viên cung cấp</label>
-                <input id="qr-token" name="qrToken" class="form-control mb-2" maxlength="60" required autocomplete="off">
+                <input id="qr-token" name="qrToken" class="form-control mb-2" maxlength="60" required autocomplete="off" aria-describedby="manager-qr-help" placeholder="Dán mã QR hội viên cung cấp">
                 <button class="btn btn-brand" type="submit">Xác nhận QR</button>
             </form>
-            <button id="qr-camera-start" type="button" class="btn btn-outline-warning mt-2">Mở camera quét QR</button>
-            <button id="qr-camera-stop" type="button" class="btn btn-outline-secondary mt-2" hidden>Dừng camera</button>
-            <p id="qr-camera-status" aria-live="polite"></p>
-            <video id="qr-camera" hidden playsinline autoplay muted style="max-width:100%;max-height:320px"></video>
-            <label for="qr-image" class="form-label mt-3">Dự phòng: đọc QR từ ảnh trên thiết bị (tối đa 10 MB)</label>
-            <input id="qr-image" type="file" accept="image/*" class="form-control">
-            <p class="small text-muted">Ảnh xử lý cục bộ. Cùng camera nhận QR vào tập và Ra về; backend kiểm tra mục đích và chi nhánh.</p>
+            <div class="manager-camera-actions"><button id="qr-camera-start" type="button" class="btn btn-outline-warning">Mở camera quét QR</button><button id="qr-camera-stop" type="button" class="btn btn-outline-secondary" hidden>Dừng camera</button></div>
+            <div class="manager-camera-frame"><div class="manager-camera-placeholder"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h4l2-3h6l2 3h4v12H3Zm13 6a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"/></svg><span>Đưa mã QR vào vùng camera</span><small>Camera chỉ mở khi bạn cho phép.</small></div><video id="qr-camera" hidden playsinline autoplay muted style="max-width:100%;max-height:320px"></video><span class="manager-scan-line" aria-hidden="true"></span></div>
+            <p id="qr-camera-status" aria-live="polite" role="status"></p>
+            <div class="staff-upload manager-qr-upload"><label for="qr-image"><strong>Chọn ảnh QR dự phòng</strong><span data-staff-file-name>Ảnh trên thiết bị · tối đa 10 MB</span></label><input id="qr-image" type="file" accept="image/*" class="form-control" data-staff-file-label></div>
+            <p id="manager-qr-help" class="staff-help">Ảnh xử lý cục bộ. Sau khi đọc mã, kiểm tra chi nhánh rồi nhấn Xác nhận QR. Backend xác định mục đích vào tập / ra về.</p>
         </section>
-        <section class="ut-panel mb-4">
+        </div>
+        <section class="ut-panel mb-4" id="manager-history" data-staff-reveal>
             <h2 class="h4">Lịch sử tại chi nhánh</h2>
-            <div class="table-responsive"><table class="table table-dark align-middle">
+            <div class="table-responsive" tabindex="0" role="region" aria-label="Lịch sử vào tập tại chi nhánh, cuộn ngang để xem đủ cột"><table class="table table-dark align-middle">
                 <thead><tr><th>Hội viên</th><th>Vào</th><th>Ra</th><th>Thao tác</th></tr></thead>
                 <tbody><tr th:each="record : ${history.content}">
-                    <td th:text="${record.user.email}"></td><td th:text="${#temporals.format(record.checkInAt,'dd/MM/yyyy HH:mm')}"></td>
+                    <td><strong th:text="${record.user.email}"></strong><span class="staff-status" th:text="${record.open ? 'Đang tập' : 'Đã ra về'}"></span></td><td th:text="${#temporals.format(record.checkInAt,'dd/MM/yyyy HH:mm')}"></td>
                     <td th:text="${record.checkOutAt == null ? 'Chưa checkout' : #temporals.format(record.checkOutAt,'dd/MM/yyyy HH:mm')}"></td>
-                    <td><form th:if="${record.open}" method="post" th:action="@{/manager/checkins/{id}/checkout(id=${record.id})}">
+                    <td><form th:if="${record.open}" method="post" th:action="@{/manager/checkins/{id}/checkout(id=${record.id})}" data-staff-submit>
                         <input name="branchId" type="hidden" th:value="${branchId}"><button class="btn btn-outline-warning btn-sm" type="submit">Ra về</button>
                     </form></td>
                 </tr></tbody>
             </table></div>
-            <p th:if="${history.empty}">Chưa có vào tập.</p>
+            <div class="manager-empty" th:if="${history.empty}"><h3>Chưa có lượt vào tập</h3><p>Các lượt được backend xác nhận sẽ xuất hiện tại đây.</p><a class="manager-text-link" href="#manager-checkin">Vào tập tại quầy →</a></div>
         </section>
-        <section class="ut-panel">
+        <section class="ut-panel" id="manager-schedules" data-staff-reveal>
             <div class="d-flex justify-content-between mb-3"><h2 class="h4">Lịch lớp</h2><a class="btn btn-brand" th:href="@{/manager/schedules/new(branchId=${branchId})}">Tạo lịch</a></div>
-            <div class="table-responsive"><table class="table table-dark align-middle">
+            <div class="table-responsive" tabindex="0" role="region" aria-label="Lịch lớp tại chi nhánh, cuộn ngang để xem đủ cột"><table class="table table-dark align-middle">
                 <thead><tr><th>Lớp / PT</th><th>Ngày</th><th>Giờ</th><th>Phòng</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
                 <tbody><tr th:each="schedule : ${schedules.content}">
                     <td><span th:text="${schedule.fitnessClass.name}"></span><br><small th:if="${schedule.fitnessClass.trainer != null}" th:text="${schedule.fitnessClass.trainer.user.fullName}"></small></td>
                     <td th:text="${schedule.scheduleDate}" data-uf-date></td><td th:text="|${schedule.startTime}–${schedule.endTime}|"></td><td th:text="${schedule.room}"></td>
-                    <td th:text="${schedule.active ? 'ACTIVE' : 'INACTIVE'}"></td>
+                    <td><span class="staff-status" th:text="${schedule.active ? 'Đang hoạt động' : 'Tạm dừng'}"></span></td>
                     <td><a class="btn btn-outline-warning btn-sm" th:href="@{/manager/schedules/{id}/edit(id=${schedule.id},branchId=${branchId})}">Sửa</a>
-                        <form class="d-inline" method="post" th:action="@{/manager/schedules/{id}/toggle(id=${schedule.id})}" onsubmit="return confirm('Đổi trạng thái lịch? Member đã đăng ký sẽ được xử lý theo nghiệp vụ hiện có.');">
+                        <form class="d-inline" method="post" th:action="@{/manager/schedules/{id}/toggle(id=${schedule.id})}" data-staff-submit onsubmit="return confirm('Đổi trạng thái lịch? Member đã đăng ký sẽ được xử lý theo nghiệp vụ hiện có.');">
                             <input name="branchId" type="hidden" th:value="${branchId}"><button class="btn btn-outline-warning btn-sm" type="submit" th:text="${schedule.active ? 'Hủy lịch' : 'Mở lại'}"></button>
                         </form>
                     </td>
                 </tr></tbody>
             </table></div>
-            <p th:if="${schedules.empty}">Chưa có lịch lớp.</p>
+            <div class="manager-empty" th:if="${schedules.empty}"><h3>Chưa có lịch lớp tại chi nhánh</h3><p>Tạo lịch cho các lớp thuộc phạm vi được phân công.</p><a class="btn btn-outline-warning" th:href="@{/manager/schedules/new(branchId=${branchId})}">Tạo lịch lớp</a></div>
         </section>
         <nav class="d-flex gap-3 mt-3">
             <a th:if="${history.hasPrevious() or schedules.hasPrevious()}" th:href="@{/manager(branchId=${branchId},page=${history.number - 1})}">Trước</a>

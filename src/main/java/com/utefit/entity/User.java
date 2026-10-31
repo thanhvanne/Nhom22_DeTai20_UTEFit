@@ -4,6 +4,7 @@ import com.utefit.enums.UserRole;
 import com.utefit.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Nationalized;
 
 import java.time.LocalDateTime;
 
@@ -20,9 +21,11 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Nationalized
     @Column(name = "first_name", nullable = false, length = 50)
     private String firstName;
 
+    @Nationalized
     @Column(name = "last_name", nullable = false, length = 50)
     private String lastName;
 

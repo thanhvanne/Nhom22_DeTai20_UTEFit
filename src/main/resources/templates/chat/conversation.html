@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
-<head>
+<head th:replace="${#authorization.expression('hasRole(''MEMBER'')')} ? ~{member/fragments/layout :: head('Trò chuyện với PT - UTEFit')} : _">
     <meta charset="UTF-8">
     <meta name="viewport"
           content="width=device-width, initial-scale=1">
@@ -26,11 +26,14 @@
     <link rel="stylesheet" th:href="@{/css/utefit-premium.css(v=2)}">
     <link rel="stylesheet" th:href="@{/css/utefit-interface.css(v=1)}">
     <script defer th:src="@{/js/utefit-interface.js(v=1)}"></script>
+    <link rel="stylesheet" th:href="@{/css/utefit-studio.css}">
+    <link rel="stylesheet" th:href="@{/css/utefit-layouts.css(v=1)}">
+    <script defer th:src="@{/js/utefit-accessibility.js(v=1)}"></script>
 </head>
 
-<body class="uf-chat-page uf-theme uf-area-chat uf-page-chat-conversation">
+<body class="uf-chat-page uf-theme uf-area-chat uf-page-chat-conversation" th:classappend="${#authorization.expression('hasRole(''MEMBER'')')} ? 'uf-member' : ''">
 
-<header th:replace="~{fragments/header :: header}"></header>
+<header th:replace="${#authorization.expression('hasRole(''MEMBER'')')} ? ~{member/fragments/layout :: header} : ~{fragments/header :: header}"></header>
 
 <!-- Dùng chung cho PT và Member legacy -->
 <main class="uf-chat-workspace has-active-chat"
@@ -40,7 +43,7 @@
                acceptedTrainers=${null}">
 
     <!-- Danh sách chat bên trái -->
-    <aside th:replace="~{fragments/chat-sidebar :: sidebar}"></aside>
+    <aside th:replace="${#authorization.expression('hasRole(''MEMBER'')')} ? ~{member/fragments/chat-sidebar :: sidebar} : ~{fragments/chat-sidebar :: sidebar}"></aside>
 
     <!-- Khung hội thoại -->
     <section class="uf-chat-main"
@@ -72,7 +75,7 @@
 
             <div class="uf-chat-partner">
 
-                <h2 th:text="${partnerName}" data-uf-label>
+                <h2 th:replace="${#authorization.expression('hasRole(''MEMBER'')')} ? ~{member/fragments/layout :: conversationTitle(${partnerName})} : _" th:text="${partnerName}" data-uf-label>
                     Tên người trò chuyện
                 </h2>
 
@@ -187,7 +190,7 @@
 
 </main>
 
-<div th:replace="~{fragments/scripts :: scripts}"></div>
+<div th:replace="${#authorization.expression('hasRole(''MEMBER'')')} ? ~{member/fragments/layout :: scripts} : ~{fragments/scripts :: scripts}"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
 

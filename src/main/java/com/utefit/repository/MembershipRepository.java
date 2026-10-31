@@ -19,6 +19,17 @@ import java.util.Optional;
 
 public interface MembershipRepository
         extends JpaRepository<Membership, Long> {
+    @Query("select count(m) from Membership m where m.offerKind = :kind and (:label is null or m.offerLabel = :label) and m.status in (com.utefit.enums.MembershipStatus.ACTIVE, com.utefit.enums.MembershipStatus.EXPIRED) and exists (select p.id from Payment p where p.membership = m and p.user = m.user and p.status = com.utefit.enums.PaymentStatus.PAID)")
+    long automaticPaidUses(@Param("kind") String kind, @Param("label") String label);
+
+    @Query("select count(m) from Membership m where m.offerKind = :kind and (:label is null or m.offerLabel = :label) and m.status = com.utefit.enums.MembershipStatus.PENDING")
+    long automaticPendingUses(@Param("kind") String kind, @Param("label") String label);
+
+    @Query("select count(m) from Membership m where m.user.id = :userId and upper(m.promotionCode) = upper(:code) and (m.status <> com.utefit.enums.MembershipStatus.CANCELLED or exists (select p.id from Payment p where p.membership = m and p.paidAt is not null))")
+    long promotionUses(@Param("userId") Long userId, @Param("code") String code);
+
+    @Query("select count(m) from Membership m where upper(m.promotionCode) = upper(:code) and (m.status <> com.utefit.enums.MembershipStatus.CANCELLED or exists (select p.id from Payment p where p.membership = m and p.paidAt is not null))")
+    long promotionReservations(@Param("code") String code);
     @EntityGraph(attributePaths = {"branch", "plan", "branchIds"})
     @Query("select distinct m from Membership m where m.user.id = :userId and m.status = com.utefit.enums.MembershipStatus.ACTIVE and (exists (select p.id from Payment p where p.membership = m and p.status = com.utefit.enums.PaymentStatus.PAID) or (m.quotedScope is null and not exists (select p.id from Payment p where p.membership = m)))")
     List<Membership> findPaidAccessByUser(@Param("userId") Long userId);

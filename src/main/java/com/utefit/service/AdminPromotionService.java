@@ -32,6 +32,7 @@ public class AdminPromotionService {
 
     @Transactional
     public void save(Long id, Promotion form) {
+        com.utefit.validation.FormChecks.validate(form);
         validate(id, form);
 
         Promotion promotion = id == null
@@ -42,6 +43,9 @@ public class AdminPromotionService {
         promotion.setCode(
                 form.getCode().trim().toUpperCase(Locale.ROOT));
         promotion.setDiscountPercent(form.getDiscountPercent());
+        promotion.setMinOrderAmount(form.getMinOrderAmount());
+        promotion.setMaxDiscountAmount(form.getMaxDiscountAmount());
+        promotion.setPerUserLimit(form.getPerUserLimit());
         promotion.setStartDate(form.getStartDate());
         promotion.setEndDate(form.getEndDate());
         promotion.setQuantity(form.getQuantity());
@@ -59,6 +63,10 @@ public class AdminPromotionService {
     }
 
     private void validate(Long id, Promotion form) {
+        for (BigDecimal amount : new BigDecimal[]{form.getMinOrderAmount(), form.getMaxDiscountAmount()}) {
+            if (amount != null && (amount.signum() <= 0 || amount.stripTrailingZeros().scale() > 0 || amount.precision() - amount.scale() > 13)) throw new IllegalArgumentException("Điều kiện tiền phải là số VND nguyên dương, tối đa 13 chữ số.");
+        }
+        if (form.getPerUserLimit() != null && form.getPerUserLimit() < 1) throw new IllegalArgumentException("Giới hạn mỗi hội viên phải lớn hơn 0 hoặc để trống.");
         if (form.getCode() == null ||
                 !form.getCode().trim().matches("[A-Za-z0-9_-]{3,50}")) {
             throw new IllegalArgumentException(

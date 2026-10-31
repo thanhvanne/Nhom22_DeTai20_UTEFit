@@ -1,37 +1,38 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments/layout :: head('Quản lý Huấn luyện viên (PT)')}"></head>
-<body class="uf-theme uf-area-admin uf-page-admin-trainers-list">
-<div class="d-flex">
+<body class="uf-theme uf-area-admin uf-page-admin-trainers-list uf-admin">
+<div class="admin-shell">
     <div th:replace="~{admin/fragments/layout :: sidebar}"></div>
 
-    <div class="flex-grow-1">
-        <div th:replace="~{admin/fragments/layout :: topbar('Quản lý Huấn luyện viên (Trainer Management)')}"></div>
+    <div class="admin-workspace">
+        <div th:replace="~{admin/fragments/layout :: topbar('Huấn luyện viên')}"></div>
 
-        <main class="container-fluid px-4 pb-5">
-            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm rounded-4 border-0">
+        <main class="admin-main" id="utefit-content" tabindex="-1">
+            <div class="admin-page-heading"><p>Chuyên môn, chi nhánh phụ trách và trạng thái hoạt động.</p></div>
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show">
                 <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}" data-uf-label></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng thông báo"></button>
             </div>
-            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm rounded-4 border-0">
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show">
                 <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${errorMessage}" data-uf-label></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng thông báo"></button>
             </div>
 
             <!-- Thanh công cụ tìm kiếm & lọc theo Chi nhánh -->
-            <div class="surface-card p-4 mb-4">
-                <form method="get" th:action="@{/admin/trainers}" class="row g-3 align-items-end">
-                    <div class="col-md-4">
-                        <label class="form-label small fw-bold text-secondary text-uppercase">Tìm kiếm PT</label>
+            <div class="surface-card admin-filter-panel">
+                <form method="get" th:action="@{/admin/trainers}" class="admin-query">
+                    <div class="admin-query-field">
+                        <label class="form-label small fw-bold text-secondary" for="admin-trainers-list-html-branchId">Tìm kiếm PT</label>
                         <div class="input-group">
                             <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
                             <input type="text" name="keyword" class="form-control border-start-0"
-                                   placeholder="Tên PT, email, chuyên môn..." th:value="${keyword}">
+                                   placeholder="Tên PT, email, chuyên môn..." th:value="${keyword}" aria-label="Từ khóa tìm kiếm">
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label small fw-bold text-secondary text-uppercase">Chi nhánh làm việc</label>
-                        <select name="branchId" class="form-select">
+                    <div class="admin-query-field">
+                        <label class="form-label small fw-bold text-secondary">Chi nhánh làm việc</label>
+                        <select name="branchId" class="form-select" id="admin-trainers-list-html-branchId">
                             <option value="">-- Tất cả chi nhánh --</option>
                             <option th:each="b : ${branches}"
                                     th:value="${b.id}"
@@ -40,68 +41,69 @@
                             </option>
                         </select>
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label small fw-bold text-secondary text-uppercase">Trạng thái PT</label>
-                        <select name="active" class="form-select">
+                    <div class="admin-query-field">
+                        <label class="form-label small fw-bold text-secondary" for="admin-trainers-list-html-active">Trạng thái PT</label>
+                        <select name="active" class="form-select" id="admin-trainers-list-html-active">
                             <option value="">-- Tất cả trạng thái --</option>
                             <option value="true" th:selected="${selectedActive != null and selectedActive}">Đang hoạt động</option>
                             <option value="false" th:selected="${selectedActive != null and !selectedActive}">Tạm ngưng</option>
                         </select>
                     </div>
-                    <div class="col-md-2 d-flex gap-2">
-                        <button type="submit" class="btn btn-utefit w-100"><i class="bi bi-funnel-fill me-1"></i> Lọc</button>
-                        <a th:href="@{/admin/trainers}" class="btn btn-outline-secondary" title="Đặt lại"><i class="bi bi-arrow-counterclockwise"></i></a>
+                    <div class="admin-query-field">
+                        <button type="submit" class="btn btn-outline-secondary w-100"><i class="bi bi-funnel-fill me-1"></i> Lọc</button>
+                        <a th:href="@{/admin/trainers}" class="btn btn-outline-secondary" title="Đặt lại" aria-label="Đặt lại bộ lọc"><i class="bi bi-arrow-counterclockwise"></i></a>
                     </div>
                 </form>
             </div>
 
             <!-- Bảng dữ liệu Huấn luyện viên -->
-            <div class="surface-card overflow-hidden">
+            <div class="surface-card admin-table-panel">
+                <div class="admin-table-heading"><h2>Danh sách huấn luyện viên</h2><p class="admin-scroll-hint">Cuộn ngang để xem đầy đủ trên máy tính bảng.</p></div>
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
+                    <table class="table table-hover align-middle mb-0 admin-data-table">
                         <thead>
                         <tr>
                             <th class="ps-4" style="width: 65px;">ID</th>
                             <th>Huấn luyện viên</th>
                             <th>Chuyên môn & Kinh nghiệm</th>
-                            <th style="width: 290px;">Gán Chi nhánh (Assign Branch)</th>
+                            <th style="width: 290px;">Chi nhánh phụ trách</th>
                             <th>Trạng thái</th>
-                            <th class="text-end pe-4">Thao tác</th>
+                            <th class="pe-4">Thao tác</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr th:if="${trainerPage.empty}">
-                            <td colspan="6" class="text-center py-5 text-muted">
+                            <td colspan="6" class="text-center py-5 text-muted admin-empty">
                                 <i class="bi bi-person-badge fs-1 d-block mb-2 text-secondary opacity-50"></i>
                                 Không tìm thấy huấn luyện viên nào phù hợp.
                             </td>
                         </tr>
                         <tr th:each="t : ${trainerPage.content}">
-                            <td class="ps-4 fw-bold text-secondary" th:text="'#' + ${t.id}">#1</td>
-                            <td>
+                            <td class="ps-4 fw-bold text-secondary" th:text="'#' + ${t.id}" data-label="ID">#1</td>
+                            <td data-label="Huấn luyện viên" class="admin-record-primary">
                                 <div class="d-flex align-items-center">
                                     <img th:src="${t.user.avatarUrl != null and !#strings.isEmpty(t.user.avatarUrl) ? t.user.avatarUrl : 'https://ui-avatars.com/api/?background=10b981&color=fff&bold=true&name=' + t.user.firstName + '+' + t.user.lastName}"
-                                         alt="Ảnh đại diện" class="rounded-circle border shadow-sm me-3" width="44" height="44" style="object-fit: cover;">
+                                         alt="Ảnh đại diện" class="border me-3" width="44" height="44" style="object-fit: cover;">
                                     <div>
                                         <div class="fw-bold text-dark" th:text="${t.user.firstName + ' ' + t.user.lastName}">Nguyễn Văn A</div>
                                         <div class="text-muted small" th:text="${t.user.email}">pt@utefit.vn</div>
-                                        <span th:if="${t.user.status.name() == 'LOCKED'}" class="badge bg-danger bg-opacity-10 text-danger mt-1" style="font-size: 0.68rem;">
+                                        <span th:if="${t.user.status.name() == 'LOCKED'}" class="badge bg-danger bg-opacity-10 text-danger mt-1">
                                             <i class="bi bi-lock-fill"></i> User đang bị khóa
                                         </span>
                                     </div>
                                 </div>
                             </td>
-                            <td>
+                            <td data-label="Chuyên môn &amp; Kinh nghiệm">
                                 <div class="fw-semibold text-dark" th:text="${t.specialization ?: 'Chưa cập nhật chuyên môn'}">Yoga & Mobility</div>
                                 <div class="text-secondary small">
                                     <i class="bi bi-award text-success me-1"></i>
                                     <span th:text="${t.yearsExperience != null ? t.yearsExperience + ' năm kinh nghiệm' : 'Chưa cập nhật'}">5 năm</span>
                                 </div>
                             </td>
-                            <td>
+                            <td data-label="Chi nhánh phụ trách">
                                 <!-- Form gán/đổi Chi nhánh nhanh ngay trên từng dòng -->
                                 <form th:action="@{/admin/trainers/{id}/assign-branch(id=${t.id})}" method="post" class="d-flex gap-2 align-items-center m-0">
-                                    <select name="branchId" class="form-select form-select-sm rounded-3">
+                                    <select name="branchId" class="form-select form-select-sm" aria-label="Chi nhánh">
                                         <option value="">-- Chưa gán chi nhánh --</option>
                                         <option th:each="b : ${branches}"
                                                 th:value="${b.id}"
@@ -109,12 +111,12 @@
                                                 th:selected="${t.branch != null and t.branch.id == b.id}">
                                         </option>
                                     </select>
-                                    <button type="submit" class="btn btn-sm btn-utefit rounded-3 px-2" title="Lưu chi nhánh">
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary px-2" title="Lưu chi nhánh">
                                         <i class="bi bi-check2-circle"></i> Lưu
                                     </button>
                                 </form>
                             </td>
-                            <td>
+                            <td data-label="Trạng thái">
                                 <span th:if="${t.active}" class="status-pill bg-success bg-opacity-10 text-success">
                                     <span class="dot bg-success"></span> Hoạt động
                                 </span>
@@ -122,13 +124,13 @@
                                     <span class="dot bg-secondary"></span> Tạm ngưng
                                 </span>
                             </td>
-                            <td class="text-end pe-4">
+                            <td class="pe-4 admin-record-actions" data-label="Thao tác">
                                 <a th:href="@{/trainers/{id}(id=${t.id})}" target="_blank"
-                                   class="btn btn-sm btn-outline-dark rounded-pill px-3 me-1" title="Xem trang public">
+                                   class="btn btn-sm btn-outline-dark px-3 me-1" title="Xem trang public" aria-label="Xem hồ sơ huấn luyện viên">
                                     <i class="bi bi-box-arrow-up-right"></i>
                                 </a>
                                 <form th:action="@{/admin/trainers/{id}/toggle-active(id=${t.id})}" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-sm rounded-pill px-3"
+                                    <button type="submit" class="btn btn-sm px-3"
                                             th:classappend="${t.active ? 'btn-outline-warning' : 'btn-outline-success'}">
                                         <span th:text="${t.active ? 'Tắt PT' : 'Bật PT'}"></span>
                                     </button>
@@ -139,7 +141,7 @@
                     </table>
                 </div>
 
-                <div class="card-footer bg-white d-flex justify-content-between align-items-center px-4 py-3" th:if="${trainerPage.totalPages > 1}">
+                <div class="admin-pagination" th:if="${trainerPage.totalPages > 1}">
                     <span class="small text-muted">Trang <b th:text="${trainerPage.number + 1}"></b> / <b th:text="${trainerPage.totalPages}"></b></span>
                     <ul class="pagination pagination-sm mb-0">
                         <li class="page-item" th:classappend="${trainerPage.first} ? 'disabled'">

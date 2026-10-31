@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="assets">
+    <link rel="stylesheet" th:href="@{/css/utefit-branch-media.css(v=2)}">
+    <script defer th:src="@{/js/utefit-branch-media.js(v=2)}"></script>
+</th:block>
+
+<th:block th:fragment="publicMedia(branch,appearance)"><th:block th:replace="~{fragments/branch-media :: media(${branch},${appearance})}"></th:block></th:block>
+<th:block th:fragment="adminPreview(branch)"><th:block th:replace="~{fragments/branch-media :: media(${branch},'admin')}"></th:block></th:block>
+
+<th:block th:fragment="media(branch,appearance)"
+          th:with="sourceUrl=${#strings.trim(branch.imageUrl ?: '')},
+                   sourceLower=${#strings.toLowerCase(sourceUrl)},
+                   foreignGym=${#strings.contains(sourceUrl,'/utefit/branches/nix4fskixwaxy3ou0gkj') or #strings.contains(sourceUrl,'/utefit/branches/xamgjfsidfbc0rhyvhhi') or #strings.contains(sourceUrl,'/utefit/branches/qoqqti8jvlilah0wxewk') or #strings.contains(sourceUrl,'/utefit/branches/zmlyompmz4ulmk1dtpau') or #strings.contains(sourceUrl,'/utefit/branches/nwfgqyo7j8xabno1c737')},
+                   validUrl=${#strings.startsWith(sourceLower,'https://') or #strings.startsWith(sourceLower,'http://') or (#strings.startsWith(sourceUrl,'/') and !#strings.startsWith(sourceUrl,'//'))},
+                   hasImage=${validUrl and !foreignGym},
+                   fallbackNote=${foreignGym ? 'Chưa có ảnh minh họa phù hợp' : (#strings.isEmpty(sourceUrl) ? 'Chưa có ảnh chi nhánh' : 'Không tải được ảnh chi nhánh')}"
+          th:switch="${appearance}">
+    <div th:case="'directory'" class="pd-club-media branch-media" th:classappend="${hasImage} ? 'has-photo' : ''" th:attr="data-club-id=${branch.id}" data-branch-media>
+        <svg class="pd-architecture" viewBox="0 0 600 400" fill="none" aria-hidden="true" data-branch-placeholder><path d="M60 350V90l170-40 270 90v210M60 90l270 100v160M230 50v230l270 70M60 350l170-70 100 70M330 190l170-50M105 109v220m47-202v181m40-165v146M265 64v226m45-211v226m46-211v226m46-211v226m46-211v226" stroke="currentColor" stroke-width="1.5"/><path d="M60 350h500M40 375h490" stroke="currentColor" stroke-width="1.5"/></svg>
+        <span class="pd-media-brand" aria-hidden="true" data-branch-placeholder>UTE<span>FIT</span></span>
+        <p class="pd-media-note" th:text="${fallbackNote}" data-branch-fallback-note></p>
+        <th:block th:replace="~{fragments/branch-media :: photo(${branch})}"></th:block>
+    </div>
+    <figure th:case="'gallery'" class="pj-club-media branch-media" th:classappend="${hasImage} ? 'has-photo' : 'is-missing'" th:attr="data-club-id=${branch.id}" data-branch-media>
+        <div class="pj-club-placeholder">
+            <svg class="pj-club-drawing" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g fill="none" stroke="currentColor"><path d="M460 520V110L780-65M510 520V140L850-40M565 520V175L920-15M625 520V210L990 15M690 520V250L1060 50M760 520V295L1130 90"/><path d="M0 360H1000M0 410H1000M0 465H1000M460 110H1000M510 140H1000M565 175H1000M625 210H1000M690 250H1000"/><circle cx="790" cy="290" r="180"/><circle cx="790" cy="290" r="130"/></g></svg>
+            <div class="pj-club-imprint"><span>UTEFit / Không gian tập</span><strong th:text="${branch.name}" aria-hidden="true">Chi nhánh</strong><p th:text="${branch.address}" aria-hidden="true">Địa chỉ</p></div>
+            <p class="pj-club-media-note"><b class="branch-fallback-text" th:text="${fallbackNote}" data-branch-fallback-note></b><span>Đồ họa thương hiệu, không phải sơ đồ cơ sở</span></p>
+        </div>
+        <th:block th:replace="~{fragments/branch-media :: photo(${branch})}"></th:block>
+    </figure>
+    <figure th:case="'admin'" class="branch-source-preview" th:attr="data-branch-image-id=${branch.id}" data-branch-media>
+        <img th:if="${validUrl}" th:src="${sourceUrl}" th:alt="${foreignGym ? 'Ảnh nguồn có thương hiệu gym khác, chỉ để đối chiếu' : 'Ảnh minh họa ' + branch.name}" width="180" height="112" decoding="async" data-branch-image>
+        <p class="branch-source-error" th:hidden="${validUrl}" th:text="${fallbackNote}" role="status" data-branch-fallback-note></p>
+        <figcaption th:if="${validUrl}" th:text="${foreignGym ? 'Ảnh gym khác · không dùng ở Public' : 'Ảnh minh họa'}" data-branch-caption></figcaption>
+        <details th:if="${!#strings.isEmpty(sourceUrl)}" class="branch-source-url"><summary>URL đang lưu</summary><code th:text="${sourceUrl}"></code></details>
+    </figure>
+    <div th:case="*" class="ut-empty-image branch-media branch-media-member" th:classappend="|${appearance == 'member-detail' ? 'branch-media-detail rounded-4' : ''} ${hasImage ? 'has-photo' : ''}|" th:attr="data-club-id=${branch.id}" data-branch-media>
+        <span th:text="${fallbackNote}" data-branch-fallback-note></span>
+        <th:block th:replace="~{fragments/branch-media :: photo(${branch})}"></th:block>
+    </div>
+</th:block>
+
+<th:block th:fragment="photo(branch)" th:if="${hasImage}">
+    <img class="branch-display-photo" th:src="${sourceUrl}" th:alt="|Ảnh minh họa ${branch.name}, không phải ảnh chụp cơ sở thực tế|" width="1200" height="800" decoding="async" data-branch-image>
+    <p class="branch-photo-caption" data-branch-caption>Ảnh minh họa</p>
+</th:block>
+</body>
+</html>

@@ -18,7 +18,7 @@
     </aside>
     <section class="uf-auth-form">
 
-    <h2 class="mb-4">Đăng ký tài khoản</h2>
+    <h1 class="mb-4">Đăng ký tài khoản</h1>
 
     <form th:action="@{/register}"
           th:object="${form}"
@@ -61,13 +61,16 @@
             </div>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">Email</label>
-
+        <div class="mb-3 ux u025-f is-up">
+            <div class="u025-box">
             <input type="email"
-                   class="form-control"
+                   class="form-control u025-in"
                    th:field="*{email}"
+                   autocomplete="email"
                    required>
+            <span class="u025-line" aria-hidden="true"><i class="l"></i><i class="g"></i><i class="r"></i></span>
+            <label class="u025-lab" for="email">Email</label>
+            </div>
 
             <div class="text-danger"
                  th:if="${#fields.hasErrors('email')}"
@@ -95,10 +98,14 @@
                 Mật khẩu
             </label>
 
+            <div class="ux u036">
             <input type="password"
-                   class="form-control"
-                   th:field="*{password}"
-                   required>
+                    class="form-control"
+                    th:field="*{password}"
+                    autocomplete="new-password"
+                    required>
+            <th:block th:replace="~{fragments/field-tools :: passwordEye}"></th:block>
+            </div>
 
             <div class="text-danger"
                  th:if="${#fields.hasErrors('password')}"
@@ -111,10 +118,14 @@
                 Nhập lại mật khẩu
             </label>
 
+            <div class="ux u036">
             <input type="password"
-                   class="form-control"
-                   th:field="*{confirmPassword}"
-                   required>
+                    class="form-control"
+                    th:field="*{confirmPassword}"
+                    autocomplete="new-password"
+                    required>
+            <th:block th:replace="~{fragments/field-tools :: passwordEye}"></th:block>
+            </div>
         </div>
 
         <button type="submit"

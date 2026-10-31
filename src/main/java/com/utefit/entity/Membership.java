@@ -16,6 +16,11 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 public class Membership {
+    @Column(name = "offer_kind", length = 24, updatable = false) private String offerKind;
+    @org.hibernate.annotations.Nationalized
+    @Column(name = "offer_label", length = 150, updatable = false) private String offerLabel;
+    @Column(name = "discount_amount", precision = 15, scale = 2, updatable = false) private BigDecimal discountAmount;
+    @Column(name = "pricing_selection", length = 12, updatable = false) private String pricingSelection;
     @Column(name = "promotion_code", length = 50, updatable = false)
     private String promotionCode;
     @Column(name = "original_price", precision = 15, scale = 2, updatable = false)

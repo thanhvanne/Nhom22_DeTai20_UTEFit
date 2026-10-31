@@ -38,17 +38,22 @@ class LiveDemoSchemaPreparationTest {
         var scanner = new ClassPathScanningCandidateComponentProvider(false);
         scanner.addIncludeFilter(new AnnotationTypeFilter(Entity.class));
         var candidates = scanner.findCandidateComponents("com.utefit.entity");
-        assertEquals(25, candidates.size());
+        assertEquals(27, candidates.size());
         for (var candidate : candidates) configuration.addAnnotatedClass(Class.forName(candidate.getBeanClassName()));
         try (var factory = configuration.buildSessionFactory()) { assertTrue(factory.isOpen()); }
         String ddl = Files.readString(target);
-        assertEquals(27, ddl.lines().filter(line -> line.stripLeading().startsWith("create table ")).count());
+        String usersTable = ddl.lines().filter(line -> line.startsWith("create table users ")).findFirst().orElseThrow();
+        assertTrue(usersTable.contains("first_name nvarchar(50) not null"));
+        assertTrue(usersTable.contains("last_name nvarchar(50) not null"));
+        assertEquals(29, ddl.lines().filter(line -> line.stripLeading().startsWith("create table ")).count());
+        assertTrue(ddl.contains("loyalty_payment_exclusions"));
+        assertTrue(ddl.contains("discount_amount"));
         assertTrue(ddl.contains("quoted_duration_days"));
         assertTrue(ddl.contains("video_public_id"));
         assertTrue(ddl.contains("uk_sepay_environment_transaction"));
         assertFalse(ddl.toLowerCase().contains("insert into"));
         assertFalse(ddl.toLowerCase().contains("drop database"));
-        var excluded = java.util.Set.of("favorites", "manager_branch_assignments", "qr_checkin_tokens", "sepay_payment_details", "sepay_webhook_transactions", "sepay_bank_reconciliations", "membership_plan_branches", "membership_branch_snapshot");
+        var excluded = java.util.Set.of("favorites", "manager_branch_assignments", "qr_checkin_tokens", "sepay_payment_details", "sepay_webhook_transactions", "sepay_bank_reconciliations", "membership_plan_branches", "membership_branch_snapshot", "loyalty_payment_exclusions", "automatic_promotions");
         var tablePattern = java.util.regex.Pattern.compile("^(?:create table|alter table) (\\w+)|^create (?:unique )?index \\w+ on (\\w+)");
         String expectedCore = ddl.lines().filter(line -> !line.isBlank()).filter(line -> {
             var matcher = tablePattern.matcher(line);
@@ -81,6 +86,7 @@ class LiveDemoSchemaPreparationTest {
 
     private String withoutV711Columns(String line) {
         String result = line.replace("renewal_of_id bigint, ", "");
+        for (String column : new String[]{"max_discount_amount numeric(15,2), ", "min_order_amount numeric(15,2), ", "discount_amount numeric(15,2), ", "offer_kind varchar(24), ", "offer_label nvarchar(150), ", "pricing_selection varchar(12), ", "per_user_limit int, "}) result = result.replace(column, "");
         for (String column : new String[]{"quoted_duration_quantity", "quoted_bonus_quantity", "duration_quantity", "bonus_quantity"})
             result = result.replace(column + " int, ", "");
         for (String column : new String[]{"quoted_duration_unit", "quoted_bonus_unit", "duration_unit", "bonus_unit"})

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="assets">
+    <link rel="stylesheet" th:href="@{/css/utefit-validation.css(v=1)}">
+    <script th:inline="javascript">
+        window.UTEFitValidationState = {
+            errors: /*[[${validationErrors}]]*/ null,
+            values: /*[[${validationValues}]]*/ null,
+            action: /*[[${validationAction}]]*/ null
+        };
+    </script>
+    <script defer th:src="@{/js/validation-core.js(v=1)}"></script>
+    <script defer th:src="@{/js/utefit-validation.js(v=1)}"></script>
+</th:block>
+</html>

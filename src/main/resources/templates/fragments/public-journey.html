@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="journey">
+    <section class="pj-arena" aria-labelledby="pj-arena-title">
+        <div class="pj-arena-stage">
+            <div class="pj-arena-window">
+                <picture><source media="(max-width: 600px)" th:srcset="@{/images/journey-arena-mobile.webp}"><img class="pj-arena-photo" th:src="@{/images/journey-arena.webp}" width="1280" height="1919" alt="Không gian tập sức mạnh với rack và thanh tạ — ảnh minh họa" loading="lazy" decoding="async"></picture>
+                <div class="pj-arena-shade" aria-hidden="true"></div>
+                <div class="pj-arena-blue" aria-hidden="true"></div>
+                <div class="pj-arena-copy">
+                    <h2 id="pj-arena-title"><span class="pj-line"><span>Bước vào</span></span><span class="pj-line"><span>nhịp tập.</span></span></h2>
+                    <p>Từ chuyển động đầu tiên đến buổi tập tiếp theo.<br>Một không gian cho hành trình của bạn.</p>
+                    <a class="pj-button" th:href="@{/branches}">Khám phá không gian tập</a>
+                </div>
+                <p class="pj-photo-note">Ảnh không gian tập minh họa · Rick Barrett / Unsplash</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="pj-training" aria-label="Tìm cách tập của bạn">
+        <div class="pj-training-story">
+            <div class="pj-training-stage">
+                <div class="pj-training-entry">
+                    <section class="pj-training-scene pj-training-scene--group" aria-labelledby="pj-group-title">
+                        <div class="pj-training-photo pj-training-photo--group"><picture><source media="(max-width: 600px)" th:srcset="@{/images/journey-group-mobile.webp}"><img th:src="@{/images/journey-group.webp}" width="1200" height="801" alt="Dụng cụ tập sức mạnh — ảnh minh họa" loading="lazy" decoding="async"></picture></div>
+                        <div class="pj-training-shade" aria-hidden="true"></div>
+                        <article id="lop-tap" class="pj-training-copy pj-training-copy--group">
+                            <p class="pj-training-label">Group classes</p>
+                            <h2 id="pj-group-title"><span class="pj-line"><span>Cùng tập.</span></span><span class="pj-line"><span>Cùng tiến.</span></span></h2>
+                            <p>Khám phá lớp tập theo mục tiêu và chi nhánh. Xem thông tin chi tiết để chọn buổi tập phù hợp.</p>
+                            <div class="pj-training-actions"><a class="pj-button" th:href="@{/classes}">Xem các lớp tập</a></div>
+                            <details class="pj-class-disclosure"><summary><span>Lớp tập nổi bật</span><span class="pj-disclosure-close">Đóng danh sách</span></summary>
+        <div id="pj-class-catalog" class="pj-class-catalog">
+            <header><h3>Lớp tập nổi bật</h3></header>
+            <div class="pj-class-list" th:unless="${#lists.isEmpty(featuredClasses)}">
+                <details th:each="c : ${featuredClasses}">
+                    <summary><span class="pj-category" th:text="${c.categoryName}">Danh mục</span><strong th:text="${c.name}">Tên lớp</strong><span class="pj-class-branch" th:text="${@membershipDisplay.name(c.branchName)}">UTEFit</span><span class="pj-class-toggle" aria-hidden="true">+</span></summary>
+                    <p th:text="${c.description}">Mô tả lớp</p>
+                </details>
+            </div>
+            <p class="pj-empty" th:if="${#lists.isEmpty(featuredClasses)}">Chưa có lớp tập đang mở. Bạn có thể xem danh mục lớp để cập nhật thông tin.</p>
+        </div>
+                            </details>
+                        </article>
+                    </section>
+                    <section class="pj-training-scene pj-training-scene--personal" aria-labelledby="pj-personal-title">
+                        <div class="pj-training-photo pj-training-photo--personal"><picture><source media="(max-width: 600px)" th:srcset="@{/images/journey-personal-mobile.webp}"><img th:src="@{/images/journey-personal.webp}" width="1200" height="800" alt="Luyện kỹ thuật nâng tạ — ảnh minh họa, không phải hồ sơ PT UTEFit" loading="lazy" decoding="async"></picture></div>
+                        <div class="pj-training-shade" aria-hidden="true"></div>
+                        <article id="huan-luyen-vien" class="pj-training-copy pj-training-copy--personal">
+                            <p class="pj-training-label">Personal training</p>
+                            <h2 id="pj-personal-title"><span class="pj-line"><span>Tập đúng.</span></span><span class="pj-line"><span>Tiến xa hơn.</span></span></h2>
+                            <p>Mục tiêu của bạn. Người đồng hành phù hợp. Khám phá chuyên môn của đội ngũ huấn luyện viên UTEFit trước khi gửi yêu cầu tập cá nhân.</p>
+                            <p class="pj-training-detail">Chọn chi nhánh và tìm hiểu từng hồ sơ PT. Lịch và khả năng nhận yêu cầu được kiểm tra tại các bước tiếp theo.</p>
+                            <div class="pj-training-actions"><a class="pj-button" th:href="@{/trainers}">Tìm huấn luyện viên</a></div>
+                        </article>
+                    </section>
+                    <div class="pj-training-footer"><p>Ảnh luyện tập minh họa · Unsplash</p><nav class="pj-training-modes" aria-label="Chọn trải nghiệm tập"><a class="pj-mode-group" href="#lop-tap">Group</a><i aria-hidden="true"></i><a class="pj-mode-personal" href="#huan-luyen-vien">Personal</a></nav></div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <section id="khong-gian" class="pj-clubs" aria-labelledby="pj-clubs-title">
+        <div class="pj-clubs-stage">
+            <header class="pj-clubs-heading"><div><h2 id="pj-clubs-title">Tìm nơi<br> bạn bắt đầu.</h2><p>Khám phá các chi nhánh đang hoạt động của UTEFit.</p></div><a class="pj-link" th:href="@{/branches}">Xem tất cả chi nhánh</a></header>
+            <div class="pj-clubs-viewport" role="region" aria-label="Gallery chi nhánh — vuốt hoặc dùng phím mũi tên" tabindex="0" th:unless="${#lists.isEmpty(featuredBranches)}">
+                <div class="pj-clubs-track">
+                    <article class="pj-club" th:each="b : ${featuredBranches}">
+                        <figure th:replace="~{fragments/branch-media :: publicMedia(${b},'gallery')}"></figure>
+                        <div class="pj-club-details"><div><h3 th:text="${b.name}">Chi nhánh</h3><p th:text="${b.address}">Địa chỉ</p><p th:if="${b.phone != null and !#strings.isEmpty(b.phone)}" th:text="|Điện thoại: ${b.phone}|"></p></div><a class="pj-link" th:href="@{/branches/{id}(id=${b.id})}">Xem chi tiết</a></div>
+                    </article>
+                </div>
+            </div>
+            <p class="pj-empty" th:if="${#lists.isEmpty(featuredBranches)}">Chưa có chi nhánh hoạt động. Thông tin sẽ được cập nhật tại trang chi nhánh.</p>
+            <div class="pj-gallery-controls" hidden><button type="button" class="pj-previous" aria-label="Chi nhánh trước">←</button><div class="pj-gallery-progress" role="progressbar" aria-label="Tiến độ gallery chi nhánh" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div><button type="button" class="pj-next" aria-label="Chi nhánh tiếp theo">→</button></div>
+            <p class="pj-gallery-hint" th:if="${#lists.size(featuredBranches) > 1}">Vuốt ngang để khám phá chi nhánh</p>
+        </div>
+    </section>
+</th:block>
+</body>
+</html>

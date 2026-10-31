@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="header">
+    <link rel="stylesheet" th:href="@{/css/utefit-manager.css(v=1)}">
+    <link rel="stylesheet" th:href="@{/css/utefit-staff.css(v=1)}">
+    <script defer th:src="@{/js/utefit-staff.js(v=1)}"></script>
+    <header class="manager-header" data-staff-header>
+        <a class="uf-skip-link" href="#utefit-content">Đến nội dung chính</a>
+        <div class="manager-topbar">
+            <a class="manager-brand" th:href="@{/manager}">UTE<span>FIT</span><small>MANAGER</small></a>
+            <div class="offcanvas-lg offcanvas-end manager-navigation" id="manager-navigation" tabindex="-1" aria-labelledby="manager-navigation-title"><div class="offcanvas-header"><strong id="manager-navigation-title">Không gian vận hành</strong><button class="btn-close btn-close-white" type="button" data-bs-dismiss="offcanvas" data-bs-target="#manager-navigation" aria-label="Đóng menu quản lý"></button></div><div class="offcanvas-body"><nav aria-label="Điều hướng quản lý chi nhánh"><a th:href="@{/manager}" data-manager-nav>Tổng quan</a><a th:href="@{/manager(branchId=${branchId})} + '#manager-checkin'" data-manager-nav>Vào tập</a><a th:href="@{/manager(branchId=${branchId})} + '#manager-qr'" data-manager-nav>Quét QR</a><a th:href="@{/manager(branchId=${branchId})} + '#manager-schedules'" data-manager-nav>Lịch lớp</a></nav><p>Quản lý đúng chi nhánh.<br>Chủ động trong từng ca vận hành.</p></div></div>
+            <div class="manager-header-actions"><a class="manager-icon-button" th:href="@{/notifications}" aria-label="Thông báo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg></a>
+                <details class="staff-account" data-staff-account><summary aria-label="Tài khoản Manager" aria-expanded="false"><span class="staff-account-avatar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M5 22v-2a7 7 0 0 1 14 0v2"/></svg></span><span class="staff-account-label">Tài khoản</span><span class="staff-account-chevron" aria-hidden="true">⌄</span></summary><div class="staff-account-menu"><p>Quản lý chi nhánh</p><strong th:text="${#authentication.name}"></strong><a th:href="@{/manager}">Chi nhánh của tôi</a><a th:href="@{/notifications}">Thông báo</a><form th:attr="action=@{/auth/logout}" method="post"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><button type="submit">Đăng xuất <span aria-hidden="true">↗</span></button></form></div></details>
+                <button type="button" class="manager-icon-button manager-menu-toggle" data-bs-toggle="offcanvas" data-bs-target="#manager-navigation" aria-controls="manager-navigation" aria-expanded="false" aria-label="Mở menu quản lý"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+            </div>
+        </div>
+    </header>
+</th:block>
+</body>
+</html>

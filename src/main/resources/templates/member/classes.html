@@ -3,12 +3,12 @@
 <html lang="vi"
       xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments/head :: head('Đăng ký lớp tập - UTEFit')}">
+<head th:replace="~{member/fragments/layout :: head('Đăng ký lớp tập - UTEFit')}">
 </head>
 
-<body class="uf-theme uf-area-member uf-page-member-classes">
+<body class="uf-theme uf-area-member uf-page-member-classes uf-member">
 
-<header th:replace="~{fragments/header :: header}">
+<header th:replace="~{member/fragments/layout :: header}">
 </header>
 
 <main class="container ut-page">
@@ -53,6 +53,7 @@
             <input type="search"
                    class="form-control"
                    name="keyword"
+                   aria-label="Tìm tên lớp"
                    maxlength="100"
                    th:value="${keyword}"
                    placeholder="Tìm tên lớp...">
@@ -62,7 +63,7 @@
         <div class="col-md-4">
 
             <select class="form-select"
-                    name="branchId">
+                    name="branchId" aria-label="Chi nhánh tập luyện">
 
                 <option value="">
                     Tất cả chi nhánh
@@ -260,10 +261,10 @@
 
 </main>
 
-<footer th:replace="~{fragments/footer :: footer}">
+<footer th:replace="~{member/fragments/layout :: footer}">
 </footer>
 
-<div th:replace="~{fragments/scripts :: scripts}">
+<div th:replace="~{member/fragments/layout :: scripts}">
 </div>
 
 </body>

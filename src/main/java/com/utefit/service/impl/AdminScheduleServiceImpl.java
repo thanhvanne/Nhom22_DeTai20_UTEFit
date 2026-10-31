@@ -103,6 +103,7 @@ public class AdminScheduleServiceImpl
     @Override
     @Transactional
     public void createSchedule(ClassScheduleFormDto dto) {
+        com.utefit.validation.FormChecks.validate(dto);
         FitnessClass fitnessClass =
                 validateScheduleBusinessRules(dto, null);
 
@@ -124,6 +125,7 @@ public class AdminScheduleServiceImpl
     @Override
     @Transactional
     public void updateSchedule(Long id, ClassScheduleFormDto dto) {
+        com.utefit.validation.FormChecks.validate(dto);
         ClassSchedule schedule = getScheduleById(id);
         if (!schedule.getScheduleDate().atTime(schedule.getStartTime()).isAfter(java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh"))))
             throw new IllegalStateException("Không thay đổi buổi học đã bắt đầu; cần giữ lịch sử.");

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head('Thời khóa biểu hội viên - UTEFit')}"></head>
-<body class="ut-week-page uf-theme uf-area-member uf-page-member-schedule">
-<header th:replace="~{fragments/header :: header}"></header>
+<head th:replace="~{member/fragments/layout :: head('Thời khóa biểu hội viên - UTEFit')}"></head>
+<body class="ut-week-page uf-theme uf-area-member uf-page-member-schedule uf-member">
+<header th:replace="~{member/fragments/layout :: header}"></header>
 <main class="container-fluid ut-week-wrap">
     <div class="ut-week-heading">
         <div><p class="ut-week-kicker">UTEFIT · MEMBER</p>
@@ -21,12 +21,12 @@
         <a th:href="@{/member/schedule(weekStart=${week.next()})}">Tuần sau →</a>
     </nav>
     <div class="ut-week-grid" role="group" aria-label="Thời khóa biểu 7 ngày">
-        <section class="ut-week-day" th:each="day : ${week.days}"
+        <section class="ut-week-day" th:each="day, dayIndex : ${week.days}"
                  th:classappend="${day.date.equals(week.today)} ? ' is-today' : ''">
             <div class="ut-week-day-head"><span th:text="${day.label}">Thứ 2</span>
                 <strong th:text="${#temporals.format(day.date,'dd/MM')}">01/01</strong></div>
             <div class="ut-week-events">
-                <article class="ut-week-event" th:each="slot : ${day.slots}"
+                <article class="ut-week-event" th:each="slot, slotIndex : ${day.slots}"
                          th:classappend="${slot.kind == 'PT'} ? ' is-pt' : ' is-class'">
                     <span class="ut-week-type" th:text="${slot.kind == 'PT' ? 'PT 1:1' : 'Lớp nhóm'}">Lớp</span>
                     <time th:text="|${#temporals.format(slot.start,'HH:mm')}–${#temporals.format(slot.end,'HH:mm')}|">18:00–19:00</time>
@@ -34,7 +34,7 @@
                     <p th:text="${slot.detail}">Chi tiết</p>
                     <small th:text="${slot.status}" data-uf-label>Trạng thái</small>
                     <div class="ut-week-actions">
-                        <a th:if="${slot.detailUrl != null}" th:href="${slot.detailUrl}">Chi tiết</a>
+                        <th:block th:replace="~{fragments/schedule-details :: details(${slot}, ${day.date}, ${'session-' + dayIndex.index + '-' + slotIndex.index})}"></th:block>
                         <form th:if="${slot.cancelUrl != null}" method="post" th:action="${slot.cancelUrl}"
                               onsubmit="return confirm('Bạn chắc chắn muốn hủy lịch này?')">
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
@@ -53,6 +53,7 @@
     </div>
     <p class="ut-week-note">Hội viên chỉ hủy được lớp chưa bắt đầu; không được xóa lịch đã học.</p>
 </main>
-<footer th:replace="~{fragments/footer :: footer}"></footer>
-<div th:replace="~{fragments/scripts :: scripts}"></div>
+<footer th:replace="~{member/fragments/layout :: footer}"></footer>
+<div th:replace="~{member/fragments/layout :: scripts}"></div>
+<th:block th:replace="~{fragments/schedule-details :: assets}"></th:block>
 </body></html>

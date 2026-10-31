@@ -1,0 +1,16 @@
+# Automatic offer values below are legacy fallbacks; V717 database rows are managed in Admin and take precedence.
+# Tier spending thresholds remain properties, not editable by the automatic promotion forms.
+utefit.loyalty.enabled=false
+utefit.loyalty.silver-threshold=500000
+utefit.loyalty.gold-threshold=1500000
+utefit.loyalty.silver-percent=5
+utefit.loyalty.gold-percent=10
+utefit.loyalty.welcome-percent=10
+utefit.loyalty.welcome-cap=50000
+utefit.loyalty.loyalty-months=6
+utefit.loyalty.renewal-grace-days=30
+utefit.loyalty.renewal-percent=10
+utefit.loyalty.value-threshold=500000
+utefit.loyalty.value-discount=50000
+utefit.loyalty.premium-threshold=1000000
+utefit.loyalty.premium-discount=100000
